@@ -9,7 +9,5 @@ public interface MigratableProcess extends Runnable, Serializable {
 	/* This method will be called before the object is serialized.
 	 * It affords an opportunity for the process to enter a known safe state.
 	 */
-	
-	public String toString();
 	void suspend();
 }
