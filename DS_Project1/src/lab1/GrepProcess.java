@@ -1,5 +1,5 @@
 package lab1;
-// change
+
 import java.io.PrintStream;
 import java.io.EOFException;
 import java.io.DataInputStream;
