@@ -1,11 +1,15 @@
 package lab1;
-// change
+
 import java.io.PrintStream;
 import java.io.EOFException;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.lang.Thread;
 import java.lang.InterruptedException;
+
+import migratableProcess.MigratableProcess;
+import transactionalIO.TransactionalFileInputStream;
+import transactionalIO.TransactionalFileOutputStream;
 
 public class GrepProcess implements MigratableProcess {
 
