@@ -117,7 +117,7 @@ public class ProcessManager {
 			String[] nameArgs = process.split(" ");
 			String className = nameArgs[0]; 
 			newProcessClass = Class.forName(className);
-			String[] args = Arrays.copyOfRange(nameArgs, 1, nameArgs.length - 1);
+			String[] args = Arrays.copyOfRange(nameArgs, 1, nameArgs.length);
 			Constructor<?> con = newProcessClass.getConstructor();
 			MigratableProcess newProcess = (MigratableProcess)con.newInstance(args);
 			Thread thread = new Thread(newProcess);
