@@ -1,4 +1,4 @@
-package lab1;
+package example;
 
 import java.io.PrintStream;
 import java.io.EOFException;
@@ -20,17 +20,12 @@ public class GrepProcess implements MigratableProcess {
 
 	private volatile boolean suspending;
 
-	// this variable is used to store the original set of arguments with which
-	// this class is called
-	private String[] args;
-
 	public GrepProcess(String args[]) throws Exception {
 		if (args.length != 3) {
 			System.out.println("usage: GrepProcess <queryString> <inputFile> <outputFile>");
 			throw new Exception("Invalid Arguments");
 		}
 
-		this.args = args;
 		query = args[0];
 		inFile = new TransactionalFileInputStream(args[1]);
 		outFile = new TransactionalFileOutputStream(args[2], false);
@@ -73,20 +68,5 @@ public class GrepProcess implements MigratableProcess {
 		suspending = true;
 		while (suspending)
 			;
-	}
-
-	/*
-	 * It is strongly recommended to have a method that can produce a simple
-	 * string representation of the object. We can use it to print the class
-	 * name of the process and the arguments. This would make the debugging and
-	 * tracing relative easy.
-	 */
-	public String toString() {
-		StringBuilder sbuilder = new StringBuilder("Track");
-		for (String arg : args) {
-			sbuilder.append(arg + " ");
-		}
-
-		return sbuilder.toString();
 	}
 }
