@@ -7,6 +7,10 @@ import java.io.IOException;
 import java.lang.Thread;
 import java.lang.InterruptedException;
 
+import migratableProcess.MigratableProcess;
+import transactionalIO.TransactionalFileInputStream;
+import transactionalIO.TransactionalFileOutputStream;
+
 public class GrepProcess implements MigratableProcess {
 
 	private static final long serialVersionUID = -2076220948300508193L;
