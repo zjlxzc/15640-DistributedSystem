@@ -1,4 +1,4 @@
-package lab1;
+package migratableProcess;
 import java.io.Serializable;
 
 /* The interface extends Runnable to be run via a Thread object.
