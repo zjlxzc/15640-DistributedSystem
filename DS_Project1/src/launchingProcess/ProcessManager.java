@@ -4,6 +4,7 @@ import java.lang.reflect.Constructor;
 import java.net.InetAddress;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Scanner;
 
@@ -19,7 +20,8 @@ import migratableProcess.MigratableProcess;
 public class ProcessManager {
 	
 	// This maps the processes and the combination of process name and arguments
-	private static HashMap<String, Object> processMap;
+	private Hashtable<String, Object> processTable;
+	private Hashtable<String, Thread> stats;
 	
 	public ProcessManager() {}
 	
@@ -30,9 +32,13 @@ public class ProcessManager {
 	 */
 	public ProcessManager(String args[]) throws Exception {
 		if (args.length == 0) {
+			processTable = new Hashtable<String, Object>();
+			stats = new Hashtable<String, Thread>();
 			new ProcessManagerMaster();			
 		} else if (args[0].equals("-c")) {	
 			String hostname = args[1];
+			processTable = new Hashtable<String, Object>();
+			stats = new Hashtable<String, Thread>();
 			new ProcessManagerSlave(hostname);
 		}
 	}
@@ -44,8 +50,7 @@ public class ProcessManager {
 	 */
 	
 	public static void main(String args[]) throws Exception {
-		ProcessManager manager = new ProcessManager(args);
-		processMap = new HashMap<String, Object>();
+		ProcessManager manager = new ProcessManager(args);		
 		manager.control();
 	}
 	
@@ -61,7 +66,7 @@ public class ProcessManager {
 			String[] command = in.nextLine().split(" ");
 			
 			// List all the process
-			if (command[0].equals("ls")) {
+			if (command[0].equals("ps")) {
 				this.listProcess();
 			}
 			
@@ -106,9 +111,9 @@ public class ProcessManager {
 
 	private static void usage() {
 		System.out.println("Process Manager for Migrable process");
-		System.out.println("Usage: Launch <ProcessName> [Arg1] [Arg2]...[ArgN]: Launch process, processName must exist)");
-		System.out.println("Usage: ls: print all the processes with their arguments");
-		System.out.println("Usage: Migrate <ProcessName> [Arg1] [Arg2]...[ArgN] <Source> <Destination> (Migrate process from source to destination)");
+		System.out.println("Usage: launch <ProcessName> [Arg1] [Arg2]...[ArgN]: Launch process, processName must exist)");
+		System.out.println("Usage: ps: print all the processes with their arguments");
+		System.out.println("Usage: migrate <ProcessName> [Arg1] [Arg2]...[ArgN] <Source> <Destination> (Migrate process from source to destination)");
 		System.out.println("Usage: quit (Quit Process Manager)");
 		System.out.println("");
 	}	
@@ -124,8 +129,8 @@ public class ProcessManager {
 			MigratableProcess newProcess = (MigratableProcess)con.newInstance(args);
 			Thread thread = new Thread(newProcess);
 			thread.start();			
-			HashMap<String, Object> processMap = this.getProcessMap();
-			processMap.put(process, newProcess);			
+			processTable.put(process, newProcess);
+			stats.put(process, thread);
 		} catch (Exception e) {
 			System.out.println("Process launching failed");
 			e.printStackTrace();
@@ -135,11 +140,15 @@ public class ProcessManager {
 	}
 	
 	protected void listProcess() {
-		HashMap<String, Object> processMap = this.getProcessMap();
-		if (processMap != null && !processMap.isEmpty()) {
-			Iterator<String> it = this.processMap.keySet().iterator();
+		if (stats != null && !stats.isEmpty()) {
+			Iterator<String> it = stats.keySet().iterator();
 			while (it.hasNext()) {
-				System.out.println(it.next());
+				String curProcess = it.next();
+				if(stats.get(curProcess).isAlive()) {
+					System.out.println(curProcess);
+				} else {
+					System.out.println("The process" + curProcess + "has been terminated");
+				}
 			}
 			return;
 		}
@@ -151,7 +160,4 @@ public class ProcessManager {
 		return false;
 	}
 	
-	protected HashMap<String, Object> getProcessMap() {
-		return processMap;
-	}
 }
