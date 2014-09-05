@@ -19,7 +19,7 @@ import migratableProcess.MigratableProcess;
 public class ProcessManager {
 	
 	// This maps the processes and the combination of process name and arguments
-	private HashMap<String, Object> processMap;
+	private static HashMap<String, Object> processMap;
 	
 	public ProcessManager() {}
 	
@@ -45,6 +45,7 @@ public class ProcessManager {
 	
 	public static void main(String args[]) throws Exception {
 		ProcessManager manager = new ProcessManager(args);
+		processMap = new HashMap<String, Object>();
 		manager.control();
 	}
 	
@@ -66,6 +67,7 @@ public class ProcessManager {
 			
 			// quit the manager
 			if (command[0].equals("quit")) {
+				System.out.println("Bye Bye");
 				System.exit(0);
 			}
 			if (command[0].equals("Launch")) {
@@ -116,9 +118,11 @@ public class ProcessManager {
 		try {
 			String[] nameArgs = process.split(" ");
 			String className = nameArgs[0]; 
+			System.out.println(className);
 			newProcessClass = Class.forName(className);
-			String[] args = Arrays.copyOfRange(nameArgs, 1, nameArgs.length - 1);
-			Constructor<?> con = newProcessClass.getConstructor();
+			Object[] args = {Arrays.copyOfRange(nameArgs, 1, nameArgs.length)};
+			System.out.println(Arrays.toString(args));
+			Constructor<?> con = newProcessClass.getConstructor(String[].class);		
 			MigratableProcess newProcess = (MigratableProcess)con.newInstance(args);
 			Thread thread = new Thread(newProcess);
 			thread.start();			
@@ -134,7 +138,7 @@ public class ProcessManager {
 	
 	protected void listProcess() {
 		HashMap<String, Object> processMap = this.getProcessMap();
-		if (!processMap.isEmpty()) {
+		if (processMap != null && !processMap.isEmpty()) {
 			Iterator<String> it = this.processMap.keySet().iterator();
 			while (it.hasNext()) {
 				System.out.println(it.next());
