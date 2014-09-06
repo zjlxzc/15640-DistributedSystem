@@ -77,10 +77,9 @@ public class ProcessManagerSlave extends ProcessManager{
 				Socket master;
 				try {
 					master = slaveListenSocket.accept();	
-					System.out.println(master.getInetAddress());
-					System.out.println(master.getInputStream() == null);
-					System.out.println(master.getInputStream().toString().length());
 					ObjectInputStream masterIn = new ObjectInputStream(master.getInputStream());
+					System.out.println(masterIn.toString().length());
+					System.out.println(masterIn.readObject());
 					String message = (String) masterIn.readObject();
 					//ObjectOutputStream masterOut = new ObjectOutputStream(master.getOutputStream());
 					
