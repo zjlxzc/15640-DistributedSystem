@@ -5,64 +5,149 @@ import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.Iterator;
 
 import migratableProcess.MigratableProcess;
 
 
 public class ProcessManagerSlave extends ProcessManager{
 	
-	// This maps the processes and the combination of process name and arguments
-	private HashMap<String, Object> processMap;
-	int masterListenPort = 12345;
-	Thread reportThread;
-	ObjectInputStream masterIn;
-	ObjectOutputStream masterOut;
+	// The server socket of master, this is pre-binded
+	private final static int masterListenPort = 12345;
 	
-	public ProcessManagerSlave(String hostname) throws Exception{					
+	// This maps the running processes and the combination of process name and arguments
+	private Hashtable<String, Object> processTable = new Hashtable<String, Object>();
+	
+	// This maps the processes and the their threads
+	private Hashtable<String, Thread> stats = new Hashtable<String, Thread>();
+	
+	// The slave thread to continually report to the master
+	Thread reportThread;
+	
+	/**
+	 * The constructor of ProcessManagerSlave, it first starts a server socket to wait for the 
+	 * migration request from master. Then start a socket to connect the server reporting the 
+	 * listen socket and its own status.
+	 */
+	public ProcessManagerSlave(String hostname) throws Exception{							
 		
-		@SuppressWarnings("resource")
-		ServerSocket slaveListenPort = new ServerSocket();		
-		reportThread = new Thread(new report(hostname, slaveListenPort.getLocalPort()));
+		// The listen socket waiting for the master requests
+		ServerSocket slaveListenPort = new ServerSocket(0);		
+		Thread listenThread = new Thread(new Listen(slaveListenPort));		
+		listenThread.start();
+		
+		// The report socket sends the listen socket as well as the current status of slave
+		reportThread = new Thread(new Report(hostname, slaveListenPort.getLocalPort()));
 		reportThread.start();
 		
-		while (true) {
-			Socket master = slaveListenPort.accept();
-			masterIn = new ObjectInputStream(master.getInputStream());
-			masterOut = new ObjectOutputStream(master.getOutputStream());
-			String message = (String) masterIn.readObject();
-			if (message.equals("Migration Start")) {
-				this.migrate();
+		System.out.println("I'm the salve");
+	}
+	
+	public Hashtable<String, Object> getProcessTable() {
+		return processTable;
+	}
+	
+	public Hashtable<String, Thread> getStats() {
+		return stats;
+	}
+	
+	public void showSlaves() {
+		System.out.println("This method is not supported by slave");
+	}
+	
+	/**
+	 * A separate thread for start the listen socket and keep listening from master
+	 * @author zjlxz
+	 *
+	 */
+	private class Listen implements Runnable {
+		ServerSocket slaveListenPort;
+		public Listen(ServerSocket slaveListenPort) {
+			this.slaveListenPort = slaveListenPort;
+		}
+		
+		/**
+		 * The thread wait for the master, when receive the request, it read the serialized object from
+		 * master, then start a new thread to recover the process, and put it into its own processTable
+		 * and stats table. When finishes the procedure, it sends a confirm message back to the master.
+		 */
+		public void run() {
+			while (true) {
+				Socket master;
+				try {
+					System.out.println(slaveListenPort.getInetAddress() + ":" + slaveListenPort.getLocalPort());
+					master = slaveListenPort.accept();				
+					ObjectInputStream masterIn = new ObjectInputStream(master.getInputStream());
+					ObjectOutputStream masterOut = new ObjectOutputStream(master.getOutputStream());
+					
+					System.out.println("get master");
+					// first read the message
+					String message = (String) masterIn.readObject();
+					System.out.println(message);
+					if (message.equals("Migration Start")) {
+						// Hold the report thread;
+						//reportThread.wait();
+						
+						masterOut.writeObject("Des Confirm");
+						masterOut.flush();
+						
+						// then read the process object and restart it in a new thread
+						MigratableProcess process = (MigratableProcess) masterIn.readObject();
+						Thread thread = new Thread(process);
+						thread.start();
+						
+						// put it into tables for status
+						String processNameArg = process.toString();
+						processTable.put(processNameArg, process);
+						stats.put(processNameArg, thread);
+						
+						// send back message
+						masterOut.writeObject("sucess");
+						masterOut.flush();
+						//reportThread.notify();
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+				}				
 			}
 		}		
 	}
-
-	private void migrate() throws Exception {
-		MigratableProcess process = (MigratableProcess) masterIn.readObject();
-		new Thread(process).start();
-	}
-
-	private class report implements Runnable {
+	
+	/**
+	 * A seperate thread that keep reporting the slave's current status at a heartbeating rate.
+	 * The report includes the listen port of slave, and the running process numbers.
+	 * @author zjlxz
+	 *
+	 */
+	private class Report implements Runnable {
 		Socket reportSocket;
 		int slaveListenPort;
-		public report(String hostname, int slaveListenPort) throws Exception {
-			this.slaveListenPort = slaveListenPort;
-			reportSocket = new Socket(hostname, masterListenPort);
+		String hostname;
+		public Report(String hostname, int slaveListenPort) throws Exception {
+			this.slaveListenPort = slaveListenPort;		
+			this.hostname = hostname;
 		}
 
 		@Override
 		public void run() {
-			String message;
-			try {
-				PrintWriter out = new PrintWriter(reportSocket.getOutputStream());
+			String message = "";
+			try {								
 				while (true) {
-					message = "" + slaveListenPort + processMap.size();
+					reportSocket = new Socket(hostname, masterListenPort);
+					PrintWriter out = new PrintWriter(reportSocket.getOutputStream());
+					for (String p : stats.keySet()) {
+						if (!stats.get(p).isAlive()) {
+							processTable.remove(p);
+						}
+					}					
+					message = "" + slaveListenPort + " " + processTable.size() + "\n";	
 					out.write(message);
 					out.flush();
+					reportSocket.close();
 					Thread.sleep(5000);
 				}
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}			
 		}

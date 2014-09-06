@@ -3,6 +3,7 @@ package launchingProcess;
 import java.lang.reflect.Constructor;
 import java.net.InetAddress;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Scanner;
@@ -19,9 +20,7 @@ import migratableProcess.MigratableProcess;
 public class ProcessManager {
 	
 	// This maps the processes and the combination of process name and arguments
-	private Hashtable<String, Object> processTable;
-	private Hashtable<String, Thread> stats;
-	
+	private ProcessManager manager;
 	public ProcessManager() {}
 	
 	/**
@@ -30,16 +29,16 @@ public class ProcessManager {
 	 * @throws Exception
 	 */
 	public ProcessManager(String args[]) throws Exception {
-		if (args.length == 0) {
-			processTable = new Hashtable<String, Object>();
-			stats = new Hashtable<String, Thread>();
-			new ProcessManagerMaster();			
-		} else if (args[0].equals("-c")) {	
+		if (args.length == 0) {			
+			manager = new ProcessManagerMaster();	
+		} else if (args.length == 2 && args[0].equals("-c")) {	
 			String hostname = args[1];
-			processTable = new Hashtable<String, Object>();
-			stats = new Hashtable<String, Thread>();
-			new ProcessManagerSlave(hostname);
+			manager = new ProcessManagerSlave(hostname);			
+		} else {
+			System.out.print("Illigel Arguments\n");
+			System.exit(1);
 		}
+		manager.control();
 	}
 	
 	/**
@@ -48,9 +47,8 @@ public class ProcessManager {
 	 * @throws Exception
 	 */
 	
-	public static void main(String args[]) throws Exception {
-		ProcessManager manager = new ProcessManager(args);		
-		manager.control();
+	public static void main(String args[]) throws Exception {	
+		new ProcessManager(args);
 	}
 	
 	/**
@@ -58,35 +56,32 @@ public class ProcessManager {
 	 * @throws Exception
 	 */
 	@SuppressWarnings("resource")
-	public void control() throws Exception {
-		usage();		
+	public void control() throws Exception {		
 		Scanner in = new Scanner(System.in);
+		usage();
 		while (true) {
+						
 			String[] command = in.nextLine().split(" ");
 			
 			// List all the process
 			if (command[0].equals("ps")) {
 				this.listProcess();
-			}
-			
-			// quit the manager
-			if (command[0].equals("quit")) {
+			} else if (command[0].equals("quit")) {  // quit the manager
 				System.out.println("Bye Bye");
 				System.exit(0);
-			}
-			if (command[0].equals("launch")) {
+			} else if (command[0].equals("launch")) { // launch new process
 				String process = "";
 				for(int i = 1; i < command.length; i++) {
 					process += command[i] + " ";
 				}
+				
 				boolean isLaunched = this.launchProcess(process.trim());
 				if (isLaunched) {
 					System.out.println("The process is successfully launched");
 				} else {
 					System.out.println("Launch Failed");
 				}
-			}
-			if (command[0].equals("Migrate")) {
+			} else if (command[0].equals("migrate")) {  // migarate process
 				if (this instanceof ProcessManagerMaster) {
 					int len = command.length;
 					String des = command[len - 1];
@@ -95,14 +90,20 @@ public class ProcessManager {
 						process += command[i] + " ";
 					}
 					InetAddress desAdd = InetAddress.getByName(des.trim());
+					System.out.println(des);
 					boolean isMigrated = this.migrate(process,desAdd);
 					if (isMigrated) {
 						System.out.println("The process is successfully migrated");
 					} else {
 						System.out.println("Migration failed");
 					}
-				}			
-				
+				}							
+			} else if (command[0].equals("slaves")) {
+				this.showSlaves();
+			}
+			else {
+				System.out.println("Wrong input, please try again");
+				usage();
 			}
 		}
 	}
@@ -119,35 +120,41 @@ public class ProcessManager {
 	
 	private boolean launchProcess(String process)  {
 		Class<?> newProcessClass;
-		try {
-			String[] nameArgs = process.split(" ");
-			String className = nameArgs[0]; 
-			newProcessClass = Class.forName(className);
-			Object[] args = {Arrays.copyOfRange(nameArgs, 1, nameArgs.length)};
-			Constructor<?> con = newProcessClass.getConstructor(String[].class);		
-			MigratableProcess newProcess = (MigratableProcess)con.newInstance(args);
-			Thread thread = new Thread(newProcess);
-			thread.start();			
-			processTable.put(process, newProcess);
-			stats.put(process, thread);
-			System.out.println("Process lauching successfull");
-		} catch (Exception e) {
-			System.out.println("Process launching failed");
-			e.printStackTrace();
-			return false;
+		if (this.getProcessTable() != null && !this.getProcessTable().contains(process)){
+			try {
+				String[] nameArgs = process.split(" ");			
+				String className = nameArgs[0]; 			
+				newProcessClass = Class.forName(className);
+				Object[] args = {Arrays.copyOfRange(nameArgs, 1, nameArgs.length)};
+				Constructor<?> con = newProcessClass.getConstructor(String[].class);
+				MigratableProcess newProcess = (MigratableProcess)con.newInstance(args);
+				Thread thread = new Thread(newProcess);
+				thread.start();				
+				this.getProcessTable().put(process, newProcess);
+				this.getStats().put(process, thread);
+				System.out.println("Process lauching successfull");
+			} catch (Exception e) {
+				System.out.println("Process launching failed");
+				e.printStackTrace();
+				return false;
+			}
+			return true;
+		} 
+		if (this.getProcessTable().contains(process)) {
+			System.out.println("This Process is already launched");
 		}
-		return true;
+		return false;
 	}
 	
 	protected void listProcess() {
-		if (stats != null && !stats.isEmpty()) {
-			Iterator<String> it = stats.keySet().iterator();
+		if (this.getStats() != null && !this.getStats().isEmpty()) {
+			Iterator<String> it = this.getStats().keySet().iterator();
 			while (it.hasNext()) {
 				String curProcess = it.next();
-				if(stats.get(curProcess).isAlive()) {
+				if(this.getStats().get(curProcess).isAlive()) {
 					System.out.println(curProcess);
 				} else {
-					System.out.println("The process" + curProcess + "has been terminated");
+					System.out.println("The process " + curProcess + " has been terminated");
 				}
 			}
 			return;
@@ -160,4 +167,14 @@ public class ProcessManager {
 		return false;
 	}
 	
+	public Hashtable<String, Object> getProcessTable() {
+		return null;
+	}
+	
+	public Hashtable<String, Thread> getStats() {
+		return null;
+	}
+	
+	public void showSlaves() {
+	}
 }
