@@ -29,7 +29,7 @@ public class TransactionalFileInputStream extends InputStream implements Seriali
 		this.fileName = fileName;
 		offset = 0L;
 	}
-	
+
 	@Override
 	public int read() throws IOException {
 		// instance of RandomAccessFile support both reading and writing to a random access file
