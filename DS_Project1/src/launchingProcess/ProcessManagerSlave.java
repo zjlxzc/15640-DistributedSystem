@@ -81,7 +81,8 @@ public class ProcessManagerSlave extends ProcessManager{
 					System.out.println(master.getInputStream() == null);
 					System.out.println(master.getInputStream().toString().length());
 					ObjectInputStream masterIn = new ObjectInputStream(master.getInputStream());
-					ObjectOutputStream masterOut = new ObjectOutputStream(master.getOutputStream());
+					ObjectOutputStream masterOut = null;
+					//ObjectOutputStream masterOut = new ObjectOutputStream(master.getOutputStream());
 					
 					System.out.println("get master");
 					// first read the message
