@@ -68,7 +68,9 @@ public class ProcessManagerMaster extends ProcessManager{
 			
 			// get the process from processTable by name and args
 			MigratableProcess midProcess = (MigratableProcess) processTable.get(process);
-			
+			System.out.println("line 71:" + process);
+			System.out.println("line 72:" + processTable.get(process) == null);
+			System.out.println("line 73:" + processTable.get(process).toString());
 			// suspend the process
 			midProcess.suspend();
 			
