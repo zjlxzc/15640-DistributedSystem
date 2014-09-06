@@ -65,21 +65,11 @@ public class ProcessManagerMaster extends ProcessManager{
 		String desRes = (String)desIn.readObject();
 		System.out.println(desRes);
 		if (desRes.equals("Des Confirm")) {
-			
-			// get the process from processTable by name and args
-			for (String s : processTable.keySet()) {
-				System.out.println(s + ": " + processTable.get(s).toString());
-			}
+			System.out.println(processTable.get(process));
 			MigratableProcess midProcess = (MigratableProcess) processTable.get(process);
-			System.out.println("line 71:" + processTable.get(process) == null);
-			for (String s : processTable.keySet()) {
-				System.out.println(s + ": " + processTable.get(s).toString());
-			}
-			System.out.println("table:" + processTable == null);
-			System.out.println("process:" + processTable.get(process).toString());
 			// suspend the process
 			midProcess.suspend();
-			
+			Thread.sleep(1000);
 			// send the process to the slave, then wait
 			desOut.writeObject(midProcess);	
 			desOut.flush();
