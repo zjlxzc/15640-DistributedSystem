@@ -72,7 +72,6 @@ public class ProcessManagerMaster extends ProcessManager{
 			System.out.println("line 72:" + processTable.get(process).toString());
 			// suspend the process
 			midProcess.suspend();
-			Thread.sleep(1000);
 			
 			// send the process to the slave, then wait
 			desOut.writeObject(midProcess);	
