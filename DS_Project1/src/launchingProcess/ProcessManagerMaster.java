@@ -53,8 +53,8 @@ public class ProcessManagerMaster extends ProcessManager{
 		Socket masterToDes = new Socket(des, slaveMap.get(des));
 		System.out.println(slaveMap.get(des));
 		System.out.println(masterToDes.getInetAddress() + ":" + masterToDes.getPort());
-		ObjectInputStream desIn = new ObjectInputStream(masterToDes.getInputStream());
 		ObjectOutputStream desOut = new ObjectOutputStream(masterToDes.getOutputStream());
+		ObjectInputStream desIn = new ObjectInputStream(masterToDes.getInputStream());		
 		
 		boolean isMigrated = false; 
 		
