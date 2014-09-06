@@ -89,9 +89,8 @@ public class ProcessManager {
 					for(int i = 1; i < command.length - 1; i++) {
 						process += command[i] + " ";
 					}
-					InetAddress desAdd = InetAddress.getByName(des.trim());
-					System.out.println(process);
-					boolean isMigrated = this.migrate(process,desAdd);
+					InetAddress desAdd = InetAddress.getByName(des);
+					boolean isMigrated = this.migrate(process.trim(),desAdd);
 					if (isMigrated) {
 						System.out.println("The process is successfully migrated");
 					} else {
