@@ -81,13 +81,14 @@ public class ProcessManagerSlave extends ProcessManager{
 					System.out.println(master.getInputStream() == null);
 					System.out.println(master.getInputStream().toString().length());
 					ObjectInputStream masterIn = new ObjectInputStream(master.getInputStream());
-					ObjectOutputStream masterOut = null;
+					String message = (String) masterIn.readObject();
 					//ObjectOutputStream masterOut = new ObjectOutputStream(master.getOutputStream());
 					
 					System.out.println("get master");
-					// first read the message
-					String message = (String) masterIn.readObject();
+					// first read the message					
 					System.out.println(message);
+					ObjectOutputStream masterOut = null;
+					
 					if (message.equals("Migration Start")) {
 						
 						masterOut.writeObject("Des Confirm");
