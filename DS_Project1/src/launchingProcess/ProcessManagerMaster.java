@@ -75,7 +75,8 @@ public class ProcessManagerMaster extends ProcessManager{
 			for (String s : processTable.keySet()) {
 				System.out.println(s + ": " + processTable.get(s).toString());
 			}
-			System.out.println("line 72:" + processTable.get(process).toString());
+			System.out.println("table:" + processTable == null);
+			System.out.println("process:" + processTable.get(process).toString());
 			// suspend the process
 			midProcess.suspend();
 			
