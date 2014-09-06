@@ -90,7 +90,6 @@ public class ProcessManager {
 						process += command[i] + " ";
 					}
 					InetAddress desAdd = InetAddress.getByName(des.trim());
-					System.out.println(des);
 					boolean isMigrated = this.migrate(process,desAdd);
 					if (isMigrated) {
 						System.out.println("The process is successfully migrated");

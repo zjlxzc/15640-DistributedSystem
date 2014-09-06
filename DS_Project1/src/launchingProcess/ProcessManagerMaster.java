@@ -49,19 +49,15 @@ public class ProcessManagerMaster extends ProcessManager{
 	
 	public boolean migrate(String process, InetAddress des) throws Exception{
 		
-//		listen.wait();	
-//		update.wait();
-		
 		// Get the accept socket to the destination slave
 		Socket masterToDes = new Socket(des, slaveMap.get(des));
 		System.out.println(slaveMap.get(des));
-		System.out.println(masterToDes.getLocalAddress() + ":" + masterToDes.getPort());
+		System.out.println(masterToDes.getInetAddress() + ":" + masterToDes.getPort());
 		ObjectInputStream desIn = new ObjectInputStream(masterToDes.getInputStream());
 		ObjectOutputStream desOut = new ObjectOutputStream(masterToDes.getOutputStream());
 		
 		boolean isMigrated = false; 
 		
-		// Start to migration, send the process name to launch new process in destination
 		desOut.writeObject("Migration Start");
 		desOut.flush();	
 		
@@ -92,8 +88,6 @@ public class ProcessManagerMaster extends ProcessManager{
 		} else {
 			System.out.println("Not success, trying again");
 		}
-//		listen.notify();
-//		update.notify();
 		return isMigrated;
 	}
 	
@@ -107,7 +101,7 @@ public class ProcessManagerMaster extends ProcessManager{
 	
 	public void showSlaves() {
 		for (InetAddress i : slaveMap.keySet()) {
-			System.out.println(i.getHostName() + ":" + slaveMap.get(i) + "current running process:" + slaveLoad.get(i) + "\n");
+			System.out.println(i.getHostName() + ":" + slaveMap.get(i) + " current running process:" + slaveLoad.get(i) + "\n");
 		}
 	}
 	/**

@@ -25,6 +25,8 @@ public class ProcessManagerSlave extends ProcessManager{
 	// The slave thread to continually report to the master
 	Thread reportThread;
 	
+	ServerSocket slaveListenSocket;
+	
 	/**
 	 * The constructor of ProcessManagerSlave, it first starts a server socket to wait for the 
 	 * migration request from master. Then start a socket to connect the server reporting the 
@@ -33,12 +35,12 @@ public class ProcessManagerSlave extends ProcessManager{
 	public ProcessManagerSlave(String hostname) throws Exception{							
 		
 		// The listen socket waiting for the master requests
-		ServerSocket slaveListenPort = new ServerSocket(0);		
-		Thread listenThread = new Thread(new Listen(slaveListenPort));		
+		slaveListenSocket = new ServerSocket(0);		
+		Thread listenThread = new Thread(new Listen(slaveListenSocket));		
 		listenThread.start();
 		
 		// The report socket sends the listen socket as well as the current status of slave
-		reportThread = new Thread(new Report(hostname, slaveListenPort.getLocalPort()));
+		reportThread = new Thread(new Report(hostname, slaveListenSocket.getLocalPort()));
 		reportThread.start();
 		
 		System.out.println("I'm the salve");
@@ -76,7 +78,7 @@ public class ProcessManagerSlave extends ProcessManager{
 			while (true) {
 				Socket master;
 				try {
-					System.out.println(slaveListenPort.getInetAddress() + ":" + slaveListenPort.getLocalPort());
+					System.out.println(slaveListenSocket.getLocalSocketAddress() + ":" + slaveListenPort.getLocalPort());
 					master = slaveListenPort.accept();				
 					ObjectInputStream masterIn = new ObjectInputStream(master.getInputStream());
 					ObjectOutputStream masterOut = new ObjectOutputStream(master.getOutputStream());
@@ -86,8 +88,6 @@ public class ProcessManagerSlave extends ProcessManager{
 					String message = (String) masterIn.readObject();
 					System.out.println(message);
 					if (message.equals("Migration Start")) {
-						// Hold the report thread;
-						//reportThread.wait();
 						
 						masterOut.writeObject("Des Confirm");
 						masterOut.flush();
@@ -105,7 +105,6 @@ public class ProcessManagerSlave extends ProcessManager{
 						// send back message
 						masterOut.writeObject("sucess");
 						masterOut.flush();
-						//reportThread.notify();
 					}
 				} catch (Exception e) {
 					e.printStackTrace();
