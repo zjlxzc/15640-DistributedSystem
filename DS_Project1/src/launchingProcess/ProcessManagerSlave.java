@@ -77,16 +77,17 @@ public class ProcessManagerSlave extends ProcessManager{
 				Socket master;
 				try {
 					master = slaveListenSocket.accept();	
+					ObjectOutputStream masterOut = new ObjectOutputStream(master.getOutputStream());
 					ObjectInputStream masterIn = new ObjectInputStream(master.getInputStream());
 					System.out.println(masterIn == null);
 					System.out.println(masterIn.readObject());
 					String message = (String) masterIn.readObject();
-					//ObjectOutputStream masterOut = new ObjectOutputStream(master.getOutputStream());
+					
 					
 					System.out.println("get master");
 					// first read the message					
 					System.out.println(message);
-					ObjectOutputStream masterOut = null;
+					//ObjectOutputStream masterOut = null;
 					
 					if (message.equals("Migration Start")) {
 						
