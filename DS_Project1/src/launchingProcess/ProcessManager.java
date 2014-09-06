@@ -74,7 +74,7 @@ public class ProcessManager {
 				System.out.println("Bye Bye");
 				System.exit(0);
 			}
-			if (command[0].equals("Launch")) {
+			if (command[0].equals("launch")) {
 				String process = "";
 				for(int i = 1; i < command.length; i++) {
 					process += command[i] + " ";
@@ -130,6 +130,7 @@ public class ProcessManager {
 			thread.start();			
 			processTable.put(process, newProcess);
 			stats.put(process, thread);
+			System.out.println("Process lauching successfull");
 		} catch (Exception e) {
 			System.out.println("Process launching failed");
 			e.printStackTrace();
