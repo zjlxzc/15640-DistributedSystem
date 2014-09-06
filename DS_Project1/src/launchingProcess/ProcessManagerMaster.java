@@ -67,8 +67,14 @@ public class ProcessManagerMaster extends ProcessManager{
 		if (desRes.equals("Des Confirm")) {
 			
 			// get the process from processTable by name and args
+			for (String s : processTable.keySet()) {
+				System.out.println(s + ": " + processTable.get(s).toString());
+			}
 			MigratableProcess midProcess = (MigratableProcess) processTable.get(process);
 			System.out.println("line 71:" + processTable.get(process) == null);
+			for (String s : processTable.keySet()) {
+				System.out.println(s + ": " + processTable.get(s).toString());
+			}
 			System.out.println("line 72:" + processTable.get(process).toString());
 			// suspend the process
 			midProcess.suspend();
