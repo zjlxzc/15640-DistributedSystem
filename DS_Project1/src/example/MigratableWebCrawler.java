@@ -1,3 +1,14 @@
+/**
+ * File name: MigratableWebCrawler.java
+ * @author Jialing Zhou (jialingz), Chun Xu (chunx)
+ * Course/Section: 15640/A
+ * 
+ * Description: Lab 1: Portable, Migratable Work
+ * 
+ * This class is a test example of Migratable Process.
+ * This function of this class is to crawl web pages.
+ */
+
 package example;
 
 import java.io.BufferedReader;
@@ -19,10 +30,6 @@ import transactionalIO.TransactionalFileInputStream;
 import transactionalIO.TransactionalFileOutputStream;
 import migratableProcess.MigratableProcess;
 
-/*
- * This class is a test example of Migratable Process.
- * This function of this class is to crawl web pages.
- */
 public class MigratableWebCrawler implements MigratableProcess {
 
 	// this is generated serial version ID
@@ -97,12 +104,14 @@ public class MigratableWebCrawler implements MigratableProcess {
 		}
 	}
 	
+	// This method is used to crawl urls.
 	public void crawlURL() {
 		while (!isSuspending && !urls.isEmpty() && crawledSet.size() < maxPages) {
 			crawl();
 		}
 	}
 	
+	// This method is used to crawl one url.
 	public void crawl() {
 		String url = urls.poll(); // get first url from the queue
 		if (crawledSet.contains(url)) { // if this url has been crawled
@@ -144,6 +153,7 @@ public class MigratableWebCrawler implements MigratableProcess {
 			e.printStackTrace();
 		}
 	}
+	
 	/*
 	 * This method is used to produce a simple string representation of the
 	 * object. It is used to print the class name of the process and the
@@ -156,28 +166,5 @@ public class MigratableWebCrawler implements MigratableProcess {
 		}
 
 		return sbuilder.toString();
-	}
-	
-	public static void main(String[] args) {
-		String[] testArgs = { "testIn.txt", "testOut.txt", "5" };
-		try {
-			MigratableWebCrawler crawler = new MigratableWebCrawler(testArgs);
-			Thread thread = new Thread(crawler);
-			thread.start();
-			
-			Thread.sleep(1000);
-			
-			System.out.println("In main first print");
-			crawler.suspend();
-			System.out.println("In main second print");
-			
-			Thread.sleep(1000);
-			System.out.println("In main third print");
-			thread = new Thread(crawler);
-			thread.start();
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 	}
 }

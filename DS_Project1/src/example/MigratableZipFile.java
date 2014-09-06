@@ -1,3 +1,14 @@
+/**
+ * File name: MigratableZipFile.java
+ * @author Jialing Zhou (jialingz), Chun Xu (chunx)
+ * Course/Section: 15640/A
+ * 
+ * Description: Lab 1: Portable, Migratable Work
+ * 
+ * This class is a test example of Migratable Process.
+ * This function of this class is to zip an input file and generate a zipped output file.
+ */
+
 package example;
 
 import java.io.DataInputStream;
@@ -9,10 +20,6 @@ import transactionalIO.TransactionalFileInputStream;
 import transactionalIO.TransactionalFileOutputStream;
 import migratableProcess.MigratableProcess;
 
-/*
- * This class is a test example of Migratable Process.
- * This function of this class is to zip an input file and generate a zipped output file.
- */
 public class MigratableZipFile implements MigratableProcess {
 
 	// this is generated serial version ID
@@ -61,7 +68,6 @@ public class MigratableZipFile implements MigratableProcess {
 				}
 
 				out.write(buffer, 0, readByte);
-				// out.flush();
 				Thread.sleep(100); // Make it take longer so that we don't require extremely
 									// large files for interesting results
 			}
@@ -98,28 +104,5 @@ public class MigratableZipFile implements MigratableProcess {
 		}
 
 		return sbuilder.toString();
-	}
-
-	public static void main(String[] args) {
-		String[] testArgs = { "testIn.txt", "testOut.txt" };
-		try {
-			MigratableZipFile zipFile = new MigratableZipFile(testArgs);
-			Thread thread = new Thread(zipFile);
-			thread.start();
-
-			Thread.sleep(1000);
-			System.out.println("In main after first sleep.");
-			
-			zipFile.suspend();
-			System.out.println("In main after suspend.");
-
-			Thread.sleep(1000);
-			System.out.println("In main after second sleep.");
-			
-			thread = new Thread(zipFile);
-			thread.start();
-		} catch (Exception e) {
-			System.out.println("In main Exception" + e);
-		}
 	}
 }

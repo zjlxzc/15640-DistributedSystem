@@ -1,3 +1,13 @@
+/**
+ * File name: TransactionalFileInputStream.java
+ * @author Jialing Zhou (jialingz), Chun Xu (chunx)
+ * Course/Section: 15640/A
+ * 
+ * Description: Lab 1: Portable, Migratable Work
+ * 
+ * This class will be used to facilitate migrating processes with files operations.
+ */
+
 package transactionalIO;
 
 import java.io.IOException;
@@ -6,9 +16,6 @@ import java.io.RandomAccessFile;
 import java.io.Serializable;
 
 public class TransactionalFileInputStream extends InputStream implements Serializable {
-
-	// default serial version ID
-	//private static final long serialVersionUID = 1L;
 	
 	// generated serial version ID
 	private static final long serialVersionUID = -8577982678271040984L;
@@ -41,5 +48,4 @@ public class TransactionalFileInputStream extends InputStream implements Seriali
 		raf.close();
 		return nextByte;
 	}
-
 }
