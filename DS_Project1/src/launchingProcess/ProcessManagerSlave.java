@@ -36,7 +36,7 @@ public class ProcessManagerSlave extends ProcessManager{
 		
 		// The listen socket waiting for the master requests
 		slaveListenSocket = new ServerSocket(0);		
-		Thread listenThread = new Thread(new Listen(slaveListenSocket));		
+		Thread listenThread = new Thread(new Listen());		
 		listenThread.start();
 		
 		// The report socket sends the listen socket as well as the current status of slave
@@ -64,9 +64,7 @@ public class ProcessManagerSlave extends ProcessManager{
 	 *
 	 */
 	private class Listen implements Runnable {
-		ServerSocket slaveListenPort;
-		public Listen(ServerSocket slaveListenPort) {
-			this.slaveListenPort = slaveListenPort;
+		public Listen() {
 		}
 		
 		/**
@@ -78,9 +76,9 @@ public class ProcessManagerSlave extends ProcessManager{
 			while (true) {
 				Socket master;
 				try {
-					System.out.println(slaveListenSocket.getLocalSocketAddress() + ":" + slaveListenPort.getLocalPort());
-					master = slaveListenPort.accept();	
-					System.out.println(master.getLocalSocketAddress() + ":" + master.getLocalPort());
+					System.out.println(slaveListenSocket.getLocalSocketAddress() + ":" + slaveListenSocket.getLocalPort());
+					master = slaveListenSocket.accept();	
+					System.out.println(master.getInetAddress());
 					ObjectInputStream masterIn = new ObjectInputStream(master.getInputStream());
 					ObjectOutputStream masterOut = new ObjectOutputStream(master.getOutputStream());
 					
