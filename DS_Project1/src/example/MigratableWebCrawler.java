@@ -93,14 +93,19 @@ public class MigratableWebCrawler implements MigratableProcess {
 		
 		while (!isSuspending) {
 			try {
-			String readURL = in.readLine();
-			if (readURL == null) {
-				break;
-			}
-			urls.add(readURL); // add url to queue
+				String readURL = in.readLine();
+				if (readURL == null) {
+					break;
+				}
+				urls.add(readURL); // add url to queue
+			
+				Thread.sleep(100);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			} catch (IOException e) {
 				e.printStackTrace();
-			} 
+			} 	
 		}
 	}
 	
@@ -108,6 +113,12 @@ public class MigratableWebCrawler implements MigratableProcess {
 	public void crawlURL() {
 		while (!isSuspending && !urls.isEmpty() && crawledSet.size() < maxPages) {
 			crawl();
+			try {
+				Thread.sleep(100);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 	}
 	
