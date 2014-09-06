@@ -79,7 +79,8 @@ public class ProcessManagerSlave extends ProcessManager{
 				Socket master;
 				try {
 					System.out.println(slaveListenSocket.getLocalSocketAddress() + ":" + slaveListenPort.getLocalPort());
-					master = slaveListenPort.accept();				
+					master = slaveListenPort.accept();	
+					System.out.println(master.getLocalSocketAddress() + ":" + master.getLocalPort());
 					ObjectInputStream masterIn = new ObjectInputStream(master.getInputStream());
 					ObjectOutputStream masterOut = new ObjectOutputStream(master.getOutputStream());
 					
