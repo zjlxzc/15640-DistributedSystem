@@ -65,7 +65,7 @@ public class ProcessManagerMaster extends ProcessManager{
 		String desRes = (String)desIn.readObject();
 		System.out.println(desRes);
 		if (desRes.equals("Des Confirm")) {
-			System.out.println(processTable.get(process));
+			System.out.println(processTable.get(process).toString());
 			MigratableProcess midProcess = (MigratableProcess) processTable.get(process);
 			// suspend the process
 			midProcess.suspend();
