@@ -75,9 +75,9 @@ public class MigratableWebCrawler implements MigratableProcess {
 
 	@Override
 	public void run() {
-		isSuspending = false;
 		getInputFile();		
-		crawlURL();		
+		crawlURL();	
+		isSuspending = false;
 	}
 
 	@Override
@@ -120,6 +120,7 @@ public class MigratableWebCrawler implements MigratableProcess {
 		
 		StringBuilder sbuilder = new StringBuilder(); // this variable is used to add content
 		String readLine = "";
+		boolean isCrawlSucceed = true;
 			try {
 				URL currentURL = new URL(url);
 				BufferedReader buffer = new BufferedReader(new InputStreamReader(currentURL.openStream()));
@@ -129,7 +130,11 @@ public class MigratableWebCrawler implements MigratableProcess {
 				buffer.close();
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
+				isCrawlSucceed = false;
 				e.printStackTrace();
+			}
+			if (!isCrawlSucceed) {
+				return;
 			}
 			
 			crawledSet.add(url); // indicate this url has been crawled
