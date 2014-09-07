@@ -3,7 +3,6 @@ package launchingProcess;
 import java.lang.reflect.Constructor;
 import java.net.InetAddress;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Scanner;
@@ -90,12 +89,7 @@ public class ProcessManager {
 						process += command[i] + " ";
 					}
 					InetAddress desAdd = InetAddress.getByName(des);
-					boolean isMigrated = this.migrate(process.trim(),desAdd);
-					if (isMigrated) {
-						System.out.println("The process is successfully migrated");
-					} else {
-						System.out.println("Migration failed");
-					}
+					this.migrate(process.trim(),desAdd);
 				}							
 			} else if (command[0].equals("slaves")) {
 				this.showSlaves();
@@ -112,6 +106,7 @@ public class ProcessManager {
 		System.out.println("Process Manager for Migrable process");
 		System.out.println("Usage: launch <ProcessName> [Arg1] [Arg2]...[ArgN]: Launch process, processName must exist)");
 		System.out.println("Usage: ps: print all the processes with their arguments");
+		System.out.println("Usage: salves: print all the connected slaves");
 		System.out.println("Usage: migrate <ProcessName> [Arg1] [Arg2]...[ArgN] <Source> <Destination> (Migrate process from source to destination)");
 		System.out.println("Usage: quit (Quit Process Manager)");
 		System.out.println("");
@@ -162,8 +157,8 @@ public class ProcessManager {
 	}
 	
 	
-	protected boolean migrate(String process, InetAddress desAdd) throws Exception {
-		return false;
+	public void migrate(String process, InetAddress desAdd){
+		return;
 	}
 	
 	public Hashtable<String, Object> getProcessTable() {
@@ -175,5 +170,12 @@ public class ProcessManager {
 	}
 	
 	public void showSlaves() {
+	}
+	
+	protected class migration implements Runnable{
+		public migration(String process, InetAddress desAdd) {			
+		}		
+		public void run() {			
+		}
 	}
 }

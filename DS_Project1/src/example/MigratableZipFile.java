@@ -63,7 +63,8 @@ public class MigratableZipFile implements MigratableProcess {
 
 			while (!isSuspending) {
 				int readByte = in.read(buffer);
-				if (readByte == -1) { // if reaching the end of the stream
+				if (readByte == -1) { // if reaching the end of the stream				
+					System.out.println("MigratableZipFile End of zipping.");
 					break;
 				}
 
@@ -75,7 +76,7 @@ public class MigratableZipFile implements MigratableProcess {
 			in.close();
 			out.finish();
 			out.close();
-			System.out.println("MigratableZipFile End of zipping.");
+			
 		} catch (IOException e) {
 			System.out.println("MigratableZipFile IOException: " + e);
 		} catch (InterruptedException e) {
