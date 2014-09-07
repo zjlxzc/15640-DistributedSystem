@@ -120,14 +120,18 @@ public class MigratableWebCrawler implements MigratableProcess {
 		
 		StringBuilder sbuilder = new StringBuilder(); // this variable is used to add content
 		String readLine = "";
-		try {
-			URL currentURL = new URL(url);
-			BufferedReader buffer = new BufferedReader(new InputStreamReader(currentURL.openStream()));
-			
-			while ((readLine = buffer.readLine()) != null) {
-				sbuilder.append(readLine);
+			try {
+				URL currentURL = new URL(url);
+				BufferedReader buffer = new BufferedReader(new InputStreamReader(currentURL.openStream()));
+				while ((readLine = buffer.readLine()) != null) {
+					sbuilder.append(readLine);
+				}
+				buffer.close();
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
-			buffer.close();
+			
 			crawledSet.add(url); // indicate this url has been crawled
 			
 			String content = sbuilder.toString();
@@ -146,12 +150,7 @@ public class MigratableWebCrawler implements MigratableProcess {
 					urls.add(nextURL);
 				}
 			}
-		} catch (MalformedURLException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+	
 	}
 	
 	/*
