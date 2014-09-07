@@ -132,7 +132,7 @@ public class MigratableWebCrawler implements MigratableProcess {
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				isCrawlSucceed = false;
-				e.printStackTrace();
+				//e.printStackTrace();
 			}
 				if (!isCrawlSucceed) {
 					return;
