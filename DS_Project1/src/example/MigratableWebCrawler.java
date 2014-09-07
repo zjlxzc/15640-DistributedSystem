@@ -124,7 +124,7 @@ public class MigratableWebCrawler implements MigratableProcess {
 			URL currentURL = new URL(url);
 			BufferedReader buffer = new BufferedReader(new InputStreamReader(currentURL.openStream()));
 			
-			while ((readLine = buffer.readLine()) != null) {
+			while (!isSuspending && (readLine = buffer.readLine()) != null) {
 				sbuilder.append(readLine);
 			}
 			buffer.close();

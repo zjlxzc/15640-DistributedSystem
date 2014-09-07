@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
-import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Hashtable;
@@ -14,7 +13,7 @@ import migratableProcess.MigratableProcess;
 
 public class ProcessManagerSlave extends ProcessManager{
 	
-	// The server socket of master, this is pre-binded
+	// The server socket of master, this is pre-bound
 	private final static int masterListenPort = 12345;
 	
 	// This maps the running processes and the combination of process name and arguments
@@ -26,8 +25,6 @@ public class ProcessManagerSlave extends ProcessManager{
 	// The slave thread to continually report to the master
 	Thread reportThread;
 	
-	ServerSocket slaveListenSocket;
-	
 	/**
 	 * The constructor of ProcessManagerSlave, it first starts a server socket to wait for the 
 	 * migration request from master. Then start a socket to connect the server reporting the 
@@ -37,9 +34,9 @@ public class ProcessManagerSlave extends ProcessManager{
 		
 		// The listen socket waiting for the master requests
 		try {
-			slaveListenSocket = new ServerSocket(0);
+			ServerSocket slaveListenSocket = new ServerSocket(0);
 			
-			Thread listenThread = new Thread(new Listen());		
+			Thread listenThread = new Thread(new Listen(slaveListenSocket));		
 			listenThread.start();
 			
 			// The report socket sends the listen socket as well as the current status of slave
@@ -73,50 +70,18 @@ public class ProcessManagerSlave extends ProcessManager{
 	 *
 	 */
 	private class Listen implements Runnable {
-		public Listen() {
+		ServerSocket slaveListenSocket;
+		public Listen(ServerSocket slaveListenSocket) {
+			this.slaveListenSocket = slaveListenSocket;
 		}
 		
-		/**
-		 * The thread wait for the master, when receive the request, it read the serialized object from
-		 * master, then start a new thread to recover the process, and put it into its own processTable
-		 * and stats table. When finishes the procedure, it sends a confirm message back to the master.
-		 */
 		public void run() {
 			while (true) {
 				Socket master;
 				try {
 					master = slaveListenSocket.accept();	
-					ObjectOutputStream masterOut = new ObjectOutputStream(master.getOutputStream());
-					ObjectInputStream masterIn = new ObjectInputStream(master.getInputStream());
-					String message = (String) masterIn.readObject();
-					
-					
-					System.out.println("get master");
-					// first read the message					
-					System.out.println(message);
-					//ObjectOutputStream masterOut = null;
-					
-					if (message.equals("Migration Start")) {
-						
-						masterOut.writeObject("Des Confirm");
-						masterOut.flush();
-						
-						// then read the process object and restart it in a new thread
-						MigratableProcess process = (MigratableProcess) masterIn.readObject();
-						System.out.println("Receive:" + process.toString());
-						Thread thread = new Thread(process);
-						thread.start();
-						System.out.println("Start:" + process.toString());
-						
-						// put it into tables for status
-						String processNameArg = process.toString();
-						processTable.put(processNameArg, process);
-						stats.put(processNameArg, thread);
-						
-						// send back message
-						masterOut.writeObject("success");
-						masterOut.flush();
-					}
+					Thread migrateThread = new Thread(new Migrate(master));
+					migrateThread.start();					
 				} catch (Exception e) {
 					System.out.println(e);
 				}				
@@ -125,9 +90,67 @@ public class ProcessManagerSlave extends ProcessManager{
 	}
 	
 	/**
+	 * A seperate thread to do the process migration, it read the serialized object from master, 
+	 * then start a new thread to recover the process, and put it into its own processTable and 
+	 * stats table. When finishes the procedure, it sends a confirm message back to the master.
+	 *
+	 */
+	private class Migrate implements Runnable {
+		Socket master;
+		Migrate(Socket master) {
+			this.master = master;
+		}
+		public void run() {
+			ObjectOutputStream masterOut;
+			try {
+				masterOut = new ObjectOutputStream(master.getOutputStream());
+			
+				ObjectInputStream masterIn = new ObjectInputStream(master.getInputStream());
+				String message = (String) masterIn.readObject();
+				
+				
+				System.out.println("get master");
+				// first read the message					
+				System.out.println(message);
+				//ObjectOutputStream masterOut = null;
+				
+				if (message.equals("Migration Start")) {
+										
+					masterOut.writeObject("Des Confirm");
+					masterOut.flush();
+					
+					// then read the process object and restart it in a new thread
+					MigratableProcess process = (MigratableProcess) masterIn.readObject();
+					System.out.println("Receive:" + process.toString());
+					Thread thread = new Thread(process);
+					thread.start();
+					System.out.println("Start:" + process.toString());
+					
+					// put it into tables for status
+					String processNameArg = process.toString();
+					processTable.put(processNameArg, process);
+					stats.put(processNameArg, thread);
+					
+					// send back message
+					masterOut.writeObject("success");
+					masterOut.flush();
+				}
+			} catch (Exception e) {
+				System.out.println(e);
+			} finally {
+				try {
+					master.close();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+	
+	/**
 	 * A seperate thread that keep reporting the slave's current status at a heartbeating rate.
 	 * The report includes the listen port of slave, and the running process numbers.
-	 * @author zjlxz
 	 *
 	 */
 	private class Report implements Runnable {
