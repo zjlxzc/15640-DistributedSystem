@@ -122,41 +122,43 @@ public class MigratableWebCrawler implements MigratableProcess {
 		String readLine = "";
 
 		boolean isCrawlSucceed = true;
-			try {
-				URL currentURL = new URL(url);
-				BufferedReader buffer = new BufferedReader(new InputStreamReader(currentURL.openStream()));
-				while ((readLine = buffer.readLine()) != null) {
-					sbuilder.append(readLine);
-				}
-				buffer.close();
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				isCrawlSucceed = false;
-				//e.printStackTrace();
+		try {
+			URL currentURL = new URL(url);
+			BufferedReader buffer = new BufferedReader(new InputStreamReader(
+					currentURL.openStream()));
+			while ((readLine = buffer.readLine()) != null) {
+				sbuilder.append(readLine);
 			}
-				if (!isCrawlSucceed) {
-					return;
-				}
-			
-				crawledSet.add(url); // indicate this url has been crawled
-			
-				String content = sbuilder.toString();
-				PrintStream print = new PrintStream(outputFile);
-				print.println(url + "\n" + content + "\n");
-				print.flush();
-			
-				String urlRegexp = "http://(\\w+\\.)*(\\w+)"; // regular expression for url
-				Pattern pattern = Pattern.compile(urlRegexp);
-				// create a matcher that will match the given input against this pattern
-				Matcher matcher = pattern.matcher(sbuilder.toString());
-			
-				while (matcher.find()) {
-					String nextURL = matcher.group(); // get matched subsequence
-					if (!nextURL.isEmpty() && !crawledSet.contains(nextURL)) {
-						urls.add(nextURL);
-					}
-				}
+			buffer.close();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			isCrawlSucceed = false;
+			// e.printStackTrace();
+		}
+		if (!isCrawlSucceed) {
+			return;
+		}
+
+		crawledSet.add(url); // indicate this url has been crawled
+
+		String content = sbuilder.toString();
+		PrintStream print = new PrintStream(outputFile);
+		print.println(url + "\n" + content + "\n");
+		print.flush();
+
+		String urlRegexp = "http://(\\w+\\.)*(\\w+)"; // regular expression for
+														// url
+		Pattern pattern = Pattern.compile(urlRegexp);
+		// create a matcher that will match the given input against this pattern
+		Matcher matcher = pattern.matcher(sbuilder.toString());
+
+		while (matcher.find()) {
+			String nextURL = matcher.group(); // get matched subsequence
+			if (!nextURL.isEmpty() && !crawledSet.contains(nextURL)) {
+				urls.add(nextURL);
 			}
+		}
+	}
 	
 	/*
 	 * This method is used to produce a simple string representation of the
