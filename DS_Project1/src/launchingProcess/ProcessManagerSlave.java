@@ -1,12 +1,13 @@
 package launchingProcess;
 
+import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Hashtable;
-import java.util.Iterator;
 
 import migratableProcess.MigratableProcess;
 
@@ -32,18 +33,26 @@ public class ProcessManagerSlave extends ProcessManager{
 	 * migration request from master. Then start a socket to connect the server reporting the 
 	 * listen socket and its own status.
 	 */
-	public ProcessManagerSlave(String hostname) throws Exception{							
+	public ProcessManagerSlave(String hostname){							
 		
 		// The listen socket waiting for the master requests
-		slaveListenSocket = new ServerSocket(0);		
-		Thread listenThread = new Thread(new Listen());		
-		listenThread.start();
-		
-		// The report socket sends the listen socket as well as the current status of slave
-		reportThread = new Thread(new Report(hostname, slaveListenSocket.getLocalPort()));
-		reportThread.start();
-		
-		System.out.println("I'm the salve");
+		try {
+			slaveListenSocket = new ServerSocket(0);
+			
+			Thread listenThread = new Thread(new Listen());		
+			listenThread.start();
+			
+			// The report socket sends the listen socket as well as the current status of slave
+			reportThread = new Thread(new Report(hostname, slaveListenSocket.getLocalPort()));
+			reportThread.start();
+			
+			System.out.println("I'm the salve");
+			
+		} catch (IOException e) {
+			System.out.println(e);
+		} catch (Exception e) {
+			System.out.println(e);
+		}
 	}
 	
 	public Hashtable<String, Object> getProcessTable() {
@@ -94,8 +103,10 @@ public class ProcessManagerSlave extends ProcessManager{
 						
 						// then read the process object and restart it in a new thread
 						MigratableProcess process = (MigratableProcess) masterIn.readObject();
+						System.out.println("Receive:" + process.toString());
 						Thread thread = new Thread(process);
 						thread.start();
+						System.out.println("Start:" + process.toString());
 						
 						// put it into tables for status
 						String processNameArg = process.toString();
@@ -103,11 +114,11 @@ public class ProcessManagerSlave extends ProcessManager{
 						stats.put(processNameArg, thread);
 						
 						// send back message
-						masterOut.writeObject("sucess");
+						masterOut.writeObject("success");
 						masterOut.flush();
 					}
 				} catch (Exception e) {
-					e.printStackTrace();
+					System.out.println(e);
 				}				
 			}
 		}		
@@ -147,9 +158,9 @@ public class ProcessManagerSlave extends ProcessManager{
 					Thread.sleep(5000);
 				}
 			} catch (Exception e) {
-				e.printStackTrace();
+				System.out.println(e);
+				System.exit(1);
 			}			
-		}
-		
+		}		
 	}
 }

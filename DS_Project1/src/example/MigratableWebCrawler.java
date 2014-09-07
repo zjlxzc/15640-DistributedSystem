@@ -75,9 +75,9 @@ public class MigratableWebCrawler implements MigratableProcess {
 
 	@Override
 	public void run() {
-		getInputFile();
-		crawlURL();
 		isSuspending = false;
+		getInputFile();		
+		crawlURL();		
 	}
 
 	@Override
