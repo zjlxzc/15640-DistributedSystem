@@ -171,4 +171,11 @@ public class ProcessManager {
 	
 	public void showSlaves() {
 	}
+	
+	protected class migration implements Runnable{
+		public migration(String process, InetAddress desAdd) {			
+		}		
+		public void run() {			
+		}
+	}
 }

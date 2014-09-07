@@ -11,6 +11,7 @@ import java.net.Socket;
 import java.util.HashMap;
 import java.util.Hashtable;
 
+import launchingProcess.ProcessManager.migration;
 import migratableProcess.MigratableProcess;
 
 public class ProcessManagerMaster extends ProcessManager{
@@ -46,7 +47,7 @@ public class ProcessManagerMaster extends ProcessManager{
 	}
 	
 	public void migrate(String process, InetAddress desAdd){
-		Thread migrateThread = new Thread(new Migration(process.trim(),desAdd));		
+		Thread migrateThread = new Thread(new migration(process.trim(),desAdd));		
 		migrateThread.start();
 	}
 	
@@ -129,10 +130,10 @@ public class ProcessManagerMaster extends ProcessManager{
 		}
 	}
 	
-	public class Migration implements Runnable{
+	public class migration implements Runnable{
 		private String process;
 		private InetAddress desAdd;
-		public Migration(String process, InetAddress desAdd) {	
+		public migration(String process, InetAddress desAdd) {	
 			this.process = process;
 			this.desAdd = desAdd;
 		}
