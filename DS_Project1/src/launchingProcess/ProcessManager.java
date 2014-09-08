@@ -2,6 +2,7 @@ package launchingProcess;
 
 import java.lang.reflect.Constructor;
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -55,51 +56,54 @@ public class ProcessManager {
 	 * @throws Exception
 	 */
 	@SuppressWarnings("resource")
-	public void control() throws Exception {		
-		Scanner in = new Scanner(System.in);
-		usage();
-		while (true) {
-						
-			String[] command = in.nextLine().split(" ");
-			
-			// List all the process
-			if (command[0].equals("ps")) {
-				this.listProcess();
-			} else if (command[0].equals("quit")) {  // quit the manager
-				System.out.println("Bye Bye");
-				System.exit(0);
-			} else if (command[0].equals("launch")) { // launch new process
-				String process = "";
-				for(int i = 1; i < command.length; i++) {
-					process += command[i] + " ";
-				}
+	public void control(){		
+			Scanner in = new Scanner(System.in);	
+			usage();
+			while (true) {
+				System.out.println("Waiting for input:");
+				String[] command = in.nextLine().split(" ");
 				
-				boolean isLaunched = this.launchProcess(process.trim());
-				if (isLaunched) {
-					System.out.println("The process is successfully launched");
-				} else {
-					System.out.println("Launch Failed");
-				}
-			} else if (command[0].equals("migrate")) {  // migarate process
-				if (this instanceof ProcessManagerMaster) {
-					int len = command.length;
-					String des = command[len - 1];
+				// List all the process
+				if (command[0].equals("ps")) {
+					this.listProcess();
+				} else if (command[0].equals("quit")) {  // quit the manager
+					System.out.println("Bye Bye");
+					System.exit(0);
+				} else if (command[0].equals("launch")) { // launch new process
 					String process = "";
-					for(int i = 1; i < command.length - 1; i++) {
+					for(int i = 1; i < command.length; i++) {
 						process += command[i] + " ";
+					}				
+					boolean isLaunched = this.launchProcess(process.trim());
+					if (isLaunched) {
+						System.out.println("The process is successfully launched");
+					} else {
+						System.out.println("Launch Failed");
 					}
-					InetAddress desAdd = InetAddress.getByName(des);
-					this.migrate(process.trim(),desAdd);
-				}							
-			} else if (command[0].equals("slaves")) {
-				this.showSlaves();
+				}else if (command[0].equals("migrate")) {  // migarate process
+					try {
+						if (this instanceof ProcessManagerMaster) {
+							int len = command.length;
+							String des = command[len - 1];
+							String process = "";
+							for(int i = 1; i < command.length - 1; i++) {
+								process += command[i] + " ";
+							}
+							InetAddress desAdd;						
+							desAdd = InetAddress.getByName(des);						
+							this.migrate(process.trim(),desAdd);
+						}
+					}catch (Exception e) {
+						System.out.println(e);
+					}
+				} else if (command[0].equals("slaves")) {
+					this.showSlaves();
+				} else {
+					System.out.println("Wrong input, please try again");
+					usage();
+				} 
 			}
-			else {
-				System.out.println("Wrong input, please try again");
-				usage();
-			}
-		}
-	}
+		}					
 
 
 	private static void usage() {
@@ -128,8 +132,8 @@ public class ProcessManager {
 				this.getStats().put(process, thread);
 				System.out.println("Process lauching successfull");
 			} catch (Exception e) {
+				System.out.println(e);
 				System.out.println("Process launching failed");
-				e.printStackTrace();
 				return false;
 			}
 			return true;

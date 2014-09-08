@@ -136,6 +136,7 @@ public class ProcessManagerMaster extends ProcessManager{
 			this.process = process;
 			this.desAdd = desAdd;
 		}
+		
 		@Override
 		public void run() {
 			try {
@@ -160,6 +161,7 @@ public class ProcessManagerMaster extends ProcessManager{
 						System.out.println("Send: " + midProcess.toString());
 						// suspend the process
 						midProcess.suspend();
+
 						// send the process to the slave, then wait
 						desOut.writeObject(midProcess);	
 						desOut.flush();
@@ -170,7 +172,7 @@ public class ProcessManagerMaster extends ProcessManager{
 						if (response.equals("success")) {
 							isMigrated = true;
 							midProcess = null;
-						}			
+						}
 					}
 					masterToDes.close();
 					if (isMigrated) {
