@@ -169,13 +169,16 @@ public class ProcessManagerSlave extends ProcessManager{
 				while (true) {
 					reportSocket = new Socket(hostname, masterListenPort);
 					PrintWriter out = new PrintWriter(reportSocket.getOutputStream());
+					String processInfo = "";
 					for (String p : stats.keySet()) {
 						if (!stats.get(p).isAlive()) {
 							processTable.remove(p);
+						} else {
+							processInfo += p + "\n";
 						}
 					}					
-					message = "" + slaveListenPort + " " + processTable.size() + "\n";	
-					out.write(message);
+					out.write(slaveListenPort + "\n");
+					out.write(processInfo);
 					out.flush();
 					reportSocket.close();
 					Thread.sleep(5000);

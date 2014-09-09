@@ -8,6 +8,7 @@ import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Hashtable;
 
@@ -23,7 +24,7 @@ public class ProcessManagerMaster extends ProcessManager{
 	private Hashtable<String, Thread> stats;
 		
 	// This maps the slave and their load;
-	private HashMap<InetAddress, Integer> slaveLoad;
+	private HashMap<InetAddress, ArrayList<String>> slaveLoad;
 	
 	// This maps the slave and their port;
 	private HashMap<InetAddress, Integer> slaveMap;
@@ -36,7 +37,7 @@ public class ProcessManagerMaster extends ProcessManager{
 		processTable = new Hashtable<String, Object>();
 		stats = new Hashtable<String, Thread>();
 		slaveMap = new HashMap<InetAddress, Integer>();
-		slaveLoad = new HashMap<InetAddress, Integer>();	
+		slaveLoad = new HashMap<InetAddress, ArrayList<String>>();	
 		ServerSocket listenSocket = new ServerSocket(listenPort);
 		listen = new Thread(new socketListen(listenSocket));		
 		listen.start();
@@ -61,7 +62,11 @@ public class ProcessManagerMaster extends ProcessManager{
 	
 	public void showSlaves() {
 		for (InetAddress i : slaveMap.keySet()) {
-			System.out.println(i.getHostName() + ":" + slaveMap.get(i) + " current running process:" + slaveLoad.get(i) + "\n");
+			System.out.println(i.getHostName() + ":" + slaveMap.get(i) + " current running process: \n");
+			for (String s : slaveLoad.get(i)) {
+				System.out.println(s + "\n");
+			}
+			System.out.println("*****************************************************************************");
 		}
 	}
 	/**
@@ -81,17 +86,14 @@ public class ProcessManagerMaster extends ProcessManager{
 					// Waiting for the slave to update port and load information
 					Socket slave = listenSocket.accept();
 					InputStreamReader inStream = new InputStreamReader(slave.getInputStream());
-					BufferedReader br = new BufferedReader(inStream);
-					String inMessage = "";  
+					BufferedReader br = new BufferedReader(inStream); 
+					slaveMap.put(slave.getInetAddress(), Integer.valueOf(br.readLine()));					
+					ArrayList<String> processOnSlave = new ArrayList<String>();
 					String inLine = "";
 			        while((inLine = br.readLine()) != null) {
-			        	inMessage += inLine;
-			        }			        
-			        
-			        // The information is constructed by two parts: port and process nums, splited by space
-			        String[] inArray = inMessage.split(" ");
-			        slaveMap.put(slave.getInetAddress(), Integer.valueOf(inArray[0]));			 
-			        slaveLoad.put(slave.getInetAddress(), Integer.valueOf(inArray[1]));
+			        	processOnSlave.add(inLine);
+			        }	
+			        slaveLoad.put(slave.getInetAddress(), processOnSlave);
 				}
 			} catch (IOException e) {
 				System.out.println(e);
