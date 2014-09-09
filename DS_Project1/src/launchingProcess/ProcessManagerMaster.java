@@ -12,8 +12,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Hashtable;
 
-import migratableProcess.MigratableProcess;
-
 public class ProcessManagerMaster extends ProcessManager{
 	
 	// This is the master server socket for slave handshaking and reporting, it's pre-binded
@@ -32,6 +30,7 @@ public class ProcessManagerMaster extends ProcessManager{
 	private Thread listen;
 	private Thread update;
 	
+
 	public ProcessManagerMaster() throws IOException {
 		super();
 		processTable = new Hashtable<String, Object>();
@@ -46,11 +45,13 @@ public class ProcessManagerMaster extends ProcessManager{
 		System.out.println("I'm the master");
 	}
 	
-	public void migrate(String process, InetAddress desAdd){
-		Thread migrateThread = new Thread(new Migration(process.trim(),desAdd));		
+	/**
+	 * Starts another thread to do the migration
+	 */
+	public void migrate(String process, InetAddress srcAdd, InetAddress desAdd){
+		Thread migrateThread = new Thread(new Migration(process.trim(),srcAdd, desAdd));		
 		migrateThread.start();
-	}
-	
+	}	
 	
 	public Hashtable<String, Object> getProcessTable() {
 		return processTable;
@@ -60,12 +61,19 @@ public class ProcessManagerMaster extends ProcessManager{
 		return stats;
 	}
 	
+	/**
+	 * Shows the globe information for all the slaves, help user to decide where and what to migrate
+	 */
 	public void showSlaves() {
 		for (InetAddress i : slaveMap.keySet()) {
 			System.out.println(i.getHostName() + ":" + slaveMap.get(i) + " current running process: \n");
-			for (String s : slaveLoad.get(i)) {
-				System.out.println(s + "\n");
-			}
+			if (slaveLoad.isEmpty()) {
+				System.out.println("none" + "\n");
+			} else {
+				for (String s : slaveLoad.get(i)) {
+					System.out.println(s + "\n");
+				}
+			}			
 			System.out.println("*****************************************************************************");
 		}
 	}
@@ -131,51 +139,87 @@ public class ProcessManagerMaster extends ProcessManager{
 		}
 	}
 	
+	/**
+	 * 
+	 * A separated thread that allow master to migrate one process from one slave to another. 
+	 * The master will first make sure the source slave and the process existence, then it will
+	 * confirm the destination. Then it will send the destination's address and server socket to
+	 * source, let them connect and migrate the process. Finally it will get the response from
+	 * source to judge if the migration is successful.
+	 *
+	 */
 	public class Migration implements Runnable{
 		private String process;
+		private InetAddress srcAdd;
 		private InetAddress desAdd;
-		public Migration(String process, InetAddress desAdd) {	
+		public Migration(String process, InetAddress srcAdd, InetAddress desAdd) {	
 			this.process = process;
+			this.srcAdd = srcAdd;
 			this.desAdd = desAdd;
 		}
 		
 		@Override
 		public void run() {
 			try {
+				boolean isMigrated = false; 
+				Socket masterToSrc = new Socket(srcAdd.getHostName(), slaveMap.get(srcAdd));
 				Socket masterToDes = new Socket(desAdd.getHostName(), slaveMap.get(desAdd));
-			
+				
+				ObjectOutputStream srcOut = new ObjectOutputStream(masterToSrc.getOutputStream());
+				ObjectInputStream srcIn = new ObjectInputStream(masterToSrc.getInputStream());
 				ObjectOutputStream desOut = new ObjectOutputStream(masterToDes.getOutputStream());
 				ObjectInputStream desIn = new ObjectInputStream(masterToDes.getInputStream());		
 				
-				boolean isMigrated = false; 
+				String srcRes, desRes;
 				
-				desOut.writeObject("Migration Start");
-				desOut.flush();	
+				// Confirm the source slave
+				System.out.println("Migration source: " + masterToSrc.getInetAddress());
+				srcOut.writeObject("Migration as Source");
+				srcOut.flush();					
+				srcRes = (String)srcIn.readObject();
 				
-				// If get the return confirmation from destination,then start to migrate
-				String desRes = (String)desIn.readObject();
-				System.out.println(desRes);
-				if (desRes.equals("Destination Confirm")) {
-					MigratableProcess midProcess = (MigratableProcess) processTable.get(process);
-					if (midProcess == null) {
-						System.out.println("The process does not exist or has been terminated");
+				if (srcRes.equals("Source Confim")) {
+					
+					System.out.println("Source Confim");
+					
+					// Confirm the target process
+					srcOut.writeObject(process);
+					srcOut.flush();
+					srcRes = (String)srcIn.readObject();
+					
+					if (srcRes.equals("No such process")) {
+						System.out.println("The process does NOT exist on source, please check again");
 					} else {
-						System.out.println("Send: " + midProcess.toString());
-						// suspend the process
-						midProcess.suspend();
-
-						// send the process to the slave, then wait
-						desOut.writeObject(midProcess);	
-						desOut.flush();
-						System.out.println("Sent: " + midProcess.toString());
 						
-						// Get the confirm information from destination, inform the source to kill the process
-						String response = (String)desIn.readObject();
-						if (response.equals("success")) {
-							isMigrated = true;
-							midProcess = null;
-						}
-					}
+						// Confirm the destination
+						System.out.println("Migration destination: " + masterToDes.getInetAddress());
+						desOut.writeObject("Migration as Destination");
+						desOut.flush();	
+						desRes = (String)desIn.readObject();
+						
+						if (desRes.equals("Destination Confirm")) {
+							
+							// Get the destination address and socket and send to source
+							desRes = (String)desIn.readObject();
+							System.out.println("Destination Confim: " + desRes);							
+							srcOut.writeObject(desRes);
+							srcOut.flush();
+							srcRes = (String)srcIn.readObject();
+							
+							if (srcRes.equals("Source connected to Destination")) {	
+								
+								// Let the slaves migrate the process, and then get the response
+								System.out.println("Source connected to Destination: start to migrate");
+								srcRes = (String)srcIn.readObject(); 
+								if (srcRes.equals("success")) {
+									isMigrated = true;
+								} else {
+									
+								}
+							}
+						}	
+					}							
+					masterToSrc.close();
 					masterToDes.close();
 					if (isMigrated) {
 						System.out.println("Migration success!!!!");

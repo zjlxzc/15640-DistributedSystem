@@ -66,7 +66,7 @@ public class ProcessManagerSlave extends ProcessManager{
 	
 	/**
 	 * A separate thread for start the listen socket and keep listening from master
-	 * @author zjlxz
+	 * This socket is used for receive the migrate request from master
 	 *
 	 */
 	private class Listen implements Runnable {
@@ -80,6 +80,8 @@ public class ProcessManagerSlave extends ProcessManager{
 				Socket master;
 				try {
 					master = slaveListenSocket.accept();	
+					
+					// When get the master's request, start another thread to migrate
 					Thread migrateThread = new Thread(new Migrate(master));
 					migrateThread.start();					
 				} catch (Exception e) {
@@ -90,38 +92,88 @@ public class ProcessManagerSlave extends ProcessManager{
 	}
 	
 	/**
-	 * A seperate thread to do the process migration, it read the serialized object from master, 
-	 * then start a new thread to recover the process, and put it into its own processTable and 
-	 * stats table. When finishes the procedure, it sends a confirm message back to the master.
+	 * A separate thread to do the process migration, the slave can be the source or the destination
+	 * of one migration, when a slave get the request from master, it will act accordingly.
+	 * A source slave will first check if the process exists, then connect to the destination, suspend 
+	 * the process and send the process object to the destination, then respond to master.
+	 * A destination slave will first open a server socket waiting for source slave, then receive the
+	 * suspended process, then resume the process and respond to source.
 	 *
 	 */
 	private class Migrate implements Runnable {
-		Socket master;
+		Socket master, toDes;
+		ServerSocket toSrc;
 		Migrate(Socket master) {
 			this.master = master;
 		}
-		public void run() {
-			ObjectOutputStream masterOut;
+		public void run() {		
 			try {
-				masterOut = new ObjectOutputStream(master.getOutputStream());
-			
-				ObjectInputStream masterIn = new ObjectInputStream(master.getInputStream());
-				String message = (String) masterIn.readObject();
-				
-				
 				System.out.println("Get Master connection");
-				// first read the message					
-				System.out.println(message);
-				//ObjectOutputStream masterOut = null;
+				ObjectOutputStream masterOut = new ObjectOutputStream(master.getOutputStream());				
+				ObjectInputStream masterIn = new ObjectInputStream(master.getInputStream());
 				
-				if (message.equals("Migration Start")) {
-										
-					masterOut.writeObject("Destination Confirm");
+				// Get the message from master and determine the roles
+				String message = (String) masterIn.readObject();				
+				System.out.println(message);
+				
+				// If the slave is source
+				if (message.equals("Migration as Source")) {
+					
+					// send back confirmation
+					masterOut.writeObject("Source Confirm");
 					masterOut.flush();
 					
+					// get the target process name and confirm it existence
+					String process = (String) masterIn.readObject();
+					MigratableProcess midProcess = (MigratableProcess) processTable.get(process);
+					if (midProcess == null) {
+						masterOut.writeObject("No such process");
+					} else {
+						
+						// get the destination address and socket and connect to it
+						message = (String) masterIn.readObject();
+						String[] mArr = message.split(":");
+						toDes = new Socket(mArr[0], Integer.parseInt(mArr[1]));						
+						masterOut.writeObject("Source connected to Destination");
+			
+						ObjectOutputStream desOut = new ObjectOutputStream(toDes.getOutputStream());
+						ObjectInputStream desIn = new ObjectInputStream(toDes.getInputStream());	
+						
+						// suspend the process and start to migrate
+						System.out.println("Send: " + midProcess.toString() + "to " + toDes.getInetAddress() + ":" + toDes.getLocalPort());
+						midProcess.suspend();
+						desOut.writeObject(midProcess);	
+						desOut.flush();
+						System.out.println("The process has been sent");
+						
+						// Get the confirm information from destination, inform the master and kill the process
+						String desRes = (String)desIn.readObject();
+						if (desRes.equals("success")) {
+							masterOut.writeObject("Success");
+							midProcess = null;
+						}
+					} 
+				}					
+				
+				// if the slave is destination
+				if (message.equals("Migration as Destination")) {
+					
+					// send back confirmation
+					masterOut.writeObject("Destination Confirm");
+					
+					// new a server socket to receive process and send the address to master
+					toSrc = new ServerSocket(0);
+					masterOut.writeObject(toSrc.getInetAddress() + ":" + toSrc.getLocalPort());
+					masterOut.flush();
+					
+					// get the connection from source
+					Socket source = toSrc.accept();
+					ObjectOutputStream srcOut = new ObjectOutputStream(source.getOutputStream());
+					ObjectInputStream srcIn = new ObjectInputStream(source.getInputStream());	
+										
 					// then read the process object and restart it in a new thread
-					MigratableProcess process = (MigratableProcess) masterIn.readObject();
-					System.out.println("Receive:" + process.toString());
+					MigratableProcess process = (MigratableProcess) srcIn.readObject();
+					System.out.println("Receive:" + process.toString() + "from " + toSrc.getInetAddress() + ":" + toSrc.getLocalPort());
 					Thread thread = new Thread(process);
 					thread.start();
 					System.out.println("Start:" + process.toString());
@@ -131,15 +183,17 @@ public class ProcessManagerSlave extends ProcessManager{
 					processTable.put(processNameArg, process);
 					stats.put(processNameArg, thread);
 					
-					// send back message
-					masterOut.writeObject("success");
-					masterOut.flush();
+					// send back message to source
+					srcOut.writeObject("success");
+					srcOut.flush();
 				}
 			} catch (Exception e) {
 				System.out.println(e);
 			} finally {
 				try {
 					master.close();
+					toSrc.close();
+					toDes.close();
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -149,7 +203,7 @@ public class ProcessManagerSlave extends ProcessManager{
 	}
 	
 	/**
-	 * A seperate thread that keep reporting the slave's current status at a heartbeating rate.
+	 * A separate thread that keep reporting the slave's current status at a heart beating rate of 5 seconds.
 	 * The report includes the listen port of slave, and the running process numbers.
 	 *
 	 */
@@ -164,7 +218,6 @@ public class ProcessManagerSlave extends ProcessManager{
 
 		@Override
 		public void run() {
-			String message = "";
 			try {								
 				while (true) {
 					reportSocket = new Socket(hostname, masterListenPort);

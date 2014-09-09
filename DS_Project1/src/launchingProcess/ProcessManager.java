@@ -2,7 +2,6 @@ package launchingProcess;
 
 import java.lang.reflect.Constructor;
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -26,34 +25,38 @@ public class ProcessManager {
 	/**
 	 * Constructor of Manager, define the master and slave role
 	 * @param args
-	 * @throws Exception
+	 * 
 	 */
-	public ProcessManager(String args[]) throws Exception {
-		if (args.length == 0) {			
-			manager = new ProcessManagerMaster();	
-		} else if (args.length == 2 && args[0].equals("-c")) {	
-			String hostname = args[1];
-			manager = new ProcessManagerSlave(hostname);			
-		} else {
+	public ProcessManager(String args[]) {
+		try {
+			if (args.length == 0) {			
+				manager = new ProcessManagerMaster();
+				} else if (args.length == 2 && args[0].equals("-c")) {	
+					String hostname = args[1];
+					manager = new ProcessManagerSlave(hostname);			
+				} else {
+					System.out.print("Illigel Arguments\n");
+					System.exit(1);
+				}
+		} catch (Exception e) {
 			System.out.print("Illigel Arguments\n");
 			System.exit(1);
-		}
+		}	
 		manager.control();
 	}
 	
 	/**
 	 * Main function
 	 * @param args
-	 * @throws Exception
+	 *
 	 */
 	
-	public static void main(String args[]) throws Exception {	
+	public static void main(String args[]){	
 		new ProcessManager(args);
 	}
 	
 	/**
-	 * This method is used to receive user's input and call according methods
-	 * @throws Exception
+	 * Receives user's input and call according methods 
 	 */
 	@SuppressWarnings("resource")
 	public void control(){		
@@ -65,11 +68,16 @@ public class ProcessManager {
 				
 				// List all the process
 				if (command[0].equals("ps")) {
+					
 					this.listProcess();
+					
 				} else if (command[0].equals("quit")) {  // quit the manager
+					
 					System.out.println("Bye Bye");
 					System.exit(0);
+					
 				} else if (command[0].equals("launch")) { // launch new process
+					
 					String process = "";
 					for(int i = 1; i < command.length; i++) {
 						process += command[i] + " ";
@@ -80,22 +88,26 @@ public class ProcessManager {
 					} else {
 						System.out.println("Launch Failed");
 					}
-				}else if (command[0].equals("migrate")) {  // migarate process
+					
+				}else if (command[0].equals("migrate")) {  // migrate process
+					
 					try {
 						if (this instanceof ProcessManagerMaster) {
 							int len = command.length;
 							String des = command[len - 1];
+							String src = command[len - 2];
 							String process = "";
-							for(int i = 1; i < command.length - 1; i++) {
+							for(int i = 1; i < command.length - 2; i++) {
 								process += command[i] + " ";
-							}
-							InetAddress desAdd;						
-							desAdd = InetAddress.getByName(des);						
-							this.migrate(process.trim(),desAdd);
+							}						
+							InetAddress desAdd = InetAddress.getByName(des);
+							InetAddress srcAdd = InetAddress.getByName(src);
+							this.migrate(process.trim(),srcAdd, desAdd);
 						}
 					}catch (Exception e) {
 						System.out.println(e);
 					}
+					
 				} else if (command[0].equals("slaves")) {
 					this.showSlaves();
 				} else {
@@ -105,7 +117,9 @@ public class ProcessManager {
 			}
 		}					
 
-
+	/**
+	 * Illustrates the usage of the process manager
+	 */
 	private static void usage() {
 		System.out.println("Process Manager for Migrable process");
 		System.out.println("Usage: launch <ProcessName> [Arg1] [Arg2]...[ArgN]: Launch process, processName must exist)");
@@ -116,20 +130,32 @@ public class ProcessManager {
 		System.out.println("");
 	}	
 	
+	/**
+	 * Launches the target process on the current node
+	 * @param process
+	 * 				The process class name with its argument as an unique identifier of a process
+	 * @return If the process is launched successfully
+	 */
 	private boolean launchProcess(String process)  {
-		Class<?> newProcessClass;
+		
 		if (this.getProcessTable() != null && !this.getProcessTable().contains(process)){
 			try {
+				// get the class name and arguments
 				String[] nameArgs = process.split(" ");			
-				String className = nameArgs[0]; 			
-				newProcessClass = Class.forName(className);
+				String className = nameArgs[0]; 
+				Class<?>  newProcessClass = Class.forName(className);
 				Object[] args = {Arrays.copyOfRange(nameArgs, 1, nameArgs.length)};
 				Constructor<?> con = newProcessClass.getConstructor(String[].class);
+				
+				// initialize a new process with arguments and start it in a separate thread
 				MigratableProcess newProcess = (MigratableProcess)con.newInstance(args);
 				Thread thread = new Thread(newProcess);
-				thread.start();				
+				thread.start();
+				
+				// update the status tables
 				this.getProcessTable().put(process, newProcess);
 				this.getStats().put(process, thread);
+				
 			} catch (Exception e) {
 				System.out.println(e);
 				return false;
@@ -142,6 +168,9 @@ public class ProcessManager {
 		return false;
 	}
 	
+	/**
+	 * Lists all the process on the current node
+	 */
 	protected void listProcess() {
 		if (this.getStats() != null && !this.getStats().isEmpty()) {
 			Iterator<String> it = this.getStats().keySet().iterator();
@@ -156,10 +185,9 @@ public class ProcessManager {
 			return;
 		}
 		System.out.println("No process running");
-	}
+	}	
 	
-	
-	public void migrate(String process, InetAddress desAdd){
+	public void migrate(String process,InetAddress srcAdd, InetAddress desAdd){
 		return;
 	}
 	
