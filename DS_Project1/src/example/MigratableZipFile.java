@@ -55,7 +55,7 @@ public class MigratableZipFile implements MigratableProcess {
 
 	@Override
 	public void run() {
-		byte[] buffer = new byte[1024];
+		byte[] buffer = new byte[32];
 		DataInputStream in = new DataInputStream(inputFile);
 
 		try {
@@ -82,7 +82,7 @@ public class MigratableZipFile implements MigratableProcess {
 		} catch (InterruptedException e) {
 			System.out.println("MigratableZipFile InterruptedException: " + e);
 		}
-
+		System.out.println("The process has been terminated: " + this.toString());
 		isSuspending = false;
 	}
 

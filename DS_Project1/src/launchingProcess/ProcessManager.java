@@ -130,10 +130,8 @@ public class ProcessManager {
 				thread.start();				
 				this.getProcessTable().put(process, newProcess);
 				this.getStats().put(process, thread);
-				System.out.println("Process lauching successfull");
 			} catch (Exception e) {
 				System.out.println(e);
-				System.out.println("Process launching failed");
 				return false;
 			}
 			return true;

@@ -77,6 +77,7 @@ public class MigratableWebCrawler implements MigratableProcess {
 	public void run() {
 		getInputFile();		
 		crawlURL();	
+		System.out.println("The process has been terminated: " + this.toString());
 		isSuspending = false;
 	}
 
@@ -122,12 +123,18 @@ public class MigratableWebCrawler implements MigratableProcess {
 		String readLine = "";
 
 		boolean isCrawlSucceed = true;
+		int linecnt = 0;
 		try {
 			URL currentURL = new URL(url);
 			BufferedReader buffer = new BufferedReader(new InputStreamReader(
 					currentURL.openStream()));
+			
 			while ((readLine = buffer.readLine()) != null) {
 				sbuilder.append(readLine);
+				linecnt++;
+				if (linecnt == 200) {
+					break;
+				}
 			}
 			buffer.close();
 		} catch (Exception e) {

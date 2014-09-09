@@ -153,7 +153,7 @@ public class ProcessManagerMaster extends ProcessManager{
 				// If get the return confirmation from destination,then start to migrate
 				String desRes = (String)desIn.readObject();
 				System.out.println(desRes);
-				if (desRes.equals("Des Confirm")) {
+				if (desRes.equals("Destination Confirm")) {
 					MigratableProcess midProcess = (MigratableProcess) processTable.get(process);
 					if (midProcess == null) {
 						System.out.println("The process does not exist or has been terminated");

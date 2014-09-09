@@ -109,14 +109,14 @@ public class ProcessManagerSlave extends ProcessManager{
 				String message = (String) masterIn.readObject();
 				
 				
-				System.out.println("get master");
+				System.out.println("Get Master connection");
 				// first read the message					
 				System.out.println(message);
 				//ObjectOutputStream masterOut = null;
 				
 				if (message.equals("Migration Start")) {
 										
-					masterOut.writeObject("Des Confirm");
+					masterOut.writeObject("Destination Confirm");
 					masterOut.flush();
 					
 					// then read the process object and restart it in a new thread
