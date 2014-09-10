@@ -73,8 +73,8 @@ public class ProcessManager {
 					
 				} else if (command[0].equals("quit")) {  // quit the manager
 					
-					System.out.println("Bye Bye");
-					System.exit(0);
+					this.exit();
+
 					
 				} else if (command[0].equals("launch")) { // launch new process
 					
@@ -116,6 +116,7 @@ public class ProcessManager {
 				} 
 			}
 		}					
+
 
 	/**
 	 * Illustrates the usage of the process manager
@@ -186,6 +187,11 @@ public class ProcessManager {
 		}
 		System.out.println("No process running");
 	}	
+	
+	public void exit() {
+		System.out.println("Bye Bye");
+		System.exit(0);		
+	}
 	
 	public void migrate(String process,InetAddress srcAdd, InetAddress desAdd){
 		return;

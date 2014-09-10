@@ -1,11 +1,14 @@
 package launchingProcess;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.Hashtable;
 
 import migratableProcess.MigratableProcess;
@@ -24,6 +27,7 @@ public class ProcessManagerSlave extends ProcessManager{
 	
 	// The slave thread to continually report to the master
 	Thread reportThread;
+	String hostname;
 	
 	/**
 	 * The constructor of ProcessManagerSlave, it first starts a server socket to wait for the 
@@ -31,7 +35,7 @@ public class ProcessManagerSlave extends ProcessManager{
 	 * listen socket and its own status.
 	 */
 	public ProcessManagerSlave(String hostname){							
-		
+		this.hostname = hostname;
 		// The listen socket waiting for the master requests
 		try {
 			ServerSocket slaveListenSocket = new ServerSocket(0);
@@ -63,6 +67,27 @@ public class ProcessManagerSlave extends ProcessManager{
 	public void showSlaves() {
 		System.out.println("This method is not supported by slave");
 	}
+	
+	public void exit() {
+		try {
+			Socket byebyeSocket = new Socket(hostname, masterListenPort);
+			PrintWriter byebyeOut = new PrintWriter(byebyeSocket.getOutputStream(), true);
+			InputStreamReader byebyeIn = new InputStreamReader(byebyeSocket.getInputStream());
+			BufferedReader br = new BufferedReader(byebyeIn); 
+			byebyeOut.write("Bye Bye\n");
+			byebyeOut.flush();
+			String res = br.readLine();
+			if (res.equals("Bye Bye")) {
+				byebyeSocket.close();
+				System.out.println("Disconnect from master");
+				System.exit(1);
+			}
+			
+		} catch (Exception e) {
+			System.out.println(e);
+		}	
+	}
+	
 	
 	/**
 	 * A separate thread for start the listen socket and keep listening from master
@@ -108,7 +133,7 @@ public class ProcessManagerSlave extends ProcessManager{
 		}
 		public void run() {		
 			try {
-				System.out.println("Get Master connection");
+				System.out.println("Get Master Migration Request");
 				ObjectOutputStream masterOut = new ObjectOutputStream(master.getOutputStream());				
 				ObjectInputStream masterIn = new ObjectInputStream(master.getInputStream());
 				
@@ -129,7 +154,7 @@ public class ProcessManagerSlave extends ProcessManager{
 					if (midProcess == null) {
 						masterOut.writeObject("No such process");
 					} else {
-						
+						masterOut.writeObject("Process Confirm");
 						// get the destination address and socket and connect to it
 						message = (String) masterIn.readObject();
 						String[] mArr = message.split(":");
@@ -140,7 +165,7 @@ public class ProcessManagerSlave extends ProcessManager{
 						ObjectInputStream desIn = new ObjectInputStream(toDes.getInputStream());	
 						
 						// suspend the process and start to migrate
-						System.out.println("Send: " + midProcess.toString() + "to " + toDes.getInetAddress() + ":" + toDes.getLocalPort());
+						System.out.println("Send: " + midProcess.toString() + " to " + toDes.getInetAddress().getHostName() + ":" + toDes.getLocalPort());
 						midProcess.suspend();
 						desOut.writeObject(midProcess);	
 						desOut.flush();
@@ -149,10 +174,12 @@ public class ProcessManagerSlave extends ProcessManager{
 						// Get the confirm information from destination, inform the master and kill the process
 						String desRes = (String)desIn.readObject();
 						if (desRes.equals("success")) {
-							masterOut.writeObject("Success");
+							System.out.println("Source complete successfully");
+							masterOut.writeObject("success");
 							midProcess = null;
 						}
 					} 
+					toDes.close();
 				}					
 				
 				// if the slave is destination
@@ -161,9 +188,9 @@ public class ProcessManagerSlave extends ProcessManager{
 					// send back confirmation
 					masterOut.writeObject("Destination Confirm");
 					
-					// new a server socket to receive process and send the address to master
+					// new a server socket to receive process and send the port to master
 					toSrc = new ServerSocket(0);
-					masterOut.writeObject(toSrc.getInetAddress() + ":" + toSrc.getLocalPort());
+					masterOut.writeObject("" + toSrc.getLocalPort());
 					masterOut.flush();
 					
 					// get the connection from source
@@ -173,7 +200,7 @@ public class ProcessManagerSlave extends ProcessManager{
 										
 					// then read the process object and restart it in a new thread
 					MigratableProcess process = (MigratableProcess) srcIn.readObject();
-					System.out.println("Receive:" + process.toString() + "from " + toSrc.getInetAddress() + ":" + toSrc.getLocalPort());
+					System.out.println("Receive:" + process.toString() + " from " + source.getInetAddress().getHostName() + ":" + source.getLocalPort());
 					Thread thread = new Thread(process);
 					thread.start();
 					System.out.println("Start:" + process.toString());
@@ -184,24 +211,25 @@ public class ProcessManagerSlave extends ProcessManager{
 					stats.put(processNameArg, thread);
 					
 					// send back message to source
+					System.out.println("Destination complete successfully");
 					srcOut.writeObject("success");
 					srcOut.flush();
-				}
+					toSrc.close();
+				}				
 			} catch (Exception e) {
 				System.out.println(e);
 			} finally {
 				try {
 					master.close();
-					toSrc.close();
-					toDes.close();
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					System.out.println(e);
 				}
 			}
 		}
 	}
 	
+
+
 	/**
 	 * A separate thread that keep reporting the slave's current status at a heart beating rate of 5 seconds.
 	 * The report includes the listen port of slave, and the running process numbers.

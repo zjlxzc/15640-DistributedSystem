@@ -173,7 +173,7 @@ public class MigratableWebCrawler implements MigratableProcess {
 	 * arguments. This would make the debugging and tracing relative easy.
 	 */
 	public String toString() {
-		StringBuilder sbuilder = new StringBuilder("MigratableWebCrawler");
+		StringBuilder sbuilder = new StringBuilder("example.MigratableWebCrawler");
 		for (String arg : args) {
 			sbuilder.append(" " + arg);
 		}

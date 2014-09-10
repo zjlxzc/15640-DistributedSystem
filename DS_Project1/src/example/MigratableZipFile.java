@@ -99,7 +99,7 @@ public class MigratableZipFile implements MigratableProcess {
 	 * arguments. This would make the debugging and tracing relative easy.
 	 */
 	public String toString() {
-		StringBuilder sbuilder = new StringBuilder("MigratableZipFile");
+		StringBuilder sbuilder = new StringBuilder("example.MigratableZipFile");
 		for (String arg : args) {
 			sbuilder.append(" " + arg);
 		}

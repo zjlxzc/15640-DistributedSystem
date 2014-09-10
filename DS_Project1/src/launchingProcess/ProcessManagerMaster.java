@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -65,13 +66,16 @@ public class ProcessManagerMaster extends ProcessManager{
 	 * Shows the globe information for all the slaves, help user to decide where and what to migrate
 	 */
 	public void showSlaves() {
+		if (slaveMap.isEmpty()) {
+			System.out.println("No slave connected now");
+		}
 		for (InetAddress i : slaveMap.keySet()) {
-			System.out.println(i.getHostName() + ":" + slaveMap.get(i) + " current running process: \n");
+			System.out.println(i.getHostName() + ":" + slaveMap.get(i) + " current running process:");
 			if (slaveLoad.isEmpty()) {
-				System.out.println("none" + "\n");
+				System.out.println("none");
 			} else {
 				for (String s : slaveLoad.get(i)) {
-					System.out.println(s + "\n");
+					System.out.println(s);
 				}
 			}			
 			System.out.println("*****************************************************************************");
@@ -79,8 +83,7 @@ public class ProcessManagerMaster extends ProcessManager{
 	}
 	/**
 	 * A separte thread for the master to accept slave handshaking and updating their status
-	 * @author zjlxz
-	 *
+	 * 
 	 */
 	private class socketListen implements Runnable{
 		ServerSocket listenSocket;
@@ -95,13 +98,22 @@ public class ProcessManagerMaster extends ProcessManager{
 					Socket slave = listenSocket.accept();
 					InputStreamReader inStream = new InputStreamReader(slave.getInputStream());
 					BufferedReader br = new BufferedReader(inStream); 
-					slaveMap.put(slave.getInetAddress(), Integer.valueOf(br.readLine()));					
-					ArrayList<String> processOnSlave = new ArrayList<String>();
-					String inLine = "";
-			        while((inLine = br.readLine()) != null) {
-			        	processOnSlave.add(inLine);
-			        }	
-			        slaveLoad.put(slave.getInetAddress(), processOnSlave);
+					PrintWriter outStream = new PrintWriter(slave.getOutputStream());				
+					String inLine = br.readLine();
+					if (inLine.equals("Bye Bye")) {						
+						System.out.println(slave.getInetAddress().getHostName() + " disconnected");
+						slaveMap.remove(slave.getInetAddress());
+						outStream.write("Bye Bye\n");
+						outStream.flush();
+					} else {
+						slaveMap.put(slave.getInetAddress(), Integer.valueOf(inLine));					
+						ArrayList<String> processOnSlave = new ArrayList<String>();
+				        while((inLine = br.readLine()) != null) {
+				        	processOnSlave.add(inLine);
+				        }	
+				        slaveLoad.put(slave.getInetAddress(), processOnSlave);
+					}
+					
 				}
 			} catch (IOException e) {
 				System.out.println(e);
@@ -148,7 +160,8 @@ public class ProcessManagerMaster extends ProcessManager{
 	 * source to judge if the migration is successful.
 	 *
 	 */
-	public class Migration implements Runnable{
+		
+	private class Migration implements Runnable{
 		private String process;
 		private InetAddress srcAdd;
 		private InetAddress desAdd;
@@ -173,14 +186,14 @@ public class ProcessManagerMaster extends ProcessManager{
 				String srcRes, desRes;
 				
 				// Confirm the source slave
-				System.out.println("Migration source: " + masterToSrc.getInetAddress());
+				System.out.println("Migration source: " + srcAdd.getHostName());
 				srcOut.writeObject("Migration as Source");
 				srcOut.flush();					
 				srcRes = (String)srcIn.readObject();
 				
-				if (srcRes.equals("Source Confim")) {
+				if (srcRes.equals("Source Confirm")) {
 					
-					System.out.println("Source Confim");
+					System.out.println("Source Comfirm: " + srcAdd.getHostName() + ":" + slaveMap.get(srcAdd));
 					
 					// Confirm the target process
 					srcOut.writeObject(process);
@@ -190,9 +203,9 @@ public class ProcessManagerMaster extends ProcessManager{
 					if (srcRes.equals("No such process")) {
 						System.out.println("The process does NOT exist on source, please check again");
 					} else {
-						
+						System.out.println(srcRes);
 						// Confirm the destination
-						System.out.println("Migration destination: " + masterToDes.getInetAddress());
+						System.out.println("Migration destination: " + desAdd.getHostName());
 						desOut.writeObject("Migration as Destination");
 						desOut.flush();	
 						desRes = (String)desIn.readObject();
@@ -201,8 +214,8 @@ public class ProcessManagerMaster extends ProcessManager{
 							
 							// Get the destination address and socket and send to source
 							desRes = (String)desIn.readObject();
-							System.out.println("Destination Confim: " + desRes);							
-							srcOut.writeObject(desRes);
+							System.out.println("Destination Confirm: " +  desAdd.getHostName() + ":" + desRes);							
+							srcOut.writeObject(desAdd.getHostName() + ":" + desRes);
 							srcOut.flush();
 							srcRes = (String)srcIn.readObject();
 							
