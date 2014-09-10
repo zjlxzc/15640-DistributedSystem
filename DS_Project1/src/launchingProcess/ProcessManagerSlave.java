@@ -203,7 +203,7 @@ public class ProcessManagerSlave extends ProcessManager{
 					System.out.println("Receive:" + process.toString() + " from " + source.getInetAddress().getHostName() + ":" + source.getLocalPort());
 					Thread thread = new Thread(process);
 					thread.start();
-					System.out.println("Start:" + process.toString());
+					System.out.println("Resume:" + process.toString());
 					
 					// put it into tables for status
 					String processNameArg = process.toString();

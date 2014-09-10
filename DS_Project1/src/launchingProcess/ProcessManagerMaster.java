@@ -193,7 +193,7 @@ public class ProcessManagerMaster extends ProcessManager{
 				
 				if (srcRes.equals("Source Confirm")) {
 					
-					System.out.println("Source Comfirm: " + srcAdd.getHostName() + ":" + slaveMap.get(srcAdd));
+					System.out.println("Source Confirm: " + srcAdd.getHostName() + ":" + slaveMap.get(srcAdd));
 					
 					// Confirm the target process
 					srcOut.writeObject(process);
