@@ -165,7 +165,7 @@ public class ProcessManagerSlave extends ProcessManager{
 						ObjectInputStream desIn = new ObjectInputStream(toDes.getInputStream());	
 						
 						// suspend the process and start to migrate
-						System.out.println("Send: " + midProcess.toString() + " to " + toDes.getInetAddress().getHostName() + ":" + toDes.getLocalPort());
+						System.out.println("Send: " + midProcess.toString() + " to " + toDes.getInetAddress().getHostName());
 						midProcess.suspend();
 						desOut.writeObject(midProcess);	
 						desOut.flush();
@@ -200,7 +200,7 @@ public class ProcessManagerSlave extends ProcessManager{
 										
 					// then read the process object and restart it in a new thread
 					MigratableProcess process = (MigratableProcess) srcIn.readObject();
-					System.out.println("Receive:" + process.toString() + " from " + source.getInetAddress().getHostName() + ":" + source.getLocalPort());
+					System.out.println("Receive:" + process.toString() + " from " + source.getInetAddress().getHostName());
 					Thread thread = new Thread(process);
 					thread.start();
 					System.out.println("Resume:" + process.toString());

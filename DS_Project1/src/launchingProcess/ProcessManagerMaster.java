@@ -193,7 +193,7 @@ public class ProcessManagerMaster extends ProcessManager{
 				
 				if (srcRes.equals("Source Confirm")) {
 					
-					System.out.println("Source Confirm: " + srcAdd.getHostName() + ":" + slaveMap.get(srcAdd));
+					System.out.println("Source Confirm: " + srcAdd.getHostName());
 					
 					// Confirm the target process
 					srcOut.writeObject(process);
@@ -214,7 +214,7 @@ public class ProcessManagerMaster extends ProcessManager{
 							
 							// Get the destination address and socket and send to source
 							desRes = (String)desIn.readObject();
-							System.out.println("Destination Confirm: " +  desAdd.getHostName() + ":" + desRes);							
+							System.out.println("Destination Confirm: " +  desAdd.getHostName());							
 							srcOut.writeObject(desAdd.getHostName() + ":" + desRes);
 							srcOut.flush();
 							srcRes = (String)srcIn.readObject();
