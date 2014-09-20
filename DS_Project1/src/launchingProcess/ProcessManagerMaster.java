@@ -81,6 +81,7 @@ public class ProcessManagerMaster extends ProcessManager{
 			System.out.println("*****************************************************************************");
 		}
 	}
+	
 	/**
 	 * A separte thread for the master to accept slave handshaking and updating their status
 	 * 
