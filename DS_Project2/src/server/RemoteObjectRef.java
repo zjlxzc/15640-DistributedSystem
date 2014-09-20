@@ -1,8 +1,10 @@
+package server;
+
 import java.lang.reflect.Method;
 
 public class RemoteObjectRef {
-	String IP_adr;
-	int Port;
+	String IP_adr; // server ip address
+	int Port; // server port 
 	int Obj_Key;
 	String Remote_Interface_Name;
 
@@ -12,7 +14,7 @@ public class RemoteObjectRef {
 		Obj_Key = obj_key;
 		Remote_Interface_Name = riname;
 	}
-	
+
 	// this method is important, since it is a stub creator.
 	//
 	Object localise() {
@@ -46,6 +48,10 @@ public class RemoteObjectRef {
 		} catch (IllegalAccessException e) {
 			e.printStackTrace();
 		}
+		return null;
+	}
+	
+	protected Object execute(Method method, Object[] args) {
 		return null;
 	}
 }

@@ -13,7 +13,7 @@ public class RemoteException extends IOException {
 
 	private static final long serialVersionUID = 3122003976067446297L;
 	
-	private Throwable detail; // the cause of the remote exception
+	public Throwable detail; // the cause of the remote exception
 	
 	// constructs a RemoteException
 	public RemoteException() {	
