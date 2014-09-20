@@ -1,5 +1,10 @@
 package registry;
 
+import exception.AccessException;
+import exception.AlreadyBoundException;
+import exception.NotBoundException;
+import exception.RemoteException;
+
 /*
  * Registry is a remote interface to a simple remote object registry
  * that provides methods for storing and retrieving remote object references
