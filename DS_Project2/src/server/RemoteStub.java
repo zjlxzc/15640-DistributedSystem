@@ -7,7 +7,7 @@ public class RemoteStub implements Serializable{
 
 	private static final long serialVersionUID = -7166353378723846018L;
 
-	public static final int port = 12345;
+	public static final int port = 2014;
 	public static final String postfix = "_Stub";
 	public static final String uri = "/stubs/";
 	public RemoteObjectRef reference;
@@ -18,8 +18,8 @@ public class RemoteStub implements Serializable{
 	}
 	
 	// Constructs a RemoteStub, with the specified remote reference.
-	protected RemoteStub(RemoteObjectRef ref) {
-		reference = ref;
+	protected RemoteStub(RemoteObjectRef referenc) {
+		reference = referenc;
 	}
 	
 	/**

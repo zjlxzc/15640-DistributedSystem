@@ -3,10 +3,10 @@ package server;
 import java.lang.reflect.Method;
 
 public class RemoteObjectRef {
-	String IP_adr; // server ip address
-	int Port; // server port 
-	int Obj_Key;
-	String Remote_Interface_Name;
+	public String IP_adr; // server ip address
+	public int Port; // server port 
+	public int Obj_Key;
+	public String Remote_Interface_Name;
 
 	public RemoteObjectRef(String ip, int port, int obj_key, String riname) {
 		IP_adr = ip;

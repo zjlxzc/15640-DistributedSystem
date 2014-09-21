@@ -7,6 +7,7 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
+import server.RemoteObjectRef;
 import exception.AccessException;
 import exception.AlreadyBoundException;
 import exception.NotBoundException;

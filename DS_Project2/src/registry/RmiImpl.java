@@ -1,6 +1,7 @@
 package registry;
 
 import java.net.InetAddress;
+import java.net.ServerSocket;
 
 public class RmiImpl {
 
@@ -18,7 +19,7 @@ public class RmiImpl {
 
 			// it should have its own port. assume you hardwire it.
 			host = (InetAddress.getLocalHost()).getHostName();
-			port = 12345;
+			port = 1099;
 
 			// it now have two classes from MainClassName:
 			// (1) the class itself (say ZipCpdeServerImpl) and
