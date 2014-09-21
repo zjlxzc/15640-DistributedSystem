@@ -25,9 +25,7 @@ public interface Registry extends Remote {
 	/* We may do not need to use these methods.
 	 * 
 	public String[] list() throws RemoteException, AccessException;
-	public void rebind(String name, Remote obj) throws RemoteException,
-			AccessException;
-	public void unbind(String name) throws RemoteException, NotBoundException,
-			AccessException;
+	public void rebind(String name, Remote obj) throws RemoteException, AccessException;
+	public void unbind(String name) throws RemoteException, NotBoundException, AccessException;
 	*/
 }

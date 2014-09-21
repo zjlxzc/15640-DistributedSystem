@@ -7,12 +7,12 @@ import java.net.UnknownHostException;
 import server.RemoteObjectRef;
 
 // This class is used to connect to server to get the return value
-public class EstablishConnection extends RemoteConnection{
+public class RegistryConnection extends RemoteConnection{
 
-	public EstablishConnection() {
+	public RegistryConnection() {
 	}
 	
-	public EstablishConnection(String ipAddr, int port) throws UnknownHostException, IOException {
+	public RegistryConnection(String ipAddr, int port) throws UnknownHostException, IOException {
 		super(ipAddr, port);
 	}
 
@@ -20,6 +20,7 @@ public class EstablishConnection extends RemoteConnection{
 			throws IOException, ClassNotFoundException {
 		Class<?>[] clas = m.getParameterTypes();
 		outStream.writeObject(reference);
+		outStream.writeObject(m);
 		for (int i = 0; i < args.length; i++) {
 			marshalling(clas[i], args[i], outStream);
 		}
