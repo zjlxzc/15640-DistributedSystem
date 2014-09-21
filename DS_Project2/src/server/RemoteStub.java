@@ -30,7 +30,7 @@ public class RemoteStub implements Serializable{
 		reference = ref;
 	}
 	
-	public Object execute(Method method, Object[] args) {
-		return reference.execute(method, args);
+	public Object execute(RemoteObjectRef reference, Method method, Object[] args) {
+		return reference.execute(reference, method, args);
 	}
 }
