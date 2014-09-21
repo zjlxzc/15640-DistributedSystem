@@ -15,8 +15,8 @@ public interface Registry extends Remote {
 
 	public static final int REGISTRY_OBJID = 0x0; // object ID
 	public static final int REGISTRY_TCP_PORT = 12345; // TCP port number
-
-	public void bind(String name, Remote obj) throws RemoteException,
+	
+	public void bind(String serviceName, RemoteObjectRef obj) throws RemoteException,
 			AlreadyBoundException, AccessException;
 	public Remote lookup(String name) throws RemoteException,
 	NotBoundException, AccessException; // query the current name bindings
