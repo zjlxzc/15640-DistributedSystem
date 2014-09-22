@@ -21,8 +21,8 @@ public class SimpleRegistry {
 	int port;
 
 	public SimpleRegistry(String host, int port) {
-		host = this.host;
-		port = this.port;
+		this.host = host;
+		this.port = port;
 	}
 
 	public void bind(String serviceName, RemoteObjectRef ror)
@@ -30,6 +30,7 @@ public class SimpleRegistry {
 		// open socket. same as before.
 		Socket soc;
 		try {
+			System.out.println("SimpleRegsitry: " + host + ":" + port);
 			soc = new Socket(host, port);
 
 			// get TCP streams and wrap them.
@@ -47,8 +48,8 @@ public class SimpleRegistry {
 
 			// it also gets an ack, but this is not used.
 			String ack = in.readLine();
-			if (ack.equals("bind success!")) {
-				System.out.println("bind success!");
+			if (ack.equals("Bind success!")) {
+				System.out.println(ack);
 			} else if (ack.equals("The service already bound")){
 				throw new AlreadyBoundException();
 			} else {
@@ -71,13 +72,14 @@ public class SimpleRegistry {
 		RemoteObjectRef ror = null;
 		try {
 			soc = new Socket(host, port);
-
+			System.out.println("SimpleRegistry: Look up");
+			PrintWriter strOut = new PrintWriter(soc.getOutputStream(), true);
+			strOut.println("Lookup");
+			
 			ObjectOutputStream out = new ObjectOutputStream(soc.getOutputStream());
 			ObjectInputStream in = new ObjectInputStream(soc.getInputStream());
-			
-			out.writeObject("Lookup");
-			out.flush();
-			
+		
+			out.writeObject(name);
 			String ack = (String)in.readObject();
 						
 			if (ack.equals("Find the service")) {

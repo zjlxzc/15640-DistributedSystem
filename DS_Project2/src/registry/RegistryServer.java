@@ -12,7 +12,7 @@ import java.util.Hashtable;
 
 import server.RemoteObjectRef;
 
-public class RegistryServer{
+public class RegistryServer implements Runnable{
 	int port;
 	Hashtable<String, RemoteObjectRef> regTable;
 	
@@ -21,23 +21,31 @@ public class RegistryServer{
 		regTable = new Hashtable<String, RemoteObjectRef>();
 	}
 	
-	public void start() {
+	public void run() {
 		ServerSocket reg = null;
+		System.out.println("Registry Server: start " + port);
 		try {
 			reg = new ServerSocket(port);
 			while(true) {
 				Socket client = reg.accept();
+				System.out.println("Registry Server get Client at" + client.getInetAddress());
 				BufferedReader in = new BufferedReader(new InputStreamReader(
 						client.getInputStream()));
+				
+				String req = in.readLine();
 				PrintWriter out = new PrintWriter(client.getOutputStream(), true);
 				
-				if ((in.readLine()).equals("I want a registry")) {
+				
+				System.out.println(req);
+				if (req.equals("I want a registry")) {
 					out.println("I am a simple registry.");
-				} else if (in.readLine().equals("bind")) {
+					System.out.println("Registry Server: send a simple registry");
+				} else if (req.equals("bind")) {
 					new Thread(new Bind(in, out)).start();
-				} else if (in.readLine().equals("Look up")) {
+				} else if (req.equals("Lookup")) {
+					System.out.println("Registry Server: get look up request");
 					new Thread(new Lookup(client)).start();
-				} else if (in.readLine().equals("List")) {
+				} else if (req.equals("List")) {
 					new Thread(new List(out)).start();
 				} else {
 					out.println("Wrong request");
@@ -67,6 +75,7 @@ public class RegistryServer{
 		@Override
 		public void run() {			
 			try {
+				System.out.println("Registry Server: bind");
 				String serviceName = in.readLine();
 				String ip_adr = in.readLine();
 				int port = Integer.parseInt(in.readLine());
@@ -99,9 +108,14 @@ public class RegistryServer{
 		@Override
 		public void run() {				
 			try {
-				in = new ObjectInputStream(client.getInputStream());
+				System.out.println("Registry Server: Look up");
+				
 				out = new ObjectOutputStream(client.getOutputStream());
+				in = new ObjectInputStream(client.getInputStream());
+				
 				String serviceName = (String)in.readObject();
+				System.out.println("Registry Server: get servicename" + serviceName);
+				
 				if (regTable.containsKey(serviceName)) {
 					RemoteObjectRef ror = regTable.get(serviceName);
 					out.writeObject("Find the service");
@@ -129,7 +143,8 @@ private class List implements Runnable {
 		}
 		
 		@Override
-		public void run() {				
+		public void run() {		
+			System.out.println("Registry Server: list");
 			if (!regTable.isEmpty()) {
 				for (String serviceName : regTable.keySet()) {
 					out.println(serviceName);

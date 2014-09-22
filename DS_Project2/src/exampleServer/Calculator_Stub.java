@@ -1,10 +1,12 @@
-package server;
+package exampleServer;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
 
-import exampleServer.Calculator;
 import registry.Remote;
+import server.RemoteObjectRef;
+import server.RemoteStub;
+import exampleClient.Calculator;
 
 public class Calculator_Stub extends RemoteStub implements Calculator, Remote {
 	private static final long serialVersionUID = 2L;

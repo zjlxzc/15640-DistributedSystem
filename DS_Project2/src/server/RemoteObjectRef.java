@@ -1,6 +1,10 @@
 package server;
 
-public class RemoteObjectRef {
+import java.io.Serializable;
+
+public class RemoteObjectRef implements Serializable{
+
+	private static final long serialVersionUID = 1L;
 	public String ip_adr; // server ip address
 	public int port; // server port 
 	public int obj_key;

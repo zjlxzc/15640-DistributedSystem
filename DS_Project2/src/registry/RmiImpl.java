@@ -30,18 +30,37 @@ public class RmiImpl {
 		registryPort = Integer.parseInt(args[2]);
 		String serviceName = args[3];
 		
-		new RegistryServer(registryPort).start();	
+		System.out.println("Server: start");
+		System.out.println("Server: initialClassName " + initialClassName);
+		System.out.println("Server: registryHost " + registryHost);
+		System.out.println("Server: registryPort " + registryPort);
+		System.out.println("Server: serviceName " + serviceName);
+		
+		System.out.println("Server: start Registry Server");
+		
+		new Thread(new RegistryServer(registryPort)).start();	
 		ServerSocket serverSoc = null;
 		// The service port
 		try {
 			serviceHost = (InetAddress.getLocalHost()).getHostName();		
 			servicePort = 12345;			
 			Class<?> initialclass = Class.forName(initialClassName);
+						
 			table = new RORtbl();
+			System.out.println("Server: new ROR table");
+			
 			Object o = initialclass.newInstance();
-			RemoteObjectRef ror = table.addObj(serviceHost, servicePort, o);			
+			System.out.println("Server: new initialclass object");
+			
+			RemoteObjectRef ror = table.addObj(serviceHost, servicePort, o);		
+			System.out.println("Server: new initialclass object add to table");
+			
 			SimpleRegistry registry = LocateRegistry.getRegistry(registryHost, registryPort);
-			registry.bind(serviceName, ror);		
+			System.out.println("Server: getRegistry");
+			
+			registry.bind(serviceName, ror);
+			System.out.println("Server: bind to registry");
+			
 			serverSoc = new ServerSocket(servicePort);
 	
 			while (true) {

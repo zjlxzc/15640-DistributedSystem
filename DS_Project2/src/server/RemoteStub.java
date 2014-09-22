@@ -44,7 +44,8 @@ public class RemoteStub implements Serializable{
 //	}
 //	
 	public Object invoke(RemoteObjectRef ref, Method method, Object[] parameters) throws IOException, ClassNotFoundException {
-	
+		
+		System.out.println("Remote Stub: method == null:" + method == null);
 		RMIMessage message = new RMIMessage(ref, method, parameters);    
 		
 		

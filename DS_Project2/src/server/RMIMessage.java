@@ -29,7 +29,8 @@ public class RMIMessage extends RemoteConnection {
 
 	public RMIMessage(RemoteObjectRef ref, Method m, Object[] parameters) throws IOException {
 		this.ref = ref;
-		this.types = m.getParameterTypes();;
+		System.out.println("RMIMessage: method == null:" + m == null);
+		this.types = m.getParameterTypes();
 		this.parameters = parameters;
 		this.method = m;
 		values = new Object[parameters.length];

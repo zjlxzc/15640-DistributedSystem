@@ -1,8 +1,8 @@
 package exampleClient;
 
 import java.io.IOException;
-import java.rmi.registry.LocateRegistry;
 
+import registry.LocateRegistry;
 import registry.SimpleRegistry;
 import server.RemoteObjectRef;
 import exception.AccessException;
@@ -16,6 +16,7 @@ public class CalculatorClient {
 		String serviceName = args[2];
 
 		SimpleRegistry sr = (SimpleRegistry) LocateRegistry.getRegistry(host, port);
+		System.out.println("Client: Get Regsitry");
 		RemoteObjectRef ror = sr.lookup(serviceName);
 
 		Calculator cal = (Calculator) ror.localise();
