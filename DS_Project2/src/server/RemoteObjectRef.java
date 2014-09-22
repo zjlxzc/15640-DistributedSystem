@@ -18,7 +18,7 @@ public class RemoteObjectRef {
 	Object localise() {
 
 		try {
-			Class<?> c = Class.forName(remote_Interface_Name + "_stub");
+			Class<?> c = Class.forName(remote_Interface_Name + "_Stub");
 			Object o = c.newInstance();
 			return o;
 		} catch (ClassNotFoundException e) {
