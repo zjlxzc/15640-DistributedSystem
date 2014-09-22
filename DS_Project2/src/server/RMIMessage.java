@@ -2,15 +2,14 @@ package server;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.lang.reflect.Method;
 import java.net.UnknownHostException;
-import java.util.HashMap;
 
 import connection.RemoteConnection;
 
 public class RMIMessage extends RemoteConnection {
 	private RemoteObjectRef ref;
+	private Method method;
 	private Class<?>[] types;
 	private Object[] parameters;
 	
@@ -30,6 +29,7 @@ public class RMIMessage extends RemoteConnection {
 
 	public RMIMessage(RemoteObjectRef ref, Method m, Object[] parameters) throws IOException {
 		this.ref = ref;
+		this.method = m;
 		this.types = m.getParameterTypes();;
 		this.parameters = parameters;
 		values = new Object[parameters.length];
