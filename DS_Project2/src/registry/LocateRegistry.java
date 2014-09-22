@@ -4,7 +4,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.net.InetAddress;
 import java.net.Socket;
+import java.net.UnknownHostException;
 
 /**
  * 
@@ -14,6 +16,17 @@ import java.net.Socket;
  */
 
 public class LocateRegistry {
+	public static SimpleRegistry getRegistry() {
+		SimpleRegistry serverRegistry = null;
+		try {
+			 serverRegistry = new SimpleRegistry((InetAddress.getLocalHost()).getHostName(), 1099);
+		} catch (UnknownHostException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return serverRegistry;
+	}
+	
 	public static SimpleRegistry getRegistry(String host, int port) {
 		// open socket.
 		Socket soc = null;
@@ -25,7 +38,7 @@ public class LocateRegistry {
 			PrintWriter out = new PrintWriter(soc.getOutputStream(), true);
 
 			// ask.
-			out.println("who are you?");
+			out.println("I want a registry");
 
 			// gets answer.
 			if ((in.readLine()).equals("I am a simple registry.")) {

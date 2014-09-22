@@ -1,35 +1,36 @@
 package registry;
 
-import java.util.*;
+import java.util.Hashtable;
+import java.util.Random;
 
 import server.RemoteObjectRef;
 
-// This is simple. ROR needs a new object key for each remote object (or its skeleton). 
-// This can be done easily, for example by using a counter.
-// We also assume a remote object implements only one interface, which is a remote interface.
-
 public class RORtbl
 {
-    // I omit all instance variables. you can use hash table, for example.
-    // The table would have a key by ROR.
-    
+    Hashtable<Integer, Object> table = new Hashtable<Integer, Object>();
     // make a new table. 
     public RORtbl()
 	{}
-
-    // add a remote object to the table. 
-    // Given an object, you can get its class, hence its remote interface.
-    // Using it, you can construct a ROR. 
-    // The host and port are not used unless it is exported outside.
-    // In any way, it is better to have it for uniformity.
-    public void addObj(String host, int port, Object o)
-	{
+    
+    // given the object, construct a RemoteObjectRef and put them into hashtable
+    public RemoteObjectRef addObj(String host, int port, Object o){	
+    	String remoteInterface = o.getClass().getInterfaces()[0].getName();
+    	Random rand = new Random();
+    	int obj_key = 0;
+    	while (true) {
+    		obj_key = rand.nextInt(900000) + 100000;
+    		if (!table.containsKey(obj_key)) {
+    			break;
+    		}
+    	}
+    	RemoteObjectRef ror = new RemoteObjectRef(host, port, obj_key, remoteInterface);
+    	table.put(obj_key, ror);
+    	return ror;
 	}
 
-    // given ror, find the corresponding object.
+    // given a RemoteObjectRef, find the corresponding object.
     public Object findObj(RemoteObjectRef ror)
 	{
-	    // if you use a hash table this is easy.
-	    return null;
+	    return table.get(ror.obj_key);
 	}
 }
