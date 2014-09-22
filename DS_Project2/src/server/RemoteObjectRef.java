@@ -1,7 +1,5 @@
 package server;
 
-import java.lang.reflect.Method;
-
 public class RemoteObjectRef {
 	public String IP_adr; // server ip address
 	public int Port; // server port 
@@ -51,7 +49,4 @@ public class RemoteObjectRef {
 		return null;
 	}
 	
-	protected Object execute(Method method, Object[] args) {
-		return null;
-	}
 }

@@ -16,6 +16,8 @@ public class CalculatorServer {
 	   
             //OLD USAGE: Naming.rebind("CoolCalculator", c); 
             Registry registry = LocateRegistry.getRegistry(args[0], Integer.parseInt(args[1]));
+            RemoteObjectRef r = (RemoteObjectRef)c;
+            
             registry.bind("CoolCalculator", (RemoteObjectRef)c);
             
             System.out.println("CalculatorServant object ready");
