@@ -15,7 +15,7 @@ public class RemoteObjectRef {
 
 	// this method is important, since it is a stub creator.
 	//
-	Object localise() {
+	public Object localise() {
 
 		try {
 			Class<?> c = Class.forName(remote_Interface_Name + "_Stub");
