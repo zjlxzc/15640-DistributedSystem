@@ -93,7 +93,8 @@ public class RmiImpl {
 				ObjectInputStream in = new ObjectInputStream(client.getInputStream());
 				
 				RMIMessage message = (RMIMessage)in.readObject();
-				
+				RemoteObjectRef ror = message.getRef();
+				Method method = message.get
 				
 			} catch (IOException e) {
 				// TODO Auto-generated catch block

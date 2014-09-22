@@ -29,9 +29,9 @@ public class RMIMessage extends RemoteConnection {
 
 	public RMIMessage(RemoteObjectRef ref, Method m, Object[] parameters) throws IOException {
 		this.ref = ref;
-		this.method = m;
 		this.types = m.getParameterTypes();;
 		this.parameters = parameters;
+		this.method = m;
 		values = new Object[parameters.length];
 		
 		marshalling();
@@ -99,11 +99,50 @@ public class RMIMessage extends RemoteConnection {
 		Class<?> returnType = m.getReturnType();
 		if (returnType == void.class) {
 			return null;
-		}
-		
+		}		
 		result = unmarshalling(returnType, inStream);
-		return this;
-		
+		return this;		
 	}
+
+	public RemoteObjectRef getRef() {
+		return ref;
+	}
+
+	public void setRef(RemoteObjectRef ref) {
+		this.ref = ref;
+	}
+
+	public Class<?>[] getTypes() {
+		return types;
+	}
+
+	public void setTypes(Class<?>[] types) {
+		this.types = types;
+	}
+
+	public Object[] getParameters() {
+		return parameters;
+	}
+
+	public void setParameters(Object[] parameters) {
+		this.parameters = parameters;
+	}
+
+	public Object[] getValues() {
+		return values;
+	}
+
+	public void setValues(Object[] values) {
+		this.values = values;
+	}
+
+	public Object getResult() {
+		return result;
+	}
+
+	public void setResult(Object result) {
+		this.result = result;
+	}
+	
 	
 }
