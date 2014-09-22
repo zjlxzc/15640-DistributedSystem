@@ -66,35 +66,6 @@ public class RMIMessage extends RemoteConnection {
 			}
         }
 	}
-
-	/*
-	public void marshalling(Class<?> clas, Object obj,
-			ObjectOutputStream outStream) throws IOException {
-		if(!clas.isPrimitive()) {
-			outStream.writeObject(obj);
-		} else {
-			if (clas == int.class) {
-				outStream.writeInt(((Integer) obj).intValue());
-			} else if (clas == long.class) {
-				outStream.writeLong(((Long) obj).longValue());
-			} else if (clas == float.class) {
-				outStream.writeFloat(((Float) obj).floatValue());
-			} else if (clas == double.class) {
-				outStream.writeDouble(((Double) obj).doubleValue());
-			} else if (clas == short.class) {
-				outStream.writeShort(((Short) obj).shortValue());
-			} else if (clas == char.class) {
-				outStream.writeChar(((Character) obj).charValue());
-			} else if (clas == byte.class) {
-				outStream.writeByte(((Byte) obj).byteValue());
-			} else if (clas == boolean.class) {
-				outStream.writeBoolean(((Boolean) obj).booleanValue());
-			} else {
-				System.out.println("Class is not valid " + clas);
-			}
-		}
-	}
-	*/
 	
 	public Object unmarshalling(Class<?> clas, ObjectInputStream inStream)
 			throws IOException, ClassNotFoundException {
