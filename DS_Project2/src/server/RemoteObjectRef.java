@@ -7,10 +7,10 @@ public class RemoteObjectRef {
 	public String remote_Interface_Name;
 
 	public RemoteObjectRef(String ip, int port, int obj_key, String riname) {
-		ip_adr = ip;
-		port = port;
-		obj_key = obj_key;
-		remote_Interface_Name = riname;
+		this.ip_adr = ip;
+		this.port = port;
+		this.obj_key = obj_key;
+		this.remote_Interface_Name = riname;
 	}
 
 	// this method is important, since it is a stub creator.

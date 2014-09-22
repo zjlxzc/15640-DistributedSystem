@@ -3,6 +3,8 @@ package registry;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -20,7 +22,8 @@ public class RmiImpl {
 	static int servicePort;
 	static String registryHost;
 	static int registryPort;
-
+	private static RORtbl table;
+	
 	public static void main(String args[]) {
 		String initialClassName = args[0];
 		registryHost = args[1];
@@ -34,9 +37,9 @@ public class RmiImpl {
 			serviceHost = (InetAddress.getLocalHost()).getHostName();		
 			servicePort = 12345;			
 			Class<?> initialclass = Class.forName(initialClassName);
-			RORtbl tbl = new RORtbl();
+			table = new RORtbl();
 			Object o = initialclass.newInstance();
-			RemoteObjectRef ror = tbl.addObj(serviceHost, servicePort, o);			
+			RemoteObjectRef ror = table.addObj(serviceHost, servicePort, o);			
 			SimpleRegistry registry = LocateRegistry.getRegistry(registryHost, registryPort);
 			registry.bind(serviceName, ror);		
 			serverSoc = new ServerSocket(servicePort);
@@ -94,12 +97,28 @@ public class RmiImpl {
 				
 				RMIMessage message = (RMIMessage)in.readObject();
 				RemoteObjectRef ror = message.getRef();
-				Method method = message.get
+				Method method = message.getMethod();
+				Object o = table.findObj(ror);
+				Object[] args = message.getParameters();
+				Object ret = method.invoke(o,args);
+				message.setResult(ret);
+				
+				out.writeObject(message);
+				out.flush();
 				
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (ClassNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IllegalAccessException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IllegalArgumentException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (InvocationTargetException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}

@@ -143,6 +143,14 @@ public class RMIMessage extends RemoteConnection {
 	public void setResult(Object result) {
 		this.result = result;
 	}
+
+	public Method getMethod() {
+		return method;
+	}
+
+	public void setMethod(Method method) {
+		this.method = method;
+	}
 	
 	
 }
