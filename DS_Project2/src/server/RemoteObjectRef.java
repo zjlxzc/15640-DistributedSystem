@@ -1,6 +1,8 @@
 package server;
 
 import java.io.Serializable;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 
 public class RemoteObjectRef implements Serializable{
 
@@ -23,7 +25,27 @@ public class RemoteObjectRef implements Serializable{
 
 		try {
 			Class<?> c = Class.forName(remote_Interface_Name + "_Stub");
-			Object o = c.newInstance();
+			Object o = null;
+			try {
+				Constructor constructor =
+				        c.getConstructor(new Class[]{RemoteObjectRef.class});
+				try {
+					o = constructor.newInstance(this);
+				} catch (IllegalArgumentException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (InvocationTargetException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			} catch (SecurityException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (NoSuchMethodException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
 			return o;
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();

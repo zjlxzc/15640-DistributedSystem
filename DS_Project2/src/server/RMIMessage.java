@@ -2,14 +2,23 @@ package server;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.lang.reflect.Method;
+import java.io.Serializable;
 import java.net.UnknownHostException;
 
 import connection.RemoteConnection;
 
-public class RMIMessage extends RemoteConnection {
+public class RMIMessage extends RemoteConnection implements Serializable{
 	private RemoteObjectRef ref;
-	private Method method;
+	//private Method method;
+	private String methodName;
+	public String getMethodName() {
+		return methodName;
+	}
+
+	public void setMethodName(String methodName) {
+		this.methodName = methodName;
+	}
+
 	private Class<?>[] types;
 	private Object[] parameters;
 	
@@ -27,15 +36,18 @@ public class RMIMessage extends RemoteConnection {
 		super(ipAddr, port);
 	}
 
-	public RMIMessage(RemoteObjectRef ref, Method m, Object[] parameters) throws IOException {
+	public void sendOut(RemoteObjectRef ref, String methodName, Class<?>[] types,
+				Object[] parameters) throws IOException {
 		this.ref = ref;
-		System.out.println("RMIMessage: method == null:" + m == null);
-		this.types = m.getParameterTypes();
+		//this.method = m;
 		this.parameters = parameters;
-		this.method = m;
+		this.methodName = methodName;
+		
+		this.types = types;
 		values = new Object[parameters.length];
 		
 		marshalling();
+
 		outStream.writeObject(this);
 		outStream.flush();
 	}
@@ -70,11 +82,12 @@ public class RMIMessage extends RemoteConnection {
 	
 	public Object unmarshalling(Class<?> clas, ObjectInputStream inStream)
 			throws IOException, ClassNotFoundException {
+		
 		if(!clas.isPrimitive()) {
 			return inStream.readObject();
 		} else {
 			if (clas == int.class) {
-				return Integer.valueOf(inStream.readInt());
+				return Integer.valueOf(((RMIMessage)inStream.readObject()).getResult().toString());
 			} else if (clas == long.class) {
 				return Long.valueOf(inStream.readLong());
 			} else if (clas == float.class) {
@@ -93,16 +106,17 @@ public class RMIMessage extends RemoteConnection {
 				System.out.println("Class is not valid " + clas);
 				return null;
 			}
-		}
+		}	
 	}
 	
-	public Object getReturnValue(Method m) throws IOException, ClassNotFoundException {
-		Class<?> returnType = m.getReturnType();
+	public Object getResultValue(Class<?> returnType) throws IOException, ClassNotFoundException {
+		//Class<?> returnType = .getReturnType();
 		if (returnType == void.class) {
 			return null;
 		}		
+		
 		result = unmarshalling(returnType, inStream);
-		return this;		
+		return result;
 	}
 
 	public RemoteObjectRef getRef() {
@@ -145,13 +159,4 @@ public class RMIMessage extends RemoteConnection {
 		this.result = result;
 	}
 
-	public Method getMethod() {
-		return method;
-	}
-
-	public void setMethod(Method method) {
-		this.method = method;
-	}
-	
-	
 }

@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 
+import connection.ConnectionManagement;
+
 public class RemoteStub implements Serializable{
 
 	private static final long serialVersionUID = -7166353378723846018L;
@@ -44,10 +46,12 @@ public class RemoteStub implements Serializable{
 //	}
 //	
 	public Object invoke(RemoteObjectRef ref, Method method, Object[] parameters) throws IOException, ClassNotFoundException {
-		
-		System.out.println("Remote Stub: method == null:" + method == null);
-		RMIMessage message = new RMIMessage(ref, method, parameters);    
-		
+		//ConnectionManagement cm = new ConnectionManagement(ref.ip_adr, ref.port);
+		RMIMessage message = new RMIMessage(ref.ip_adr, ref.port); 
+		//message.setRef(ref);
+		//message.setMethod(method);
+		//message.setParameters(parameters);
+		message.sendOut(ref, method.getName(), method.getParameterTypes(), parameters);
 		
 		//message.outStream.writeObject(ref);
         //for(int i = 0; i < parameters.length; i++){
@@ -55,6 +59,6 @@ public class RemoteStub implements Serializable{
         //}
         //message.outStream.flush();
         
-        return message.getReturnValue(method);  
+        return message.getResultValue(method.getReturnType());  
 	}
 }

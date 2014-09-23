@@ -65,6 +65,7 @@ public class RmiImpl {
 	
 			while (true) {
 				Socket client = serverSoc.accept();
+				
 				Excution excute = new Excution(client);
 				new Thread(excute).start();		
 			}
@@ -111,13 +112,29 @@ public class RmiImpl {
 		@Override
 		public void run() {
 			try {
+				
 				ObjectOutputStream out = new ObjectOutputStream(client.getOutputStream());
 				ObjectInputStream in = new ObjectInputStream(client.getInputStream());
 				
 				RMIMessage message = (RMIMessage)in.readObject();
+				
 				RemoteObjectRef ror = message.getRef();
-				Method method = message.getMethod();
+				Object obj = table.findObj(ror);
+				Class<?> c = obj.getClass();
+				System.out.println(c.getName());
+				Method method = null;
+				try {
+					method = c.getDeclaredMethod(message.getMethodName(), message.getTypes());
+				} catch (SecurityException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (NoSuchMethodException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				//Method method = message.getMethod();
 				Object o = table.findObj(ror);
+				
 				Object[] args = message.getParameters();
 				Object ret = method.invoke(o,args);
 				message.setResult(ret);

@@ -24,7 +24,7 @@ public class RORtbl
     		}
     	}
     	RemoteObjectRef ror = new RemoteObjectRef(host, port, obj_key, remoteInterface);
-    	table.put(obj_key, ror);
+    	table.put(obj_key, o);
     	return ror;
 	}
 
