@@ -5,6 +5,7 @@ import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.net.UnknownHostException;
 
+import remote.RemoteObjectRef;
 import connection.RemoteConnection;
 
 public class RMIMessage extends RemoteConnection implements Serializable{

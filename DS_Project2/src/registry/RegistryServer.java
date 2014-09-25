@@ -11,7 +11,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Hashtable;
 
-import server.RemoteObjectRef;
+import remote.RemoteObjectRef;
 
 public class RegistryServer implements Runnable{
 	int port;

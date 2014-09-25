@@ -1,4 +1,4 @@
-package registry;
+package remote;
 
 public interface Remote {
 

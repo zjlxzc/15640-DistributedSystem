@@ -1,4 +1,4 @@
-package registry;
+package server;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -10,11 +10,14 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
+import registry.LocateRegistry;
+import registry.RegistryServer;
+import registry.SimpleRegistry;
+import remote.RORtbl;
+import remote.RemoteObjectRef;
 import exception.AccessException;
 import exception.AlreadyBoundException;
 import exception.RemoteException;
-import server.RMIMessage;
-import server.RemoteObjectRef;
 
 public class RmiImpl {
 

@@ -1,7 +1,7 @@
 package exampleServer;
 
 import exception.RemoteException;
-import registry.Remote;
+import remote.Remote;
 
 public interface Calculator extends Remote {
    // this method will be called from remote clients

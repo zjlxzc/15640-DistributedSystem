@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 
-import connection.ConnectionManagement;
+import remote.RemoteObjectRef;
 
 public class RemoteStub implements Serializable{
 

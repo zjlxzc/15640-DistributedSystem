@@ -1,4 +1,4 @@
-package server;
+package remote;
 
 import java.io.Serializable;
 import java.lang.reflect.Constructor;

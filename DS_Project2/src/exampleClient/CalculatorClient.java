@@ -4,7 +4,7 @@ import java.io.IOException;
 
 import registry.LocateRegistry;
 import registry.SimpleRegistry;
-import server.RemoteObjectRef;
+import remote.RemoteObjectRef;
 import exception.AccessException;
 import exception.NotBoundException;
 

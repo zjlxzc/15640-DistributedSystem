@@ -1,9 +1,7 @@
-package registry;
+package remote;
 
 import java.util.Hashtable;
 import java.util.Random;
-
-import server.RemoteObjectRef;
 
 public class RORtbl
 {

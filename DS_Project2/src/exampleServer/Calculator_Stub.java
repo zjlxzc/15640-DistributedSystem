@@ -3,8 +3,8 @@ package exampleServer;
 import java.io.IOException;
 import java.lang.reflect.Method;
 
-import registry.Remote;
-import server.RemoteObjectRef;
+import remote.Remote;
+import remote.RemoteObjectRef;
 import server.RemoteStub;
 import exampleClient.Calculator;
 
