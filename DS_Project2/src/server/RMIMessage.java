@@ -2,17 +2,21 @@ package server;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.net.Socket;
 import java.net.UnknownHostException;
 
 import remote.RemoteObjectRef;
-import connection.RemoteConnection;
 
-public class RMIMessage extends RemoteConnection implements Serializable{
+public class RMIMessage implements Serializable{
 
 	private static final long serialVersionUID = 1L;
 	private RemoteObjectRef ref;
-	//private Method method;
+	public ObjectInputStream inStream;
+	public ObjectOutputStream outStream;
+	public Socket socket;
+	
 	private String methodName;
 	public String getMethodName() {
 		return methodName;
@@ -36,7 +40,9 @@ public class RMIMessage extends RemoteConnection implements Serializable{
 	}
 	
 	public RMIMessage(String ipAddr, int port) throws UnknownHostException, IOException {
-		super(ipAddr, port);
+		socket = new Socket(ipAddr, port);
+		outStream = new ObjectOutputStream(socket.getOutputStream());
+		inStream = new ObjectInputStream(socket.getInputStream());
 		System.out.println("RMIMessage : build connection to " + ipAddr);
 	}
 
@@ -55,6 +61,10 @@ public class RMIMessage extends RemoteConnection implements Serializable{
 		outStream.writeObject(this);
 		outStream.flush();
 		System.out.println("RMIMessage : sent the message");
+		
+		inStream.close();
+		outStream.close();
+		socket.close();
 	}
 	
 	public void marshalling() throws IOException {
