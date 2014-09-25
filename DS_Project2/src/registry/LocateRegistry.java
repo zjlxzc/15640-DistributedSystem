@@ -31,7 +31,6 @@ public class LocateRegistry {
 		// open socket.
 		Socket soc = null;
 		try {
-			System.out.println("LocateRegsitry: " + host + ":" + port);
 			soc = new Socket(host, port);
 			// get TCP streams and wrap them.
 			BufferedReader in = new BufferedReader(new InputStreamReader(

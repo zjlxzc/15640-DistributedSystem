@@ -23,7 +23,8 @@ public class Calculator_Stub extends RemoteStub implements Calculator, Remote {
 	}
 	
 	public int add(int paramInt1, int paramInt2) {
-		Class c = calServant.getClass();
+		System.out.println(this.getClass().getName() + " : get method call on ADD");
+		Class<? extends CalculatorServant> c = calServant.getClass();
 		Class[] cArg = new Class[2];
         cArg[0] = int.class;
         cArg[1] = int.class;

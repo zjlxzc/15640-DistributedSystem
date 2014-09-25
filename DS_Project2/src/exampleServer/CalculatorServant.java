@@ -5,8 +5,7 @@ public class CalculatorServant implements Calculator {
        public CalculatorServant() {
        }
        public int add(int x, int y) {
-            System.out.println("Got request to add " + x + " and " + y);
-
+            System.out.println("CalculatorServant : Got request to add " + x + " and " + y);
             return x + y;
     }
 }

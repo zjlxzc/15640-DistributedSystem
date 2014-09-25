@@ -31,12 +31,9 @@ public class RmiImpl {
 		String serviceName = args[3];
 		
 		System.out.println("Server: start");
-		System.out.println("Server: initialClassName " + initialClassName);
-		System.out.println("Server: registryHost " + registryHost);
-		System.out.println("Server: registryPort " + registryPort);
-		System.out.println("Server: serviceName " + serviceName);
-		
-		System.out.println("Server: start Registry Server");
+		System.out.println("Server: initialClassName : " + initialClassName);
+		System.out.println("Server: registry         : " + registryHost + " : " + registryPort);
+		System.out.println("Server: serviceName      : " + serviceName);
 		
 		new Thread(new RegistryServer(registryPort)).start();	
 		ServerSocket serverSoc = null;
@@ -47,25 +44,21 @@ public class RmiImpl {
 			Class<?> initialclass = Class.forName(initialClassName);
 						
 			table = new RORtbl();
-			System.out.println("Server: new ROR table");
 			
 			Object o = initialclass.newInstance();
-			System.out.println("Server: new initialclass object");
 			
 			RemoteObjectRef ror = table.addObj(serviceHost, servicePort, o);		
-			System.out.println("Server: new initialclass object add to table");
 			
+			System.out.println("Server: request a registry from " + registryHost + " : " + registryPort);
 			SimpleRegistry registry = LocateRegistry.getRegistry(registryHost, registryPort);
-			System.out.println("Server: getRegistry");
 			
 			registry.bind(serviceName, ror);
-			System.out.println("Server: bind to registry");
+			System.out.println("Server: bind service " + serviceName + " to registry");
 			
 			serverSoc = new ServerSocket(servicePort);
 	
 			while (true) {
-				Socket client = serverSoc.accept();
-				
+				Socket client = serverSoc.accept();				
 				Excution excute = new Excution(client);
 				new Thread(excute).start();		
 			}
@@ -112,35 +105,34 @@ public class RmiImpl {
 		@Override
 		public void run() {
 			try {
-				
+				System.out.println("Server: get service request from " + client.getInetAddress());
 				ObjectOutputStream out = new ObjectOutputStream(client.getOutputStream());
 				ObjectInputStream in = new ObjectInputStream(client.getInputStream());
 				
 				RMIMessage message = (RMIMessage)in.readObject();
+				System.out.println("Server: read in RMIMessage");
 				
 				RemoteObjectRef ror = message.getRef();
+				System.out.println("Server: get the Remote Object Reference of " + ror.getRemote_Interface_Name());
+				
 				Object obj = table.findObj(ror);
 				Class<?> c = obj.getClass();
-				System.out.println(c.getName());
+				System.out.println("Server: get the local Object of " + c.getName());
+
 				Method method = null;
-				try {
-					method = c.getDeclaredMethod(message.getMethodName(), message.getTypes());
-				} catch (SecurityException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (NoSuchMethodException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				//Method method = message.getMethod();
-				Object o = table.findObj(ror);
+				method = c.getDeclaredMethod(message.getMethodName(), message.getTypes());
+				System.out.println("Server: get the method name:  " + method.getName());	
 				
 				Object[] args = message.getParameters();
-				Object ret = method.invoke(o,args);
-				message.setResult(ret);
+				System.out.println("Server: get the parameters of " + method.getName());
+				
+				System.out.println("Server: call the method and get the result");
+				Object ret = method.invoke(obj,args);
+				message.setResult(ret);			
 				
 				out.writeObject(message);
 				out.flush();
+				System.out.println("Server: send back the message");
 				
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
@@ -155,6 +147,12 @@ public class RmiImpl {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (InvocationTargetException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (NoSuchMethodException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (SecurityException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}

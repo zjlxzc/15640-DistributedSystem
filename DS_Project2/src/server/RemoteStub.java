@@ -36,29 +36,14 @@ public class RemoteStub implements Serializable{
 	protected void setRef(RemoteObjectRef referenc) {
 		reference = referenc;
 	}
-//	
-//	public Object invoke(Method method, Object[] parameters) {
-//		if (reference != null) {
-//			return reference.invoke(this, method, parameters);
-//		}
-//		System.out.println("Reference is NULL!!!");
-//		return null;
-//	}
-//	
+	
 	public Object invoke(RemoteObjectRef ref, Method method, Object[] parameters) throws IOException, ClassNotFoundException {
-		//ConnectionManagement cm = new ConnectionManagement(ref.ip_adr, ref.port);
+		
+		System.out.println("RemoteStub : create new RMIMessage to communate");
 		RMIMessage message = new RMIMessage(ref.ip_adr, ref.port); 
-		//message.setRef(ref);
-		//message.setMethod(method);
-		//message.setParameters(parameters);
+
 		message.sendOut(ref, method.getName(), method.getParameterTypes(), parameters);
 		
-		//message.outStream.writeObject(ref);
-        //for(int i = 0; i < parameters.length; i++){
-        	//message.marshalling(types[i], parameters[i], message.outStream);
-        //}
-        //message.outStream.flush();
-        
         return message.getResultValue(method.getReturnType());  
 	}
 }

@@ -8,6 +8,8 @@ import java.net.UnknownHostException;
 import connection.RemoteConnection;
 
 public class RMIMessage extends RemoteConnection implements Serializable{
+
+	private static final long serialVersionUID = 1L;
 	private RemoteObjectRef ref;
 	//private Method method;
 	private String methodName;
@@ -34,6 +36,7 @@ public class RMIMessage extends RemoteConnection implements Serializable{
 	
 	public RMIMessage(String ipAddr, int port) throws UnknownHostException, IOException {
 		super(ipAddr, port);
+		System.out.println("RMIMessage : build connection to " + ipAddr);
 	}
 
 	public void sendOut(RemoteObjectRef ref, String methodName, Class<?>[] types,
@@ -50,9 +53,11 @@ public class RMIMessage extends RemoteConnection implements Serializable{
 
 		outStream.writeObject(this);
 		outStream.flush();
+		System.out.println("RMIMessage : sent the message");
 	}
 	
 	public void marshalling() throws IOException {
+		System.out.println("RMIMessage : marshalling...");
 		for(int i = 0; i < parameters.length; i++){
 			if(!types[i].isPrimitive()) {
 				values[i] = parameters[i];
@@ -82,7 +87,7 @@ public class RMIMessage extends RemoteConnection implements Serializable{
 	
 	public Object unmarshalling(Class<?> clas, ObjectInputStream inStream)
 			throws IOException, ClassNotFoundException {
-		
+		System.out.println("RMIMessage : unmarshalling...");
 		if(!clas.isPrimitive()) {
 			return inStream.readObject();
 		} else {
@@ -114,7 +119,7 @@ public class RMIMessage extends RemoteConnection implements Serializable{
 		if (returnType == void.class) {
 			return null;
 		}		
-		
+		System.out.println("RMIMessage : get the return value");
 		result = unmarshalling(returnType, inStream);
 		return result;
 	}
