@@ -101,6 +101,80 @@ public class SimpleRegistry {
 		return ror; 
 	}
 	
+	public void rebind(String serviceName, RemoteObjectRef ror)
+			throws RemoteException, AlreadyBoundException, AccessException {
+		// open socket. same as before.
+		Socket soc;
+		try {
+			soc = new Socket(host, port);
+
+			// get TCP streams and wrap them.
+			BufferedReader in = new BufferedReader(new InputStreamReader(
+					soc.getInputStream()));
+			PrintWriter out = new PrintWriter(soc.getOutputStream(), true);
+
+			// it is a bind request, with a service name and ROR.
+			out.println("rebind");
+			out.println(serviceName);
+			out.println(ror.ip_adr);
+			out.println(ror.port);
+			out.println(ror.obj_key);
+			out.println(ror.remote_Interface_Name);
+
+			// it also gets an ack, but this is not used.
+			String ack = in.readLine();
+			if (ack.equals("Rebind success!")) {
+				System.out.println("Registry :rebind success");
+			} else {
+				throw new RemoteException();
+			}
+			// close the socket.
+			soc.close();
+		} catch (UnknownHostException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	public void unbind(String serviceName)
+			throws RemoteException, AlreadyBoundException, AccessException {
+		// open socket. same as before.
+		Socket soc;
+		try {
+			soc = new Socket(host, port);
+
+			// get TCP streams and wrap them.
+			BufferedReader in = new BufferedReader(new InputStreamReader(
+					soc.getInputStream()));
+			PrintWriter out = new PrintWriter(soc.getOutputStream(), true);
+
+			// it is a bind request, with a service name and ROR.
+			out.println("unbind");
+			out.println(serviceName);
+
+			// it also gets an ack, but this is not used.
+			String ack = in.readLine();
+			if (ack.equals("Unbind success!")) {
+				System.out.println("Registry : unbind success");
+			} else if (ack.equals("The service has not been bound")){
+				throw new AlreadyBoundException();
+			} else {
+				throw new RemoteException();
+			}
+			// close the socket.
+			soc.close();
+		} catch (UnknownHostException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
 	public void list() throws RemoteException {
 		
 		Socket soc;	

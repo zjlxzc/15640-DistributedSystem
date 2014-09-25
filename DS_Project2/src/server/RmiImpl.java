@@ -112,47 +112,15 @@ public class RmiImpl {
 				ObjectOutputStream out = new ObjectOutputStream(client.getOutputStream());
 				ObjectInputStream in = new ObjectInputStream(client.getInputStream());
 				
-				RMIMessage message = (RMIMessage)in.readObject();
-				System.out.println("Server: read in RMIMessage");
-				
-				RemoteObjectRef ror = message.getRef();
-				System.out.println("Server: get the Remote Object Reference of " + ror.getRemote_Interface_Name());
-				
-				Object obj = table.findObj(ror);
-				Class<?> c = obj.getClass();
-				System.out.println("Server: get the local Object of " + c.getName());
-
-				Method method = null;
-				method = c.getDeclaredMethod(message.getMethodName(), message.getTypes());
-				System.out.println("Server: get the method name:  " + method.getName());	
-				
-				Object[] args = message.getParameters();
-				System.out.println("Server: get the parameters of " + method.getName());
-				
-				System.out.println("Server: call the method and get the result");
-				Object ret = method.invoke(obj,args);
-				message.setResult(ret);			
-				
-				out.writeObject(message);
-				out.flush();
-				System.out.println("Server: send back the message");
+				System.out.println("Server: start new dispatcher ");
+				Dispatcher patcher = new Dispatcher(table, in, out);
+				patcher.localize();
+				patcher.dispatch();				
 				
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-			} catch (ClassNotFoundException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IllegalAccessException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
 			} catch (IllegalArgumentException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (InvocationTargetException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (NoSuchMethodException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (SecurityException e) {

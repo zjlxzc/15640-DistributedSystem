@@ -40,6 +40,10 @@ public class RegistryServer implements Runnable{
 					System.out.println("Registry Server: send a simple registry to " + client.getInetAddress());
 				} else if (req.equals("bind")) {
 					new Thread(new Bind(in, out)).start();
+				} else if (req.equals("rebind")) {
+					new Thread(new Rebind(in, out)).start();
+				} else if (req.equals("unbind")) {
+					new Thread(new Unbind(in, out)).start();
 				} else if (req.equals("Lookup")) {
 					System.out.println("Registry Server: get look up request");
 					new Thread(new Lookup(client)).start();
@@ -94,6 +98,7 @@ public class RegistryServer implements Runnable{
 			} 
 		}
 	}
+	
 	private class Lookup implements Runnable {
 		
 		Socket client;
@@ -134,7 +139,68 @@ public class RegistryServer implements Runnable{
 		}
 	}
 	
-private class List implements Runnable {
+	private class Rebind implements Runnable {
+		
+		BufferedReader in;
+		PrintWriter out;
+		
+		public Rebind(BufferedReader in, PrintWriter out) {
+			this.in = in;
+			this.out = out;
+		}
+		
+		@Override
+		public void run() {			
+			try {
+				System.out.println("Registry Server: start rebind");
+				String serviceName = in.readLine();
+				String ip_adr = in.readLine();
+				int port = Integer.parseInt(in.readLine());
+				int obj_Key = Integer.parseInt(in.readLine());
+				String remote_Interface_Name = in.readLine();
+				
+				RemoteObjectRef ror = new RemoteObjectRef(ip_adr, port, obj_Key, remote_Interface_Name);
+				regTable.put(serviceName, ror);
+				out.println("Rebind success!");
+				System.out.println("Registry Server: rebind success");								
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} 
+		}
+	}
+	
+	private class Unbind implements Runnable {
+		
+		BufferedReader in;
+		PrintWriter out;
+		
+		public Unbind(BufferedReader in, PrintWriter out) {
+			this.in = in;
+			this.out = out;
+		}
+		
+		@Override
+		public void run() {			
+			try {
+				System.out.println("Registry Server: start unbind");
+				String serviceName = in.readLine();				
+				
+				if (regTable.containsKey(serviceName)) {
+					regTable.remove(serviceName);
+					out.println("Unbind success!");
+					System.out.println("Registry Server: unbind success");
+				} else {
+					out.println("The service has not been bound");
+				}								
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} 
+		}
+	}
+	
+	private class List implements Runnable {
 		
 		PrintWriter out;
 		
