@@ -45,7 +45,7 @@ public class Dispatcher{
 			
 			System.out.println("Dispatcher: call the method and get the result");
 			Object ret = method.invoke(obj,args);
-		message.setResult(ret);		
+			message.setResult(ret);		
 		} catch (ClassNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
