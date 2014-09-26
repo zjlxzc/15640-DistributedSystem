@@ -1,11 +1,7 @@
 package server;
 
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.Serializable;
-import java.net.Socket;
-import java.net.UnknownHostException;
 
 import remote.RemoteObjectRef;
 
@@ -13,9 +9,6 @@ public class RMIMessage implements Serializable{
 
 	private static final long serialVersionUID = 1L;
 	private RemoteObjectRef ref;
-	public ObjectInputStream inStream;
-	public ObjectOutputStream outStream;
-	public Socket socket;
 	
 	private String methodName;
 	public String getMethodName() {
@@ -38,15 +31,8 @@ public class RMIMessage implements Serializable{
 	public RMIMessage(Object result) {
 		this.result = result;
 	}
-	
-	public RMIMessage(String ipAddr, int port) throws UnknownHostException, IOException {
-		socket = new Socket(ipAddr, port);
-		outStream = new ObjectOutputStream(socket.getOutputStream());
-		inStream = new ObjectInputStream(socket.getInputStream());
-		System.out.println("RMIMessage : build connection to " + ipAddr);
-	}
 
-	public void sendOut(RemoteObjectRef ref, String methodName, Class<?>[] types,
+	public RMIMessage(RemoteObjectRef ref, String methodName, Class<?>[] types,
 				Object[] parameters) throws IOException {
 		this.ref = ref;
 		//this.method = m;
@@ -56,15 +42,8 @@ public class RMIMessage implements Serializable{
 		this.types = types;
 		values = new Object[parameters.length];
 		
-		marshalling();
-
-		outStream.writeObject(this);
-		outStream.flush();
-		System.out.println("RMIMessage : sent the message");
-		
-		inStream.close();
-		outStream.close();
-		socket.close();
+		marshalling();	
+		System.out.println("RMIMessage : sent the message");		
 	}
 	
 	public void marshalling() throws IOException {
@@ -96,28 +75,28 @@ public class RMIMessage implements Serializable{
         }
 	}
 	
-	public Object unmarshalling(Class<?> clas, ObjectInputStream inStream)
+	public Object unmarshalling(Class<?> clas, RMIMessage resultMessage)
 			throws IOException, ClassNotFoundException {
 		System.out.println("RMIMessage : unmarshalling...");
 		if(!clas.isPrimitive()) {
-			return inStream.readObject();
+			return result;
 		} else {
 			if (clas == int.class) {
-				return Integer.valueOf(((RMIMessage)inStream.readObject()).getResult().toString());
+				return Integer.valueOf(resultMessage.getResult().toString());
 			} else if (clas == long.class) {
-				return Long.valueOf(inStream.readLong());
+				return Long.valueOf(resultMessage.getResult().toString());
 			} else if (clas == float.class) {
-				return Float.valueOf(inStream.readFloat());
+				return Float.valueOf(resultMessage.getResult().toString());
 			} else if (clas == double.class) {
-				return Double.valueOf(inStream.readDouble());
+				return Double.valueOf(resultMessage.getResult().toString());
 			} else if (clas == short.class) {
-				return Short.valueOf(inStream.readShort());
+				return Short.valueOf(resultMessage.getResult().toString());
 			} else if (clas == char.class) {
-				return Character.valueOf(inStream.readChar());
+				return Character.valueOf(resultMessage.getResult().toString().charAt(0));
 			} else if (clas == byte.class) {
-				return Byte.valueOf(inStream.readByte());
+				return Byte.valueOf(resultMessage.getResult().toString());
 			} else if (clas == boolean.class) {
-				return Boolean.valueOf(inStream.readBoolean());
+				return Boolean.valueOf(resultMessage.getResult().toString());
 			} else {
 				System.out.println("Class is not valid " + clas);
 				return null;
@@ -125,13 +104,13 @@ public class RMIMessage implements Serializable{
 		}	
 	}
 	
-	public Object getResultValue(Class<?> returnType) throws IOException, ClassNotFoundException {
+	public Object getResultValue(Class<?> returnType, RMIMessage resultMessage) throws IOException, ClassNotFoundException {
 		//Class<?> returnType = .getReturnType();
 		if (returnType == void.class) {
 			return null;
 		}		
 		System.out.println("RMIMessage : get the return value");
-		result = unmarshalling(returnType, inStream);
+		result = unmarshalling(returnType, resultMessage);
 		return result;
 	}
 
