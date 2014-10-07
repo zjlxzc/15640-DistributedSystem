@@ -1,207 +1,123 @@
 package textScraper;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
-
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
-
-/**
- * @author Chun Xu - chunx@andrew.cmu.edu
- * 
- *         This assignment is to design and build a robust text scraper that
- *         will connect to a page on www.shopping.com and return results about
- *         a given keyword.
- *         
- *         This is the entry of this assignment (main part).
- * 
- */
 
 public class TextScraper {
 
-	public static void main(String[] args) {
+	private String totalNumber;
+	private ArrayList<ResultObject> resultObjects;
 	
-		if (!checkArguments(args)) { // check input first
-			System.out.println("Input is not valid!");
-			System.out.println("You should use one of the following two formats: ");
-			System.out.println("single argument format: java -jar Assignment.jar \"baby strollers\"");
-			System.out.println("two arguments format: java -jar Assignment.jar \"baby strollers\" 2");
-			System.out.println();
-			System.exit(1);
-		}
+	public TextScraper() {
+		resultObjects = new ArrayList<ResultObject>();
+	}
+	
+	public static void main(String[] args) throws IOException {
+		TextScraper textScraper = new TextScraper();
 		
-		String keyword = args[0]; // get the first input argument
+		String keyword = args[0];
 		int pageNumber = 0;
-
-		// composing search parts for url
-		String concatenatekey = connectWords(keyword, true);
-		String searchString = connectWords(keyword, false);
 		
-		// create request url
-		String request = "http://www.shopping.com/" + concatenatekey + "/products?CLT=SCH&KW=" + searchString;
-		Document doc = null;
-		try {
-			doc = Jsoup.connect(request).get(); // get response
-		} catch (IOException e1) {
-			System.out.println("In main function, line 38: IOException");
-			e1.printStackTrace();
-		} 
-
-		// create a QueryResult instance to store query results
-		QueryResult queryResult = new QueryResult();
-		
-		if (args.length == 1) { // for query with only one argument
-			// get elements that have the result
-			Elements products = doc.getElementsByClass("numTotalResults"); 
-			String s = products.toString();
-			
-			// "3" is the number of characters from "of " to real result
-			queryResult.setTotalNumber(s.substring(s.indexOf("of") + 3, s.indexOf("</")));
-			System.out.println("Total number of results: " + queryResult.getTotalNumber());
-			
-		} else { // for query with two arguments
-			// if the input page number is not the first page, I need to get the parent directory
-			if (Integer.parseInt(args[1]) != 1) { 
-				String directory = "";
-				
-				// according to the structure of the web page, I have the following parts
-				Elements products = doc.getElementsByClass("breadCrumb");
-				for (Element e : products) {
-					for (Element a : e.getElementsByAttribute("itemtype")) {
-						for (Element b : a.getElementsByAttribute("class")) {
-							if (b.toString().contains("category")
-									&& !b.toString().contains("itemtype")) {
-								// get the parent directory of arguments
-								directory = b.getElementsByTag("span").text(); 
-							}
-						}
-					}
-				}
-			
-				directory = connectWords(directory, true);
-				pageNumber = Integer.parseInt(args[1]); // get input page number
-				
-				// create a new request url
-				request = "http://www.shopping.com/" + directory + "/" + concatenatekey
-					+ "/products~PG-" + pageNumber + "?KW=" + searchString; 
-				
-				try {
-					doc = Jsoup.connect(request).get(); // get new response
-				} catch (IOException e1) {
-					System.out.println("In main function, line 77: IOException");
-					e1.printStackTrace();
-				} 
-			}
-			
-			queryResult.setResultObjects(query(doc)); // execute query
-			queryResult.printObjects(); // print result
-		} 
-	}
-	
-	/** This method is used to get detail information of each product
-	 * 
-	 * @param doc - source Document
-	 * @return - result set
-	 */
-	public static ArrayList<ResultObject> query(Document doc) {
-		// create an array to store result objects
-		ArrayList<ResultObject> resultObjects = new ArrayList<ResultObject>();
-		Elements products = doc.getElementsByClass("gridItemBtm"); // get products section
-		ResultObject resultObject = null; // a single result object to store detail information
-
-		for (Element product : products) {
-			resultObject = new ResultObject();
-
-			// get Product Name information
-			for (Element productName : product.getElementsByClass("productName")) {
-				// "title" information could be in different element, so I need to use if-else condition
-				if (productName.attr("title").length() != 0) {
-					resultObject.setTitle(productName.attr("title"));
-				} else {
-					resultObject.setTitle(productName.getElementsByTag("span")
-							.attr("title"));
-				}
-			}
-
-			// get Price of the product
-			for (Element productPrice : product
-					.getElementsByClass("productPrice")) {
-				resultObject.setProductPrice(productPrice.text());
-			}
-
-			// get Shipping Price information
-			Elements shipInfo = product.getElementsByClass("freeShip");
-			shipInfo.addAll(product.getElementsByClass("calc")); // merge two categories 
-			for (Element shipIn : shipInfo) {
-				resultObject.setShippingPrice(shipIn.text());
-			}
-
-			// get Vendor information
-			for (Element productVendor : product.getElementsByClass("newMerchantName")) {
-				// "vendor" information could be in different element, so I need to use if-else condition
-				if (productVendor.text().length() != 0) {
-					resultObject.setVendor(productVendor.text());
-				} else {
-					resultObject.setVendor(productVendor.getElementsByTag("a").attr("class"));
-				}
-			}
-
-			resultObjects.add(resultObject); // add single result object to result set
-		}
-		
-		return resultObjects;
-	}
-	
-
-	/** This method is used to concatenate search parts.
-	 * 
-	 * @param keyword - the input string
-	 * @param sign - to indicate the symbol that is needed to connect each part
-	 * 				 if sign is true, it needs "-" to do connection,
-	 * 				 if sign is false, it needs "+" to do connection
-	 * @return concatenated string
-	 */
-	
-	public static String connectWords(String keyword, boolean sign) {
-		String[] words = keyword.toLowerCase().split(" "); // split input by empty space
-		StringBuilder concatenatekey = new StringBuilder(); // this variable is used to store result
+		String[] words = keyword.split(" ");
+		StringBuilder key = new StringBuilder();
+		StringBuilder searchB = new StringBuilder();
 		for (String str : words) {
-			concatenatekey.append(str);
-			if (sign) {
-				concatenatekey.append("-");
-			} else {
-				concatenatekey.append("+");
-			}
+			key.append(str).append("-");
+			searchB.append(str).append("%20");
 		}
-		concatenatekey.deleteCharAt(concatenatekey.length() - 1); // remove the last symbol
-		return concatenatekey.toString();
+		key.deleteCharAt(key.length() - 1);
+		String search = searchB.substring(0, searchB.length() - 2);
+		URL shopping = new URL("http://www.shopping.com/" + key +"/products?CLT=SCH&KW=" + search);
+
+		String response = "";
+		HttpURLConnection connection = (HttpURLConnection)shopping.openConnection();
+		BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream(), "UTF-8"));
+		
+        String str = "";
+        while ((str = in.readLine()) != null) {
+        	response += str;
+        }
+        in.close();
+        
+		if (args.length == 1) {
+			textScraper.query1(response, keyword);
+		} else {
+			pageNumber = Integer.parseInt(args[1]);
+			textScraper.query2(response, keyword, pageNumber);
+		}
+		
+		textScraper.printObjects();
 	}
 	
-	/** This method is used to check if input is valid.
-	 * 
-	 * @param args - user input
-	 * @return a boolean value to indicate result status
-	 */
-	public static boolean checkArguments(String[] args) {
-		if (args == null || args.length == 0) { // if no input
-			return false;
+	public void query1(String response, String keyword) throws UnsupportedEncodingException {
+		if(response.indexOf("numTotalResults") != -1){
+			int index = response.indexOf("numTotalResults");
+            int startIndex = response.indexOf("of", index);
+            int endIndex = response.indexOf("</span>", index);
+           
+            totalNumber = response.substring(startIndex + 3, endIndex); 
+            System.out.println("totalNumber: " + totalNumber);
+        }
+        else {
+            totalNumber = "0";
+        }
+	}
+	
+	public void query2(String response, String keyword, int pageNumber) {
+		if(response.indexOf("selected" + pageNumber) != -1){
+			ResultObject tempObject = new ResultObject();
+			int signalIndex = 0;
+			
+			while (true) {
+				int nameIndex = response.indexOf("productName", signalIndex);
+				if (nameIndex == -1) {
+					break;
+				}
+				
+				tempObject = new ResultObject();
+				int titleIndex = response.indexOf("title", nameIndex);
+				int startIndex = response.indexOf("\"", titleIndex);
+				int endIndex = response.indexOf("\">", startIndex);
+				tempObject.setTitle(response.substring(startIndex + 1, endIndex));
+				
+				int priceIndex = response.indexOf("productPrice", nameIndex);
+				startIndex = response.indexOf("$", priceIndex);
+				endIndex = response.indexOf("</", startIndex);
+				tempObject.setProductPrice(response.substring(startIndex, endIndex));
+				
+				int shipIndex = (response.indexOf("freeShip", nameIndex) != -1) ?
+						(response.indexOf("freeShip", nameIndex)) : (response.indexOf("calc", nameIndex));
+				startIndex = response.indexOf(">", shipIndex);
+				endIndex = response.indexOf("</", startIndex);
+				tempObject.setShippingPrice(response.substring(startIndex + 1, endIndex));
+				
+				int merchantIndex = response.indexOf("newMerchantName", nameIndex);
+				startIndex = response.indexOf(">", merchantIndex);
+				endIndex = response.indexOf("</", startIndex);
+				tempObject.setVendor(response.substring(startIndex + 1, endIndex));
+				
+				signalIndex = endIndex;
+				resultObjects.add(tempObject);
+			}
+        }
+        else {
+        	resultObjects = new ArrayList<ResultObject>();
+        }
+	}
+	
+	public void printObjects() {
+		for (ResultObject object : resultObjects) {
+			System.out.println(object.toString());
 		}
-		
-		if (args.length == 2) { // if the page number is not integer
-			try {
-		        Integer.valueOf(args[1]);
-		        return true;
-		    } catch (NumberFormatException e) {
-		    	System.out.println("The second argument should be a positive integer.");
-		        return false;
-		    }
-		}
-		if (args.length > 2) { // if there are more than one arguments
-			return false;
-		}
-		
-		return true;
 	}
 }
+
+
+
+
+
