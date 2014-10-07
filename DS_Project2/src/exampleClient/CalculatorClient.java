@@ -14,7 +14,9 @@ public class CalculatorClient {
 		String host = args[0];
 		int port = Integer.parseInt(args[1]);
 		String serviceName = args[2];
-
+		int arg1 = Integer.parseInt(args[3]);
+		int arg2 = Integer.parseInt(args[4]);
+		
 		SimpleRegistry sr = (SimpleRegistry) LocateRegistry.getRegistry(host, port);
 		System.out.println("Client : Get Regsitry");
 		RemoteObjectRef ror = sr.lookup(serviceName);
@@ -22,8 +24,11 @@ public class CalculatorClient {
 
 		Calculator cal = (Calculator) ror.localise();
 		
-		System.out.println("Client : call method add(3, 4)");
+		System.out.println("Client : call method add(" + arg1 + ", " + arg2 + ")");
 		
-		System.out.println("Client : get the result : " + cal.add(3 ,4));
+		System.out.println("Client : get the result of add: " + cal.add(arg1, arg2));
+		System.out.println("Client : get the result of minus: " + cal.minus(arg1, arg2));
+		System.out.println("Client : get the result of multiply: " + cal.multiply(arg1, arg2));
+		System.out.println("Client : get the result divide: " + cal.divide(arg1, arg2));
 	}
 }
