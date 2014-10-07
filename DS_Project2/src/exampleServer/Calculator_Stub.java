@@ -12,8 +12,8 @@ public class Calculator_Stub extends RemoteStub implements Calculator, Remote {
 	private static final long serialVersionUID = 2L;
 	private static Method add;
 	private static Method minus;
-	private static Method mutiply;
-	private static Method devide;
+	private static Method multiply;
+	private static Method divide;
 	private CalculatorServant calServant = new CalculatorServant();
 
 	RemoteObjectRef paramRemoteRef;
@@ -87,14 +87,14 @@ public class Calculator_Stub extends RemoteStub implements Calculator, Remote {
 		return ((Integer) localObject).intValue();
 	}
 	
-	public int mutiply(int paramInt1, int paramInt2) {
+	public int multiply(int paramInt1, int paramInt2) {
 		System.out.println(this.getClass().getName() + " : get method call on MUTIPLY");
 		Class<? extends CalculatorServant> c = calServant.getClass();
 		Class[] cArg = new Class[2];
         cArg[0] = int.class;
         cArg[1] = int.class;
 		try {
-			mutiply = c.getMethod("mutiply", cArg);
+			multiply = c.getMethod("multiply", cArg);
 		} catch (SecurityException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -106,7 +106,7 @@ public class Calculator_Stub extends RemoteStub implements Calculator, Remote {
 		Object localObject = null;
 		try {
 			
-			localObject = invoke(paramRemoteRef, mutiply, new Object[] { new Integer(paramInt1),
+			localObject = invoke(paramRemoteRef, multiply, new Object[] { new Integer(paramInt1),
 							new Integer(paramInt2) });
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -118,14 +118,14 @@ public class Calculator_Stub extends RemoteStub implements Calculator, Remote {
 		return ((Integer) localObject).intValue();
 	}
 	
-	public int devide(int paramInt1, int paramInt2) {
-		System.out.println(this.getClass().getName() + " : get method call on DEVIDE");
+	public int divide(int paramInt1, int paramInt2) {
+		System.out.println(this.getClass().getName() + " : get method call on DIVIDE");
 		Class<? extends CalculatorServant> c = calServant.getClass();
 		Class[] cArg = new Class[2];
         cArg[0] = int.class;
         cArg[1] = int.class;
 		try {
-			devide = c.getMethod("devide", cArg);
+			divide = c.getMethod("divide", cArg);
 		} catch (SecurityException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -137,7 +137,7 @@ public class Calculator_Stub extends RemoteStub implements Calculator, Remote {
 		Object localObject = null;
 		try {
 			
-			localObject = invoke(paramRemoteRef, devide, new Object[] { new Integer(paramInt1),
+			localObject = invoke(paramRemoteRef, divide, new Object[] { new Integer(paramInt1),
 							new Integer(paramInt2) });
 		} catch (IOException e) {
 			// TODO Auto-generated catch block

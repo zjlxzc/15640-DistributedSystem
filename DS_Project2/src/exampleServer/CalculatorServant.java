@@ -23,7 +23,7 @@ public class CalculatorServant implements Calculator {
 	}
 
 	@Override
-	public int mutiply(int x, int y) throws RemoteException {
+	public int multiply(int x, int y) throws RemoteException {
 		// TODO Auto-generated method stub
 		System.out.println("CalculatorServant : Got request to mutiply " + x
 				+ " and " + y);
