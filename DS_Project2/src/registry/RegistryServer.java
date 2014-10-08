@@ -75,28 +75,52 @@ public class RegistryServer implements Runnable{
 		}
 		
 		@Override
-		public void run() {			
+		public void run() {						
+			System.out.println("Registry Server	: start bind");
+			String serviceName = null;
 			try {
-				System.out.println("Registry Server	: start bind");
-				String serviceName = in.readLine();
-				String ip_adr = in.readLine();
-				int port = Integer.parseInt(in.readLine());
-				int obj_Key = Integer.parseInt(in.readLine());
-				String remote_Interface_Name = in.readLine();
-				
-				RemoteObjectRef ror = new RemoteObjectRef(ip_adr, port, obj_Key, remote_Interface_Name);
-				if (!regTable.containsKey(serviceName)) {
-					regTable.put(serviceName, ror);
-					out.println("Bind success!");
-					System.out.println("Registry Server	: bind success");
-					System.out.println();
-				} else {
-					out.println("The service already bound");
-				}								
+				serviceName = in.readLine();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} 
+				System.out.println("Bind failed : cannot get the service name");
+			}
+			String ip_adr = null;
+			try {
+				ip_adr = in.readLine();
+			} catch (IOException e) {
+				System.out.println("Bind failed : cannot get the ip address");
+			}
+			int port = 0;
+			try {
+				port = Integer.parseInt(in.readLine());
+			} catch (NumberFormatException e) {
+				System.out.println("Bind failed : port number is not valid");
+			} catch (IOException e) {
+				System.out.println("Bind failed : cannot get the port number");
+			}
+			int obj_Key = 0;
+			try {
+				obj_Key = Integer.parseInt(in.readLine());
+			} catch (NumberFormatException e) {
+				System.out.println("Bind failed : object key is not valid");
+			} catch (IOException e) {
+				System.out.println("Bind failed : cannot get the object key");
+			}
+			String remote_Interface_Name = null;
+			try {
+				remote_Interface_Name = in.readLine();
+			} catch (IOException e) {
+				System.out.println("Bind failed : cannot get the remote interface name");
+			}
+			
+			RemoteObjectRef ror = new RemoteObjectRef(ip_adr, port, obj_Key, remote_Interface_Name);
+			if (!regTable.containsKey(serviceName)) {
+				regTable.put(serviceName, ror);
+				out.println("Bind success!");
+				System.out.println("Registry Server	: bind success");
+				System.out.println();
+			} else {
+				out.println("The service already bound");
+			}								
 		}
 	}
 	
@@ -112,32 +136,35 @@ public class RegistryServer implements Runnable{
 		
 		@Override
 		public void run() {				
+			System.out.println("Registry Server	: start look up");
+			
 			try {
-				System.out.println("Registry Server	: start look up");
-				
 				out = new ObjectOutputStream(client.getOutputStream());
 				in = new ObjectInputStream(client.getInputStream());
-				
-				String serviceName = (String)in.readObject();
+			
+				String serviceName = null;
+				try {
+					serviceName = (String)in.readObject();
+				} catch (ClassNotFoundException e) {
+					System.out.println("Lookup failed : cannot get class");
+				}
 				System.out.println("Registry Server	: get servicename : " + serviceName);
 				
 				if (regTable.containsKey(serviceName)) {
 					RemoteObjectRef ror = regTable.get(serviceName);
+				
 					out.writeObject("Find the service");
 					out.writeObject(ror);
+					
 					System.out.println("Registry Server	: finished look up and return");
 					System.out.println();
 				} else {
+					
 					out.writeObject("The target service does not exist");
 					System.out.println();
 				}
-							
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (ClassNotFoundException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				System.out.println("Lookup failed : stream failed");
 			}
 		}
 	}
@@ -168,8 +195,7 @@ public class RegistryServer implements Runnable{
 				System.out.println("Registry Server: rebind success");	
 				System.out.println();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				System.out.println("Rebind failed : stream failed");
 			} 
 		}
 	}
@@ -200,8 +226,7 @@ public class RegistryServer implements Runnable{
 					System.out.println();
 				}								
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				System.out.println("Unbind failed : stream failed");
 			} 
 		}
 	}
