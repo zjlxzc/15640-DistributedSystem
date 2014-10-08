@@ -31,15 +31,20 @@ public class RmiImpl {
 			Usage();
 			System.exit(1);
 		}
-		String initialClassName = args[0];
-		registryHost = args[1];
-		registryPort = Integer.parseInt(args[2]);
-		String serviceName = args[3];
 		
 		System.out.println("Server		: Initialize");
-		System.out.println("Server		: InitialClassName : " + initialClassName);
-		System.out.println("Server		: Registry         : " + registryHost + " : " + registryPort);
-		System.out.println("Server		: ServiceName      : " + serviceName);
+		System.out.println("Server		: InitialClassName : " + args[0]);
+		System.out.println("Server		: Registry         : " + args[1] + " : " + args[2]);
+		System.out.println("Server		: ServiceName      : " + args[3]);
+		
+		String initialClassName = args[0];
+		registryHost = args[1];
+		try {
+			registryPort = Integer.parseInt(args[2]);
+		} catch (NumberFormatException e) {
+			System.out.println("Server initialization failed: port number is not valid");
+		}
+		String serviceName = args[3];
 		
 		new Thread(new RegistryServer(registryPort)).start();	
 		ServerSocket serverSoc = null;
@@ -96,12 +101,6 @@ public class RmiImpl {
 				client = serverSoc.accept();
 			} catch (IOException e) {
 				System.out.println("Get client failed : I/O failed");
-			} finally {
-				try {
-					serverSoc.close();
-				} catch (IOException e) {
-					System.out.println("Server Socket fails to close");
-				}
 			}
 			Excution excute = new Excution(client);
 			new Thread(excute).start();		

@@ -26,7 +26,7 @@ public class RegistryServer implements Runnable{
 		ServerSocket reg = null;		
 		try {			
 			reg = new ServerSocket(port);
-			System.out.println("Registry Server	: start at       : " + InetAddress.getLocalHost() + ":" + port);
+			System.out.println("Registry Server	: start at	: " + InetAddress.getLocalHost() + ":" + port);
 			while(true) {
 				Socket client = reg.accept();
 				BufferedReader in = new BufferedReader(new InputStreamReader(
