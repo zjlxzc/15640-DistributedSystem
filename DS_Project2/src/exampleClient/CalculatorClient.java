@@ -25,10 +25,12 @@ public class CalculatorClient {
 		Calculator cal = (Calculator) ror.localise();
 		
 		System.out.println("Client     : call method arguments: (" + arg1 + ", " + arg2 + ")");
+		System.out.println();
 		
-		System.out.println("\n" + "Client     : get the result of add: " + cal.add(arg1, arg2));
-		System.out.println("\n" + "Client     : get the result of minus: " + cal.minus(arg1, arg2));
-		System.out.println("\n" + "Client     : get the result of multiply: " + cal.multiply(arg1, arg2));
-		System.out.println("\n" + "Client     : get the result divide: " + cal.divide(arg1, arg2));
+		System.out.println("Client     : get the result of add: " + cal.add(arg1, arg2) + "\n");
+		System.out.println("Client     : get the result of minus: " + cal.minus(arg1, arg2) + "\n");
+		System.out.println("Client     : get the result of multiply: " + cal.multiply(arg1, arg2) + "\n");
+		System.out.println("Client     : get the result divide: " + cal.divide(arg1, arg2) + "\n");
+		System.out.println();
 	}
 }
