@@ -1,4 +1,4 @@
-package exampleClient;
+package exampleCalculationClient;
 
 import exception.RemoteException;
 import remote.Remote;

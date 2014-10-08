@@ -1,4 +1,4 @@
-package textScraper;
+package exampleTextScraperClient;
 
 import remote.Remote;
 import exception.RemoteException;

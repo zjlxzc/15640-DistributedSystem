@@ -1,20 +1,18 @@
-package textScraper;
+package exampleTextScraperClient;
 
-import java.io.IOException;
-
+import exception.AccessException;
+import exception.NotBoundException;
+import exception.RemoteException;
 import registry.LocateRegistry;
 import registry.SimpleRegistry;
 import remote.RemoteObjectRef;
-import exampleClient.Calculator;
-import exception.AccessException;
-import exception.NotBoundException;
 
 public class TextScraperClient {
 	
 	public TextScraperClient() {
 	}
 	
-	public static void main(String[] args) throws IOException, NotBoundException, AccessException {
+	public static void main(String[] args) {
 		String host = args[0];
 		int port = Integer.parseInt(args[1]);
 		String serviceName = args[2];
@@ -22,7 +20,16 @@ public class TextScraperClient {
 		
 		SimpleRegistry sr = (SimpleRegistry) LocateRegistry.getRegistry(host, port);
 		System.out.println("Client     : Get Regsitry");
-		RemoteObjectRef ror = sr.lookup(serviceName);
+		RemoteObjectRef ror = null;
+		try {
+			ror = sr.lookup(serviceName);
+		} catch (RemoteException e) {
+			System.out.println(e.getStackTrace());
+		} catch (NotBoundException e) {
+			System.out.println(e.getStackTrace());
+		} catch (AccessException e) {
+			System.out.println(e.getStackTrace());
+		}
 		System.out.println("Client     : Get the remote object reference of \"" + serviceName + "\"");
 
 		TextScraper scraper = (TextScraper) ror.localise();
@@ -30,7 +37,11 @@ public class TextScraperClient {
 		System.out.println("Client     : call method arguments: (" + keyword + ")");
 		System.out.println();
 		
-		System.out.println("Client     : get the result of add: " + scraper.query(keyword) + "\n");
+		try {
+			System.out.println("Client     : get the result of add: " + scraper.query(keyword) + "\n");
+		} catch (RemoteException e) {
+			System.out.println(e.getStackTrace());
+		}
 	}
 }
 

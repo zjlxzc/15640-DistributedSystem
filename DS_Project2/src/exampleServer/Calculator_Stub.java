@@ -6,7 +6,7 @@ import java.lang.reflect.Method;
 import remote.Remote;
 import remote.RemoteObjectRef;
 import server.RemoteStub;
-import exampleClient.Calculator;
+import exampleCalculationClient.Calculator;
 
 public class Calculator_Stub extends RemoteStub implements Calculator, Remote {
 	private static final long serialVersionUID = 2L;
