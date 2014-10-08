@@ -1,3 +1,13 @@
+/**
+ * File name: RegistryServer.java
+ * @author Chun Xu (chunx), Jialing Zhou (jialingz)
+ * Course/Section: 15640/A
+ * 
+ * Description: Lab 2: RMI
+ * 
+ * This class is the registry server to register object.
+ */
+
 package registry;
 
 import java.io.BufferedReader;
@@ -23,7 +33,7 @@ public class RegistryServer implements Runnable{
 	}
 	
 	public void run() {
-		ServerSocket reg = null;		
+		ServerSocket reg = null;	
 		try {			
 			reg = new ServerSocket(port);
 			System.out.println("Registry Server	: start at	: " + InetAddress.getLocalHost() + ":" + port);

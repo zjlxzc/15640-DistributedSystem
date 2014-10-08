@@ -1,3 +1,13 @@
+/**
+ * File name: RORtbl.java
+ * @author Chun Xu (chunx), Jialing Zhou (jialingz)
+ * Course/Section: 15640/A
+ * 
+ * Description: Lab 2: RMI
+ * 
+ * This class is used to maintain a remote object reference table.
+ */
+
 package remote;
 
 import java.util.Hashtable;
@@ -7,8 +17,8 @@ public class RORtbl
 {
     Hashtable<Integer, Object> table = new Hashtable<Integer, Object>();
     // make a new table. 
-    public RORtbl()
-	{}
+    public RORtbl(){
+    }
     
     // given the object, construct a RemoteObjectRef and put them into hashtable
     public RemoteObjectRef addObj(String host, int port, Object o){	
@@ -16,7 +26,7 @@ public class RORtbl
     	Random rand = new Random();
     	int obj_key = 0;
     	while (true) {
-    		obj_key = rand.nextInt(900000) + 100000;
+    		obj_key = rand.nextInt(900000) + 100000; // generate a random number
     		if (!table.containsKey(obj_key)) {
     			break;
     		}

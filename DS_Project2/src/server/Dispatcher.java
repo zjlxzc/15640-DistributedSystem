@@ -1,3 +1,13 @@
+/**
+ * File name: Dispatcher.java
+ * @author Chun Xu (chunx), Jialing Zhou (jialingz)
+ * Course/Section: 15640/A
+ * 
+ * Description: Lab 2: RMI
+ * 
+ * This class is a single object which can unmarshalling any method invocation
+ */
+
 package server;
 
 import java.io.IOException;
@@ -18,6 +28,7 @@ public class Dispatcher{
 	
 	public Dispatcher () {	}
 	
+	// initialize variables
 	public Dispatcher (RORtbl table, ObjectInputStream in, ObjectOutputStream out) {
 		this.out = out;
 		this.in = in;
@@ -26,58 +37,50 @@ public class Dispatcher{
 	
 	public void localize() {		
 		try {
-			message = (RMIMessage)in.readObject();		
+			message = (RMIMessage)in.readObject(); // get RMIMessage object
 			System.out.println("Dispatcher	: read in RMIMessage");
 			
-			RemoteObjectRef ror = message.getRef();
+			RemoteObjectRef ror = message.getRef(); // get remote object reference
 			System.out.println("Dispatcher	: get the Remote Object Reference of " + ror.getRemote_Interface_Name());
 				
-			Object obj = table.findObj(ror);
+			Object obj = table.findObj(ror); // get object
 			Class<?> c = obj.getClass();
 			System.out.println("Dispatcher	: get the local Object of " + c.getName());
 	
 			Method method = null;
-			method = c.getDeclaredMethod(message.getMethodName(), message.getTypes());
+			method = c.getDeclaredMethod(message.getMethodName(), message.getTypes()); // get method
 			System.out.println("Dispatcher	: get the method name:  " + method.getName());	
 			
-			Object[] args = message.getParameters();
+			Object[] args = message.getParameters(); // get method parameters
 			System.out.println("Dispatcher	: get the parameters of " + method.getName());
 			
 			System.out.println("Dispatcher	: call the method and get the result");
-			Object ret = method.invoke(obj,args);
-			message.setResult(ret);		
+			Object ret = method.invoke(obj,args); // call method to get result
+			message.setResult(ret); // set result to RMIMessage
 		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (NoSuchMethodException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (SecurityException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IllegalAccessException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IllegalArgumentException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (InvocationTargetException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 	
 	public void dispatch() {
 		try {
-			out.writeObject(message);
+			out.writeObject(message); // send out RMIMessage
 			out.flush();
 			System.out.println("Dispatcher	: send back the message");
 			System.out.println();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}		
 	}	

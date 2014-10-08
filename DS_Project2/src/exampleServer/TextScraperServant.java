@@ -1,3 +1,15 @@
+/**
+ * File name: TextScraperServant.java
+ * @author Chun Xu (chunx), Jialing Zhou (jialingz)
+ * Course/Section: 15640/A
+ * 
+ * Description: Lab 2: RMI
+ * 
+ * This is class is a servant of the example - "textScraper",
+ * it is a remote object class that implements TextScraper.
+ * This function of it is to do the query for given "product name".
+ */
+
 package exampleServer;
 
 import java.io.BufferedReader;
@@ -15,65 +27,61 @@ public class TextScraperServant implements TextScraper {
 	}
 	
 	public int query(String param) throws RemoteException {
-		System.out.println("TextScraperServant: Got request to query \"" + param + "\"");
+		System.out.println("TextScraperServant: Got request to query " + param);
 		
 		String[] words = param.split(" ");
 		StringBuilder key = new StringBuilder();
 		StringBuilder searchB = new StringBuilder();
+		// concatenate the input word to meet with url format
 		for (String str : words) {
 			key.append(str).append("-");
 			searchB.append(str).append("%20");
 		}
-		key.deleteCharAt(key.length() - 1);
+		key.deleteCharAt(key.length() - 1); // remove last character
 		String search = searchB.substring(0, searchB.length() - 2);
+		
 		URL shopping = null;
-		try {
+		try { // generate URL
 			shopping = new URL("http://www.shopping.com/" + key +"/products?CLT=SCH&KW=" + search);
 		} catch (MalformedURLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
 		String response = "";
 		HttpURLConnection connection = null;
 		try {
-			connection = (HttpURLConnection)shopping.openConnection();
+			connection = (HttpURLConnection)shopping.openConnection(); // connect to URL
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		
 		BufferedReader in = null;
-		try {
+		try { // get input
 			in = new BufferedReader(new InputStreamReader(connection.getInputStream(), "UTF-8"));
 		} catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
         String str = "";
         try {
 			while ((str = in.readLine()) != null) {
-				response += str;
+				response += str; // get response
 			}
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
         try {
 			in.close();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
         
         System.out.println("TextScraperServant: get the result of query \"" + param + "\"");
 		try {
-			return query1(response, param);
+			return query1(response, param); // return the result of query
 		} catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return 0;
@@ -81,7 +89,7 @@ public class TextScraperServant implements TextScraper {
 	
 	public int query1(String response, String keyword) throws UnsupportedEncodingException {
 		String totalNumber = "0";
-		if(response.indexOf("numTotalResults") != -1){
+		if(response.indexOf("numTotalResults") != -1){ // get result by key word and remove unrelated string
 			int index = response.indexOf("numTotalResults");
             int startIndex = response.indexOf("of", index);
             int endIndex = response.indexOf("</span>", index);

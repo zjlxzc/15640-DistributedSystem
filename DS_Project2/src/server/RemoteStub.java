@@ -1,3 +1,13 @@
+/**
+ * File name: RemoteStub.java
+ * @author Chun Xu (chunx), Jialing Zhou (jialingz)
+ * Course/Section: 15640/A
+ * 
+ * Description: Lab 2: RMI
+ * 
+ * This class is serializable.
+ */
+
 package server;
 
 import java.io.IOException;
@@ -12,10 +22,6 @@ import remote.RemoteObjectRef;
 public class RemoteStub implements Serializable{
 
 	private static final long serialVersionUID = -7166353378723846018L;
-
-	public static final int port = 2014;
-	public static final String postfix = "_Stub";
-	public static final String uri = "/stubs/";
 	public RemoteObjectRef reference;
 	
 	// Constructs a RemoteStub.
@@ -48,12 +54,13 @@ public class RemoteStub implements Serializable{
 		ObjectInputStream inStream = new ObjectInputStream(socket.getInputStream());
 		ObjectOutputStream outStream = new ObjectOutputStream(socket.getOutputStream());
 		
+		// create RMIMessage instance
 		RMIMessage message = new RMIMessage(ref, method.getName(), method.getParameterTypes(), parameters); 
 		
-		outStream.writeObject(message);
+		outStream.writeObject(message); // send out RMIMessage
 		outStream.flush();
 		
-		RMIMessage result = (RMIMessage)(inStream.readObject());
-        return result.getResultValue(method.getReturnType(), result);  
+		RMIMessage result = (RMIMessage)(inStream.readObject()); // get returned RMIMessage
+        return result.getResultValue(method.getReturnType(), result); // return value
 	}
 }

@@ -1,3 +1,13 @@
+/**
+ * File name: RMIMessage.java
+ * @author Chun Xu (chunx), Jialing Zhou (jialingz)
+ * Course/Section: 15640/A
+ * 
+ * Description: Lab 2: RMI
+ * 
+ * This class is used to represent messages need to cross network.
+ */
+
 package server;
 
 import java.io.IOException;
@@ -11,19 +21,11 @@ public class RMIMessage implements Serializable{
 	private RemoteObjectRef ref;
 	
 	private String methodName;
-	public String getMethodName() {
-		return methodName;
-	}
-
-	public void setMethodName(String methodName) {
-		this.methodName = methodName;
-	}
-
-	private Class<?>[] types;
-	private Object[] parameters;
+	private Class<?>[] types; // an array to store parameter types
+	private Object[] parameters; // an Object array to store parameters
 	
 	private Object[] values;
-	private Object result;
+	private Object result; 
 	
 	public RMIMessage() {
 	}
@@ -35,20 +37,19 @@ public class RMIMessage implements Serializable{
 	public RMIMessage(RemoteObjectRef ref, String methodName, Class<?>[] types,
 				Object[] parameters) throws IOException {
 		this.ref = ref;
-		//this.method = m;
-		this.parameters = parameters;
-		this.methodName = methodName;
+		this.parameters = parameters; // get all parameters
+		this.methodName = methodName; // get method name
 		
-		this.types = types;
+		this.types = types; // get parameter types
 		values = new Object[parameters.length];
 		
-		marshalling();	
+		marshalling();	// do marshalling
 		System.out.println("RMIMessage : sent the message");		
 	}
 	
 	public void marshalling() throws IOException {
 		System.out.println("RMIMessage : marshalling...");
-		for(int i = 0; i < parameters.length; i++){
+		for(int i = 0; i < parameters.length; i++){ // for each parameter, get corresponding type
 			if(!types[i].isPrimitive()) {
 				values[i] = parameters[i];
 			} else {
@@ -75,6 +76,7 @@ public class RMIMessage implements Serializable{
         }
 	}
 	
+	// unmarshalling return message
 	public Object unmarshalling(Class<?> clas, RMIMessage resultMessage)
 			throws IOException, ClassNotFoundException {
 		System.out.println("RMIMessage : unmarshalling...");
@@ -115,6 +117,7 @@ public class RMIMessage implements Serializable{
 		return result;
 	}
 
+	// getters and setters
 	public RemoteObjectRef getRef() {
 		return ref;
 	}
@@ -155,4 +158,11 @@ public class RMIMessage implements Serializable{
 		this.result = result;
 	}
 
+	public String getMethodName() {
+		return methodName;
+	}
+
+	public void setMethodName(String methodName) {
+		this.methodName = methodName;
+	}
 }

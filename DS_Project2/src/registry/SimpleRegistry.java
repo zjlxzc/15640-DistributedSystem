@@ -1,3 +1,13 @@
+/**
+ * File name: SimpleRegistry.java
+ * @author Chun Xu (chunx), Jialing Zhou (jialingz)
+ * Course/Section: 15640/A
+ * 
+ * Description: Lab 2: RMI
+ * 
+ * This class is to provide a static method for client and server to get the Registry.
+ */
+
 package registry;
 
 import java.io.BufferedReader;
@@ -25,6 +35,7 @@ public class SimpleRegistry {
 		this.port = port;
 	}
 
+	// bind service
 	public void bind(String serviceName, RemoteObjectRef ror)
 			throws RemoteException, AlreadyBoundException, AccessException {
 		// open socket. same as before.
@@ -57,14 +68,13 @@ public class SimpleRegistry {
 			// close the socket.
 			soc.close();
 		} catch (UnknownHostException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 
+	// lookup service
 	public RemoteObjectRef lookup(String name) throws RemoteException,
 			NotBoundException, AccessException {
 		Socket soc;
@@ -74,6 +84,7 @@ public class SimpleRegistry {
 			PrintWriter strOut = new PrintWriter(soc.getOutputStream(), true);
 			strOut.println("Lookup");
 			
+			// get input and output stream
 			ObjectOutputStream out = new ObjectOutputStream(soc.getOutputStream());
 			ObjectInputStream in = new ObjectInputStream(soc.getInputStream());
 		
@@ -89,18 +100,16 @@ public class SimpleRegistry {
 			soc.close();
 					
 		} catch (UnknownHostException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return ror; 
 	}
 	
+	// rebind service
 	public void rebind(String serviceName, RemoteObjectRef ror)
 			throws RemoteException, AlreadyBoundException, AccessException {
 		// open socket. same as before.
@@ -131,14 +140,13 @@ public class SimpleRegistry {
 			// close the socket.
 			soc.close();
 		} catch (UnknownHostException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 	
+	// unbind service
 	public void unbind(String serviceName)
 			throws RemoteException, AlreadyBoundException, AccessException {
 		// open socket. same as before.
@@ -167,14 +175,13 @@ public class SimpleRegistry {
 			// close the socket.
 			soc.close();
 		} catch (UnknownHostException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 	
+	// list all service
 	public void list() throws RemoteException {
 		
 		Socket soc;	
@@ -190,12 +197,10 @@ public class SimpleRegistry {
 			while((line = in.readLine()) != null) {
 				System.out.println(line);
 			}
-			soc.close();
+			soc.close(); // close socket
 		} catch (UnknownHostException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}

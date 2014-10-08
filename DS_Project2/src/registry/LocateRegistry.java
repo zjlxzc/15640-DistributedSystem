@@ -1,3 +1,13 @@
+/**
+ * File name: LocateRegistry.java
+ * @author Chun Xu (chunx), Jialing Zhou (jialingz)
+ * Course/Section: 15640/A
+ * 
+ * Description: Lab 2: RMI
+ * 
+ * This class is to provide a static method for client and server to get the Registry.
+ */
+
 package registry;
 
 import java.io.BufferedReader;
@@ -8,20 +18,12 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
-/**
- * 
- * The locateRegistry provides a static method for client and server to 
- * get the Registry
- *
- */
-
 public class LocateRegistry {
 	public static SimpleRegistry getRegistry() {
 		SimpleRegistry serverRegistry = null;
 		try {
 			 serverRegistry = new SimpleRegistry((InetAddress.getLocalHost()).getHostName(), 1099);
 		} catch (UnknownHostException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return serverRegistry;
@@ -52,7 +54,7 @@ public class LocateRegistry {
 			return null;
 		} finally {
 			try {
-				soc.close();
+				soc.close(); // close socket
 			} catch (IOException e) {
 				e.printStackTrace();
 			}

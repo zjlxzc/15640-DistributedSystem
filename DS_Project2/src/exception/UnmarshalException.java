@@ -1,3 +1,13 @@
+/**
+ * File name: UnmarshalException.java
+ * @author Chun Xu (chunx), Jialing Zhou (jialingz)
+ * Course/Section: 15640/A
+ * 
+ * Description: Lab 2: RMI
+ * 
+ * This class is a exception may be thrown by RMI.
+ */
+
 package exception;
 
 /*

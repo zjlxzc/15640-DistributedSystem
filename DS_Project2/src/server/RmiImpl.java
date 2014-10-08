@@ -1,3 +1,13 @@
+/**
+ * File name: RmiImpl.java
+ * @author Chun Xu (chunx), Jialing Zhou (jialingz)
+ * Course/Section: 15640/A
+ * 
+ * Description: Lab 2: RMI
+ * 
+ * This class is primary part on server.
+ */
+
 package server;
 
 import java.io.IOException;
@@ -73,14 +83,14 @@ public class RmiImpl {
 			System.out.println("Server initialization failed : Illegal Access");
 		}
 		
-		RemoteObjectRef ror = table.addObj(serviceHost, servicePort, o);		
+		RemoteObjectRef ror = table.addObj(serviceHost, servicePort, o); // get remote object reference	
 		
 		System.out.println("Server		: request a registry from " + registryHost + " : " + registryPort);
-		SimpleRegistry registry = LocateRegistry.getRegistry(registryHost, registryPort);
+		SimpleRegistry registry = LocateRegistry.getRegistry(registryHost, registryPort); // get registry
 		
 		System.out.println("Server		: bind service " + serviceName + " to registry");
 		try {
-			registry.bind(serviceName, ror);
+			registry.bind(serviceName, ror); // bind service
 		} catch (RemoteException e1) {
 			System.out.println("Server initialization failed : Remote Exception");
 		} catch (AlreadyBoundException e1) {
