@@ -31,6 +31,5 @@ public class CalculatorClient {
 		System.out.println("Client     : get the result of minus: " + cal.minus(arg1, arg2) + "\n");
 		System.out.println("Client     : get the result of multiply: " + cal.multiply(arg1, arg2) + "\n");
 		System.out.println("Client     : get the result divide: " + cal.divide(arg1, arg2) + "\n");
-		System.out.println();
 	}
 }
