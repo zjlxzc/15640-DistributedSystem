@@ -13,9 +13,15 @@ public class TextScraperClient {
 	}
 	
 	public static void main(String[] args) {
+		if (args.length != 4) {
+			System.out.println("Invalid input. Please use IP-address 1099 textScraper \"baby strol\".");
+			System.exit(1);
+		}
+		
 		String host = args[0];
 		int port = Integer.parseInt(args[1]);
 		String serviceName = args[2];
+		
 		String keyword = args[3];
 		
 		SimpleRegistry sr = (SimpleRegistry) LocateRegistry.getRegistry(host, port);
@@ -32,7 +38,6 @@ public class TextScraperClient {
 		}
 		System.out.println("Client     : Get the remote object reference of \"" + serviceName + "\"");
 
-		System.out.println("name: " + ror.getRemote_Interface_Name());
 		TextScraper scraper = (TextScraper) ror.localise();
 		
 		System.out.println("Client     : call method arguments: (" + keyword + ")");

@@ -15,7 +15,6 @@ public class TextScraperServant implements TextScraper {
 	}
 	
 	public int query(String param) throws RemoteException {
-		// TODO Auto-generated method stub
 		System.out.println("TextScraperServant: Got request to query \"" + param + "\"");
 		
 		String[] words = param.split(" ");
@@ -86,10 +85,10 @@ public class TextScraperServant implements TextScraper {
 			int index = response.indexOf("numTotalResults");
             int startIndex = response.indexOf("of", index);
             int endIndex = response.indexOf("</span>", index);
-            System.out.println("response: " + response);
+            
             totalNumber = response.substring(startIndex + 3, endIndex); 
         }
-		System.out.println("number: " + totalNumber);
+		
 		return Integer.parseInt(totalNumber.substring(0, totalNumber.indexOf("&")));
 	}
 }
