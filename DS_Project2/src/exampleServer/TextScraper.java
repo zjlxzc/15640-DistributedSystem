@@ -1,4 +1,4 @@
-package textScraper;
+package exampleServer;
 
 import remote.Remote;
 import exception.RemoteException;
