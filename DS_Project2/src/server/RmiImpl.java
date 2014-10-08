@@ -3,8 +3,6 @@ package server;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -33,10 +31,10 @@ public class RmiImpl {
 		registryPort = Integer.parseInt(args[2]);
 		String serviceName = args[3];
 		
-		System.out.println("Server: start");
-		System.out.println("Server: initialClassName : " + initialClassName);
-		System.out.println("Server: registry         : " + registryHost + " : " + registryPort);
-		System.out.println("Server: serviceName      : " + serviceName);
+		System.out.println("Server			: Initialize");
+		System.out.println("Server			: initialClassName : " + initialClassName);
+		System.out.println("Server			: registry         : " + registryHost + " : " + registryPort);
+		System.out.println("Server			: serviceName      : " + serviceName);
 		
 		new Thread(new RegistryServer(registryPort)).start();	
 		ServerSocket serverSoc = null;
@@ -52,11 +50,11 @@ public class RmiImpl {
 			
 			RemoteObjectRef ror = table.addObj(serviceHost, servicePort, o);		
 			
-			System.out.println("Server: request a registry from " + registryHost + " : " + registryPort);
+			System.out.println("Server			: request a registry from " + registryHost + " : " + registryPort);
 			SimpleRegistry registry = LocateRegistry.getRegistry(registryHost, registryPort);
 			
+			System.out.println("Server			: bind service " + serviceName + " to registry");
 			registry.bind(serviceName, ror);
-			System.out.println("Server: bind service " + serviceName + " to registry");
 			
 			serverSoc = new ServerSocket(servicePort);
 	
@@ -108,11 +106,11 @@ public class RmiImpl {
 		@Override
 		public void run() {
 			try {
-				System.out.println("Server: get service request from " + client.getInetAddress());
+				System.out.println("Server			: get service request from " + client.getInetAddress());
 				ObjectOutputStream out = new ObjectOutputStream(client.getOutputStream());
 				ObjectInputStream in = new ObjectInputStream(client.getInputStream());
 				
-				System.out.println("Server: start new dispatcher ");
+				System.out.println("Server			: start new dispatcher ");
 				Dispatcher patcher = new Dispatcher(table, in, out);
 				patcher.localize();
 				patcher.dispatch();				

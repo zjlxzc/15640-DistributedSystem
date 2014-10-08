@@ -27,23 +27,23 @@ public class Dispatcher{
 	public void localize() {		
 		try {
 			message = (RMIMessage)in.readObject();		
-			System.out.println("Dispatcher: read in RMIMessage");
+			System.out.println("Dispatcher		: read in RMIMessage");
 			
 			RemoteObjectRef ror = message.getRef();
-			System.out.println("Dispatcher: get the Remote Object Reference of " + ror.getRemote_Interface_Name());
-			
+			System.out.println("Dispatcher		: get the Remote Object Reference of " + ror.getRemote_Interface_Name());
+				
 			Object obj = table.findObj(ror);
 			Class<?> c = obj.getClass();
-			System.out.println("Dispatcher: get the local Object of " + c.getName());
+			System.out.println("Dispatcher		: get the local Object of " + c.getName());
 	
 			Method method = null;
 			method = c.getDeclaredMethod(message.getMethodName(), message.getTypes());
-			System.out.println("Dispatcher: get the method name:  " + method.getName());	
+			System.out.println("Dispatcher		: get the method name:  " + method.getName());	
 			
 			Object[] args = message.getParameters();
-			System.out.println("Dispatcher: get the parameters of " + method.getName());
+			System.out.println("Dispatcher		: get the parameters of " + method.getName());
 			
-			System.out.println("Dispatcher: call the method and get the result");
+			System.out.println("Dispatcher		: call the method and get the result");
 			Object ret = method.invoke(obj,args);
 			message.setResult(ret);		
 		} catch (ClassNotFoundException e) {
@@ -74,7 +74,8 @@ public class Dispatcher{
 		try {
 			out.writeObject(message);
 			out.flush();
-			System.out.println("Dispatcher: send back the message");
+			System.out.println("Dispatcher		: send back the message");
+			System.out.println();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

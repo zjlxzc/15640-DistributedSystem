@@ -48,7 +48,7 @@ public class SimpleRegistry {
 			// it also gets an ack, but this is not used.
 			String ack = in.readLine();
 			if (ack.equals("Bind success!")) {
-				System.out.println("Registry : bind success");
+				//System.out.println("Registry : bind success");
 			} else if (ack.equals("The service already bound")){
 				throw new AlreadyBoundException();
 			} else {
