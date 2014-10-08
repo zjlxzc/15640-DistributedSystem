@@ -86,10 +86,10 @@ public class TextScraperServant implements TextScraper {
 			int index = response.indexOf("numTotalResults");
             int startIndex = response.indexOf("of", index);
             int endIndex = response.indexOf("</span>", index);
-           
+            System.out.println("response: " + response);
             totalNumber = response.substring(startIndex + 3, endIndex); 
         }
-		
+		System.out.println("number: " + totalNumber);
 		return Integer.parseInt(totalNumber.substring(0, totalNumber.indexOf("%")));
 	}
 }

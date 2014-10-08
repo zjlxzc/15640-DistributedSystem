@@ -6,6 +6,7 @@ import java.lang.reflect.Method;
 import remote.Remote;
 import remote.RemoteObjectRef;
 import server.RemoteStub;
+import exampleTextScraperClient.TextScraper;
 
 public class TextScraper_Stub extends RemoteStub implements TextScraper, Remote {
 
@@ -41,7 +42,7 @@ public class TextScraper_Stub extends RemoteStub implements TextScraper, Remote 
 		Object localObject = null;
 		try {
 			
-			localObject = invoke(paramRemoteRef, query, new Object[] {new String(param) });
+			localObject = invoke(paramRemoteRef, query, new Object[] {new String("\"" + param + "\"")});
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

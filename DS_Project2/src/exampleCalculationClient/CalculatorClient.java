@@ -37,6 +37,7 @@ public class CalculatorClient {
 		}
 		System.out.println("Client     : Get the remote object reference of \"" + serviceName + "\"");
 
+		System.out.println("name: " + ror.getRemote_Interface_Name());
 		Calculator cal = (Calculator) ror.localise();
 		
 		System.out.println("Client     : call method arguments: (" + arg1 + ", " + arg2 + ")");

@@ -32,6 +32,7 @@ public class TextScraperClient {
 		}
 		System.out.println("Client     : Get the remote object reference of \"" + serviceName + "\"");
 
+		System.out.println("name: " + ror.getRemote_Interface_Name());
 		TextScraper scraper = (TextScraper) ror.localise();
 		
 		System.out.println("Client     : call method arguments: (" + keyword + ")");
