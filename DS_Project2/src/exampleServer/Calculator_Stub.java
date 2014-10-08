@@ -27,6 +27,8 @@ public class Calculator_Stub extends RemoteStub implements Calculator, Remote {
 	
 	public int add(int paramInt1, int paramInt2) {
 		System.out.println(this.getClass().getName() + " : get method call on ADD");
+		System.out.println();
+		
 		Class<? extends CalculatorServant> c = calServant.getClass();
 		Class[] cArg = new Class[2];
         cArg[0] = int.class;
@@ -58,6 +60,8 @@ public class Calculator_Stub extends RemoteStub implements Calculator, Remote {
 	
 	public int minus(int paramInt1, int paramInt2) {
 		System.out.println(this.getClass().getName() + " : get method call on MINUS");
+		System.out.println();
+		
 		Class<? extends CalculatorServant> c = calServant.getClass();
 		Class[] cArg = new Class[2];
         cArg[0] = int.class;
@@ -88,7 +92,9 @@ public class Calculator_Stub extends RemoteStub implements Calculator, Remote {
 	}
 	
 	public int multiply(int paramInt1, int paramInt2) {
-		System.out.println(this.getClass().getName() + " : get method call on MUTIPLY");
+		System.out.println(this.getClass().getName() + " : get method call on MULTIPLY");
+		System.out.println();
+		
 		Class<? extends CalculatorServant> c = calServant.getClass();
 		Class[] cArg = new Class[2];
         cArg[0] = int.class;
@@ -120,6 +126,8 @@ public class Calculator_Stub extends RemoteStub implements Calculator, Remote {
 	
 	public int divide(int paramInt1, int paramInt2) {
 		System.out.println(this.getClass().getName() + " : get method call on DIVIDE");
+		System.out.println();
+		
 		Class<? extends CalculatorServant> c = calServant.getClass();
 		Class[] cArg = new Class[2];
         cArg[0] = int.class;

@@ -29,7 +29,8 @@ public class RemoteObjectRef implements Serializable{
 			Constructor<?> constructor =
 				        c.getConstructor(new Class[]{RemoteObjectRef.class});
 			o = constructor.newInstance(this);
-			System.out.println("Remote Object Reference : generate " + o.getClass().getName());
+			System.out.println("Remote Object Reference : generate \"" + o.getClass().getName() + "\"");
+			System.out.println();
 			return o;
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();

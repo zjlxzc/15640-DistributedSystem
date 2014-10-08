@@ -78,6 +78,8 @@ public class RMIMessage implements Serializable{
 	public Object unmarshalling(Class<?> clas, RMIMessage resultMessage)
 			throws IOException, ClassNotFoundException {
 		System.out.println("RMIMessage : unmarshalling...");
+		System.out.println();
+		
 		if(!clas.isPrimitive()) {
 			return result;
 		} else {

@@ -18,17 +18,17 @@ public class CalculatorClient {
 		int arg2 = Integer.parseInt(args[4]);
 		
 		SimpleRegistry sr = (SimpleRegistry) LocateRegistry.getRegistry(host, port);
-		System.out.println("Client : Get Regsitry");
+		System.out.println("Client     : Get Regsitry");
 		RemoteObjectRef ror = sr.lookup(serviceName);
-		System.out.println("Client : Get the remote object reference of " + serviceName);
+		System.out.println("Client     : Get the remote object reference of \"" + serviceName + "\"");
 
 		Calculator cal = (Calculator) ror.localise();
 		
-		System.out.println("Client : call method add(" + arg1 + ", " + arg2 + ")");
+		System.out.println("Client     : call method arguments: (" + arg1 + ", " + arg2 + ")");
 		
-		System.out.println("Client : get the result of add: " + cal.add(arg1, arg2));
-		System.out.println("Client : get the result of minus: " + cal.minus(arg1, arg2));
-		System.out.println("Client : get the result of multiply: " + cal.multiply(arg1, arg2));
-		System.out.println("Client : get the result divide: " + cal.divide(arg1, arg2));
+		System.out.println("\n" + "Client     : get the result of add: " + cal.add(arg1, arg2));
+		System.out.println("\n" + "Client     : get the result of minus: " + cal.minus(arg1, arg2));
+		System.out.println("\n" + "Client     : get the result of multiply: " + cal.multiply(arg1, arg2));
+		System.out.println("\n" + "Client     : get the result divide: " + cal.divide(arg1, arg2));
 	}
 }

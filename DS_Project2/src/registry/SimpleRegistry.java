@@ -81,7 +81,7 @@ public class SimpleRegistry {
 			String ack = (String)in.readObject();
 						
 			if (ack.equals("Find the service")) {
-				System.out.println("Registry: found the service: " + name);
+				System.out.println("Registry   : found the service: \"" + name + "\"");
 				ror = (RemoteObjectRef)in.readObject();
 			} else if (ack.equals("The target service does not exist")){
 				System.out.println(ack);
