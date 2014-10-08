@@ -9,32 +9,36 @@ public class CalculatorServant implements Calculator {
 	}
 
 	public int add(int x, int y) {
-		System.out.println("CalculatorServant : Got request to add " + x
+		System.out.println("CalculatorServant: Got request to add " + x
 				+ " and " + y);
+		System.out.println("CalculatorServant: get the result " + (x + y));
 		return x + y;
 	}
 
 	@Override
 	public int minus(int x, int y) throws RemoteException {
 		// TODO Auto-generated method stub
-		System.out.println("CalculatorServant : Got request to minus " + x
+		System.out.println("CalculatorServant: Got request to minus " + x
 				+ " and " + y);
+		System.out.println("CalculatorServant: get the result " + (x - y));
 		return x - y;
 	}
 
 	@Override
 	public int multiply(int x, int y) throws RemoteException {
 		// TODO Auto-generated method stub
-		System.out.println("CalculatorServant : Got request to mutiply " + x
+		System.out.println("CalculatorServant: Got request to mutiply " + x
 				+ " and " + y);
+		System.out.println("CalculatorServant: get the result " + (x * y));
 		return x * y;
 	}
 
 	@Override
 	public int divide(int x, int y) throws RemoteException {
 		// TODO Auto-generated method stub
-		System.out.println("CalculatorServant : Got request to devide " + x
+		System.out.println("CalculatorServant: Got request to devide " + x
 				+ " and " + y);
+		System.out.println("CalculatorServant: get the result " + (x / y));
 		return x / y;
 	}
 
