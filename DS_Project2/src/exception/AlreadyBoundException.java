@@ -11,7 +11,7 @@
 package exception;
 
 /* An AlreadyBoundException is thrown if an attempt is made to bind an object
- * in the registryto a name that already has an associated binding.
+ * in the registry to a name that already has an associated binding.
  * 
  */
 

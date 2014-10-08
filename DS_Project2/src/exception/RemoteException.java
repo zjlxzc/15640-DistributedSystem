@@ -15,8 +15,7 @@ import java.io.IOException;
 /*
  * A RemoteException is the common superclass for a number of communication-related exceptions
  * that may occur during the execution of a remote method call.
- * Each method of a remote interface, an interface that extends java.rmi.Remote,
- * must list RemoteException in its throws clause.
+ * Each method of a remote interface must list RemoteException in its throws clause.
  */
 
 public class RemoteException extends IOException {
