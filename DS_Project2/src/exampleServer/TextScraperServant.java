@@ -90,6 +90,6 @@ public class TextScraperServant implements TextScraper {
             totalNumber = response.substring(startIndex + 3, endIndex); 
         }
 		System.out.println("number: " + totalNumber);
-		return Integer.parseInt(totalNumber.substring(0, totalNumber.indexOf("%")));
+		return Integer.parseInt(totalNumber.substring(0, totalNumber.indexOf("&")));
 	}
 }
