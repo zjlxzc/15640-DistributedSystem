@@ -10,7 +10,7 @@
  * need to be implemented by other classes that implement the interface.
  */
 
-package exampleCalculationClient;
+package exampleCalculatorClient;
 
 import exception.RemoteException;
 import remote.Remote;

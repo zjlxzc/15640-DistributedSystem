@@ -9,7 +9,7 @@
  * This function of this class is to get the result of calculation given two operands.
  */
 
-package exampleCalculationClient;
+package exampleCalculatorClient;
 
 import registry.LocateRegistry;
 import registry.SimpleRegistry;
