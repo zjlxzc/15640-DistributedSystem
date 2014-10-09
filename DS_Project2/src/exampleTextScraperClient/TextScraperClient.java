@@ -41,13 +41,9 @@ public class TextScraperClient {
 		RemoteObjectRef ror = null;
 		try {
 			ror = sr.lookup(serviceName); // get remote object reference
-		} catch (RemoteException e) {
-			System.out.println(e.getStackTrace());
 		} catch (NotBoundException e) {
 			System.out.println(e.getStackTrace());
-		} catch (AccessException e) {
-			System.out.println(e.getStackTrace());
-		}
+		} 
 		System.out.println("Client     : Get the remote object reference of \"" + serviceName + "\"");
 
 		TextScraper scraper = (TextScraper) ror.localise(); // generate stub
