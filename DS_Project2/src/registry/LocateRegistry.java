@@ -56,7 +56,7 @@ public class LocateRegistry {
 			try {
 				soc.close(); // close socket
 			} catch (IOException e) {
-				e.printStackTrace();
+				System.out.println("Registry Server Error : socket can not be closed");
 			}
 		}
 	}

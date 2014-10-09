@@ -22,6 +22,7 @@ import java.net.Socket;
 import java.util.Hashtable;
 
 import exception.AlreadyBoundException;
+import exception.NotBoundException;
 import remote.RemoteObjectRef;
 
 public class RegistryServer implements Runnable{
@@ -151,7 +152,11 @@ public class RegistryServer implements Runnable{
 				System.out.println("Registry Server	: bind success");
 				System.out.println();
 			} else {
-				out.println("The service already bound");
+				try {
+					throw new AlreadyBoundException();
+				} catch (AlreadyBoundException e) {
+					out.println("The service already bound");
+				}				
 			}								
 		}
 	}
@@ -199,9 +204,12 @@ public class RegistryServer implements Runnable{
 					System.out.println("Registry Server	: finished look up and return");
 					System.out.println();
 				} else {
-					
-					out.writeObject("The target service does not exist");
-					System.out.println();
+					try {
+						throw new NotBoundException();
+					} catch (NotBoundException e) {
+						out.writeObject("The target service does not exist");
+						System.out.println();
+					}					
 				}
 			} catch (IOException e) {
 				System.out.println("Lookup failed : stream failed");

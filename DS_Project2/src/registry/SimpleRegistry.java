@@ -20,7 +20,6 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 
 import remote.RemoteObjectRef;
-import exception.AccessException;
 import exception.AlreadyBoundException;
 import exception.NotBoundException;
 import exception.RemoteException;
@@ -37,7 +36,7 @@ public class SimpleRegistry {
 
 	// bind service
 	public void bind(String serviceName, RemoteObjectRef ror)
-			throws RemoteException, AlreadyBoundException, AccessException {
+			throws AlreadyBoundException {
 		// open socket. same as before.
 		Socket soc;
 		try {
@@ -62,21 +61,18 @@ public class SimpleRegistry {
 				//System.out.println("Registry : bind success");
 			} else if (ack.equals("The service already bound")){
 				throw new AlreadyBoundException();
-			} else {
-				throw new RemoteException();
-			}
+			} 
 			// close the socket.
 			soc.close();
 		} catch (UnknownHostException e) {
-			e.printStackTrace();
+			System.out.println("Registry error : cannot reach the server");
 		} catch (IOException e) {
-			e.printStackTrace();
+			System.out.println("Registry error : IOException");
 		}
 	}
 
 	// lookup service
-	public RemoteObjectRef lookup(String name) throws RemoteException,
-			NotBoundException, AccessException {
+	public RemoteObjectRef lookup(String name) throws NotBoundException {
 		Socket soc;
 		RemoteObjectRef ror = null;
 		try {
@@ -96,22 +92,22 @@ public class SimpleRegistry {
 				ror = (RemoteObjectRef)in.readObject();
 			} else if (ack.equals("The target service does not exist")){
 				System.out.println(ack);
+				throw new NotBoundException();				
 			} 
-			soc.close();
-					
+			soc.close();					
 		} catch (UnknownHostException e) {
-			e.printStackTrace();
+			System.out.println("Registry error : cannot reach the server");
 		} catch (IOException e) {
-			e.printStackTrace();
+			System.out.println("Registry error : IOException");
 		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
+			System.out.println("Registry error : return value error");
 		}
 		return ror; 
 	}
 	
 	// rebind service
 	public void rebind(String serviceName, RemoteObjectRef ror)
-			throws RemoteException, AlreadyBoundException, AccessException {
+			throws RemoteException, AlreadyBoundException {
 		// open socket. same as before.
 		Socket soc;
 		try {
@@ -140,15 +136,15 @@ public class SimpleRegistry {
 			// close the socket.
 			soc.close();
 		} catch (UnknownHostException e) {
-			e.printStackTrace();
+			System.out.println("Registry error : cannot reach the server");
 		} catch (IOException e) {
-			e.printStackTrace();
+			System.out.println("Registry error : IOException");
 		}
 	}
 	
 	// unbind service
 	public void unbind(String serviceName)
-			throws RemoteException, AlreadyBoundException, AccessException {
+			throws NotBoundException {
 		// open socket. same as before.
 		Socket soc;
 		try {
@@ -168,16 +164,14 @@ public class SimpleRegistry {
 			if (ack.equals("Unbind success!")) {
 				System.out.println("Registry : unbind success");
 			} else if (ack.equals("The service has not been bound")){
-				throw new AlreadyBoundException();
-			} else {
-				throw new RemoteException();
+				throw new NotBoundException();
 			}
 			// close the socket.
 			soc.close();
 		} catch (UnknownHostException e) {
-			e.printStackTrace();
+			System.out.println("Registry error : cannot reach the server");
 		} catch (IOException e) {
-			e.printStackTrace();
+			System.out.println("Registry error : IOException");
 		}
 	}
 	
@@ -199,9 +193,9 @@ public class SimpleRegistry {
 			}
 			soc.close(); // close socket
 		} catch (UnknownHostException e) {
-			e.printStackTrace();
+			System.out.println("Registry error : cannot reach the server");
 		} catch (IOException e) {
-			e.printStackTrace();
+			System.out.println("Registry error : IOException");
 		}
 	}
 }

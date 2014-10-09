@@ -23,6 +23,7 @@ import registry.LocateRegistry;
 import registry.RegistryServer;
 import registry.SimpleRegistry;
 import remote.RORtbl;
+import remote.Remote;
 import remote.RemoteObjectRef;
 import exception.AccessException;
 import exception.AlreadyBoundException;
@@ -70,6 +71,7 @@ public class RmiImpl {
 			serviceHost = (InetAddress.getLocalHost()).getHostName();
 		} catch (UnknownHostException e) {
 			System.out.println("Server initialization failed : Unknown server host");
+			System.exit(1);
 		}		
 		servicePort = 12345;			
 		Class<?> initialclass = null;
@@ -77,6 +79,23 @@ public class RmiImpl {
 			initialclass = Class.forName(initialClassName);
 		} catch (ClassNotFoundException e1) {
 			System.out.println("Server initialization failed : Unknown initialClassName");
+			System.exit(1);
+		}
+		
+		Class<?>[] interfaces = initialclass.getInterfaces();
+		int i = 0;
+		for (; i < interfaces.length; i++) {
+			if (interfaces[i] == Remote.class) {
+				break;
+			}
+		}
+		if (i == interfaces.length) {
+			try {
+				throw new RemoteException();
+			} catch (RemoteException e) {
+				System.out.println("Remote Exception");
+				System.exit(1);
+			}
 		}
 		
 		// initialize the ROR table
@@ -88,8 +107,10 @@ public class RmiImpl {
 			o = initialclass.newInstance();
 		} catch (InstantiationException e1) {
 			System.out.println("Server initialization failed : Unable to instantiate the initial class");
+			System.exit(1);
 		} catch (IllegalAccessException e1) {
 			System.out.println("Server initialization failed : Illegal Access");
+			System.exit(1);
 		}
 		
 		// for the object of initial class, get a ror and add them to the ROR table	
@@ -103,12 +124,9 @@ public class RmiImpl {
 		System.out.println("Server		: bind service " + serviceName + " to registry");
 		try {
 			registry.bind(serviceName, ror); 
-		} catch (RemoteException e1) {
-			System.out.println("Server initialization failed : Remote Exception");
 		} catch (AlreadyBoundException e1) {
 			System.out.println("Server initialization failed : The service has already bound");
-		} catch (AccessException e1) {
-			System.out.println("Server initialization failed : AccessException");
+			System.exit(1);
 		}
 		
 		try {
