@@ -21,10 +21,14 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Hashtable;
 
+import exception.AlreadyBoundException;
 import remote.RemoteObjectRef;
 
 public class RegistryServer implements Runnable{
+	
 	int port;
+	
+	// the table stores service name and corresponding ror
 	Hashtable<String, RemoteObjectRef> regTable;
 	
 	public RegistryServer(int port) {
@@ -32,6 +36,8 @@ public class RegistryServer implements Runnable{
 		regTable = new Hashtable<String, RemoteObjectRef>();
 	}
 	
+	// the main thread listening to the client, when get a request, 
+	// start a correspond thread to excute and continue listening
 	public void run() {
 		ServerSocket reg = null;	
 		try {			
@@ -74,6 +80,11 @@ public class RegistryServer implements Runnable{
 		}
 	}
 	
+	/**
+	 * This class servers to bind a registry with its service name 
+	 * on the registry server 
+	 *
+	 */
 	private class Bind implements Runnable {
 		
 		BufferedReader in;
@@ -88,17 +99,23 @@ public class RegistryServer implements Runnable{
 		public void run() {						
 			System.out.println("Registry Server	: start bind");
 			String serviceName = null;
+			
+			// get the service name
 			try {
 				serviceName = in.readLine();
 			} catch (IOException e) {
 				System.out.println("Bind failed : cannot get the service name");
 			}
+			
+			// get the service ip address
 			String ip_adr = null;
 			try {
 				ip_adr = in.readLine();
 			} catch (IOException e) {
 				System.out.println("Bind failed : cannot get the ip address");
 			}
+			
+			// get the service port
 			int port = 0;
 			try {
 				port = Integer.parseInt(in.readLine());
@@ -107,6 +124,8 @@ public class RegistryServer implements Runnable{
 			} catch (IOException e) {
 				System.out.println("Bind failed : cannot get the port number");
 			}
+			
+			// get the obj key
 			int obj_Key = 0;
 			try {
 				obj_Key = Integer.parseInt(in.readLine());
@@ -115,6 +134,8 @@ public class RegistryServer implements Runnable{
 			} catch (IOException e) {
 				System.out.println("Bind failed : cannot get the object key");
 			}
+			
+			// get the remote interface name of the service
 			String remote_Interface_Name = null;
 			try {
 				remote_Interface_Name = in.readLine();
@@ -122,6 +143,7 @@ public class RegistryServer implements Runnable{
 				System.out.println("Bind failed : cannot get the remote interface name");
 			}
 			
+			// initialize a ror from the above arguments and register it to the table
 			RemoteObjectRef ror = new RemoteObjectRef(ip_adr, port, obj_Key, remote_Interface_Name);
 			if (!regTable.containsKey(serviceName)) {
 				regTable.put(serviceName, ror);
@@ -134,6 +156,11 @@ public class RegistryServer implements Runnable{
 		}
 	}
 	
+	/**
+	 * 
+	 * the class serves to look up a service which is bound in the registry server
+	 *
+	 */
 	private class Lookup implements Runnable {
 		
 		Socket client;
@@ -151,7 +178,8 @@ public class RegistryServer implements Runnable{
 			try {
 				out = new ObjectOutputStream(client.getOutputStream());
 				in = new ObjectInputStream(client.getInputStream());
-			
+				
+				// get the service name
 				String serviceName = null;
 				try {
 					serviceName = (String)in.readObject();
@@ -160,6 +188,8 @@ public class RegistryServer implements Runnable{
 				}
 				System.out.println("Registry Server	: get servicename : " + serviceName);
 				
+				// look it up in the table, if find it then return to the client, if not
+				// then return a message
 				if (regTable.containsKey(serviceName)) {
 					RemoteObjectRef ror = regTable.get(serviceName);
 				
@@ -179,6 +209,12 @@ public class RegistryServer implements Runnable{
 		}
 	}
 	
+	/**
+	 * 
+	 * the class serves to rebind a service which is bound in the registry server,
+	 * if the service is not bound, it will bind it
+	 *
+	 */
 	private class Rebind implements Runnable {
 		
 		BufferedReader in;
@@ -191,25 +227,67 @@ public class RegistryServer implements Runnable{
 		
 		@Override
 		public void run() {			
+			String serviceName = null;
+			
+			// get the service name
 			try {
-				System.out.println("Registry Server: start rebind");
-				String serviceName = in.readLine();
-				String ip_adr = in.readLine();
-				int port = Integer.parseInt(in.readLine());
-				int obj_Key = Integer.parseInt(in.readLine());
-				String remote_Interface_Name = in.readLine();
-				
-				RemoteObjectRef ror = new RemoteObjectRef(ip_adr, port, obj_Key, remote_Interface_Name);
-				regTable.put(serviceName, ror);
-				out.println("Rebind success!");
-				System.out.println("Registry Server: rebind success");	
-				System.out.println();
+				serviceName = in.readLine();
 			} catch (IOException e) {
-				System.out.println("Rebind failed : stream failed");
-			} 
+				System.out.println("Rebind failed : cannot get the service name");
+			}
+			
+			// get the service ip address
+			String ip_adr = null;
+			try {
+				ip_adr = in.readLine();
+			} catch (IOException e) {
+				System.out.println("Rebind failed : cannot get the ip address");
+			}
+			
+			// get the service port
+			int port = 0;
+			try {
+				port = Integer.parseInt(in.readLine());
+			} catch (NumberFormatException e) {
+				System.out.println("Rebind failed : port number is not valid");
+			} catch (IOException e) {
+				System.out.println("Rebind failed : cannot get the port number");
+			}
+			
+			// get the obj key
+			int obj_Key = 0;
+			try {
+				obj_Key = Integer.parseInt(in.readLine());
+			} catch (NumberFormatException e) {
+				System.out.println("Rebind failed : object key is not valid");
+			} catch (IOException e) {
+				System.out.println("Rebind failed : cannot get the object key");
+			}
+			
+			// get the remote interface name of the service
+			String remote_Interface_Name = null;
+			try {
+				remote_Interface_Name = in.readLine();
+			} catch (IOException e) {
+				System.out.println("Rebind failed : cannot get the remote interface name");
+			}			
+				
+			RemoteObjectRef ror = new RemoteObjectRef(ip_adr, port, obj_Key, remote_Interface_Name);
+			regTable.put(serviceName, ror);
+			out.println("Rebind success!");
+			System.out.println("Registry Server: rebind success");	
+			System.out.println();
+			
 		}
 	}
 	
+	
+	/**
+	 * 
+	 * the class serves to unbind a service which is bound in the registry server,
+	 * if the service is not bound, it will return a warning message
+	 *
+	 */
 	private class Unbind implements Runnable {
 		
 		BufferedReader in;
@@ -222,25 +300,34 @@ public class RegistryServer implements Runnable{
 		
 		@Override
 		public void run() {			
+			System.out.println("Registry Server: start unbind");
+			String serviceName = null;
 			try {
-				System.out.println("Registry Server: start unbind");
-				String serviceName = in.readLine();				
-				
-				if (regTable.containsKey(serviceName)) {
-					regTable.remove(serviceName);
-					out.println("Unbind success!");
-					System.out.println("Registry Server: unbind success");
-					System.out.println();
-				} else {
-					out.println("The service has not been bound");
-					System.out.println();
-				}								
+				serviceName = in.readLine();
 			} catch (IOException e) {
-				System.out.println("Unbind failed : stream failed");
-			} 
-		}
+				System.out.println("Unbind failed : cannot get the service name");
+			}				
+			
+			// look up the service name in the table, if exists, remove it, if not
+			// return a message to client
+			if (regTable.containsKey(serviceName)) {
+				regTable.remove(serviceName);
+				out.println("Unbind success!");
+				System.out.println("Registry Server: unbind success");
+				System.out.println();
+			} else {
+				out.println("The service has not been bound");
+				System.out.println();
+			}								
+		} 
 	}
 	
+	
+	/**
+	 * 
+	 * the class serves to list the services which are bound in the registry server
+	 *
+	 */
 	private class List implements Runnable {
 		
 		PrintWriter out;

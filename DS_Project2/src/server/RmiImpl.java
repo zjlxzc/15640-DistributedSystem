@@ -5,7 +5,8 @@
  * 
  * Description: Lab 2: RMI
  * 
- * This class is primary part on server.
+ * This class serves as the main entrance for user to start the server and the registry
+ * the registry runs on the same machine of the server. 
  */
 
 package server;
@@ -35,7 +36,10 @@ public class RmiImpl {
 	static int registryPort;
 	private static RORtbl table;
 	
+	
 	public static void main(String args[]) {
+		
+		// check the number of input arguments
 		if (args.length != 4) {
 			System.out.println("Invalid Arguments, please try again");
 			Usage();
@@ -47,6 +51,7 @@ public class RmiImpl {
 		System.out.println("Server		: Registry         : " + args[1] + " : " + args[2]);
 		System.out.println("Server		: ServiceName      : " + args[3]);
 		
+		// initialize the server
 		String initialClassName = args[0];
 		registryHost = args[1];
 		try {
@@ -56,9 +61,11 @@ public class RmiImpl {
 		}
 		String serviceName = args[3];
 		
+		// start the registry server in a seperated thread
 		new Thread(new RegistryServer(registryPort)).start();	
 		ServerSocket serverSoc = null;
-		// The service port
+		
+		// Get the server host
 		try {
 			serviceHost = (InetAddress.getLocalHost()).getHostName();
 		} catch (UnknownHostException e) {
@@ -71,9 +78,11 @@ public class RmiImpl {
 		} catch (ClassNotFoundException e1) {
 			System.out.println("Server initialization failed : Unknown initialClassName");
 		}
-					
+		
+		// initialize the ROR table
 		table = new RORtbl();
 		
+		// initialize the initial class for service
 		Object o = null;
 		try {
 			o = initialclass.newInstance();
@@ -83,14 +92,17 @@ public class RmiImpl {
 			System.out.println("Server initialization failed : Illegal Access");
 		}
 		
-		RemoteObjectRef ror = table.addObj(serviceHost, servicePort, o); // get remote object reference	
+		// for the object of initial class, get a ror and add them to the ROR table	
+		RemoteObjectRef ror = table.addObj(serviceHost, servicePort, o); 
 		
+		// Request a registry from registry server
 		System.out.println("Server		: request a registry from " + registryHost + " : " + registryPort);
-		SimpleRegistry registry = LocateRegistry.getRegistry(registryHost, registryPort); // get registry
+		SimpleRegistry registry = LocateRegistry.getRegistry(registryHost, registryPort); 
 		
+		// Bind service to the registry
 		System.out.println("Server		: bind service " + serviceName + " to registry");
 		try {
-			registry.bind(serviceName, ror); // bind service
+			registry.bind(serviceName, ror); 
 		} catch (RemoteException e1) {
 			System.out.println("Server initialization failed : Remote Exception");
 		} catch (AlreadyBoundException e1) {
@@ -104,7 +116,9 @@ public class RmiImpl {
 		} catch (IOException e1) {
 			System.out.println("Server initialization failed : Server socket failed");
 		}
-
+		
+		// Initialization completed, waiting for client, when get a request
+		// start a new thread to excute it
 		while (true) {
 			Socket client = null;
 			try {
@@ -122,13 +136,14 @@ public class RmiImpl {
 		System.out.println("Usage: java - jar RMI_Server.jar InitialClassName registryHost registryPort ServiceName");
 		System.out.println();
 	}
-
+	
 	private static class Excution implements Runnable {
 		Socket client;		
 		public Excution(Socket client) {
 			this.client = client;
 		}
 		
+		// when get the client, send it to the dispatcher, and let dispatcher to do the work
 		@Override
 		public void run() {
 			System.out.println("Server		: get service request from " + client.getInetAddress());
