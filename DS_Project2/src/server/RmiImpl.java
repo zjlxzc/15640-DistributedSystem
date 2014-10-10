@@ -167,7 +167,7 @@ public class RmiImpl {
 		// when get the client, send it to the dispatcher, and let dispatcher to do the work
 		@Override
 		public void run() {
-			System.out.println("Server		: get service request from " + client.getLocalPort());
+			System.out.println("Server		: get service request from " + client.getRemoteSocketAddress());
 			ObjectOutputStream out = null;
 			ObjectInputStream in = null;
 			try {

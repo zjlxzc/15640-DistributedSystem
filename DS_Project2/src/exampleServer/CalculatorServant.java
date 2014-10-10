@@ -12,7 +12,6 @@
 
 package exampleServer;
 
-import exception.RemoteException;
 
 public class CalculatorServant implements Calculator {
 	public CalculatorServant() {
@@ -27,7 +26,7 @@ public class CalculatorServant implements Calculator {
 	}
 
 	@Override
-	public int minus(int x, int y) throws RemoteException {
+	public int minus(int x, int y) {
 		System.out.println("CalculatorServant: Got request to minus " + x
 				+ " and " + y);
 		System.out.println("CalculatorServant: get the result " + (x - y));
@@ -35,7 +34,7 @@ public class CalculatorServant implements Calculator {
 	}
 
 	@Override
-	public int multiply(int x, int y) throws RemoteException {
+	public int multiply(int x, int y) {
 		System.out.println("CalculatorServant: Got request to mutiply " + x
 				+ " and " + y);
 		System.out.println("CalculatorServant: get the result " + (x * y));
@@ -43,7 +42,7 @@ public class CalculatorServant implements Calculator {
 	}
 
 	@Override
-	public int divide(int x, int y) throws RemoteException {
+	public int divide(int x, int y) {
 		System.out.println("CalculatorServant: Got request to devide " + x
 				+ " and " + y);
 		System.out.println("CalculatorServant: get the result " + (x / y));

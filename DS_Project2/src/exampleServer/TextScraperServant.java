@@ -20,13 +20,11 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import exception.RemoteException;
-
 public class TextScraperServant implements TextScraper {
 	public TextScraperServant() {
 	}
 	
-	public int query(String param) throws RemoteException {
+	public int query(String param) {
 		System.out.println("TextScraperServant: Got request to query " + param);
 		
 		String[] words = param.split(" ");
