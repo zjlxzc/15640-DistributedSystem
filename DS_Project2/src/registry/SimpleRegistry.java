@@ -59,7 +59,7 @@ public class SimpleRegistry {
 			String ack = in.readLine();
 			if (ack.equals("Bind success!")) {
 				//System.out.println("Registry : bind success");
-			} else if (ack.equals("The service already bound")){
+			} else if (ack.equals("Registry : The service already bound")){
 				throw new AlreadyBoundException();
 			} 
 			// close the socket.
@@ -91,7 +91,7 @@ public class SimpleRegistry {
 				System.out.println("Registry   : found the service: \"" + name + "\"");
 				ror = (RemoteObjectRef)in.readObject();
 			} else if (ack.equals("The target service does not exist")){
-				System.out.println(ack);
+				System.out.println("Registry : " + ack);
 				throw new NotBoundException();				
 			} 
 			soc.close();					
@@ -129,7 +129,7 @@ public class SimpleRegistry {
 			// it also gets an ack, but this is not used.
 			String ack = in.readLine();
 			if (ack.equals("Rebind success!")) {
-				System.out.println("Registry :rebind success");
+				System.out.println("Registry : rebind success");
 			} else {
 				throw new RemoteException();
 			}
@@ -164,6 +164,7 @@ public class SimpleRegistry {
 			if (ack.equals("Unbind success!")) {
 				System.out.println("Registry : unbind success");
 			} else if (ack.equals("The service has not been bound")){
+				System.out.println("Registry : " + ack);
 				throw new NotBoundException();
 			}
 			// close the socket.
