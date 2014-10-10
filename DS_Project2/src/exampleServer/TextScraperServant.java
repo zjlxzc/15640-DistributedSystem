@@ -94,6 +94,9 @@ public class TextScraperServant implements TextScraper {
             
             totalNumber = response.substring(startIndex + 3, endIndex); 
         }
+		if (totalNumber.indexOf("&") == -1) {
+			return Integer.parseInt(totalNumber);
+		}
 		
 		return Integer.parseInt(totalNumber.substring(0, totalNumber.indexOf("&")));
 	}
