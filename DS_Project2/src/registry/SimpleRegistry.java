@@ -177,7 +177,7 @@ public class SimpleRegistry {
 	}
 	
 	// list all service
-	public void list() throws RemoteException {
+	public void list() {
 		
 		Socket soc;	
 		try {
