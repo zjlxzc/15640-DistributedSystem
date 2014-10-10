@@ -36,12 +36,6 @@ public class CalculatorClient {
 		SimpleRegistry sr = (SimpleRegistry) LocateRegistry.getRegistry(host, port); // get registry
 		System.out.println("Client     : Get Regsitry");
 		
-		try {
-			sr.list();
-		} catch (RemoteException e1) {
-			System.out.println("There is something wrong with list() function!");
-		}
-		
 		RemoteObjectRef ror = null;
 		try {
 			ror = sr.lookup(serviceName); // get remote object reference
