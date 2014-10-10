@@ -15,7 +15,6 @@ import registry.LocateRegistry;
 import registry.SimpleRegistry;
 import remote.RemoteObjectRef;
 import exception.NotBoundException;
-import exception.RemoteException;
 
 public class CalculatorClient {
 
@@ -40,7 +39,8 @@ public class CalculatorClient {
 		try {
 			ror = sr.lookup(serviceName); // get remote object reference
 		} catch (NotBoundException e) {
-			System.out.println(e.getStackTrace());
+			System.out.println("Service does not exist!");
+			System.exit(1);
 		}
 		System.out.println("Client     : Get the remote object reference of \"" + serviceName + "\"");
 
@@ -49,21 +49,13 @@ public class CalculatorClient {
 		
 		System.out.println("Client     : call method arguments: (" + arg1 + ", " + arg2 + ")");
 		System.out.println();
-		
-		try {
-			System.out.println("Client     : get the result of add: " + cal.add(arg1, arg2) + "\n");
-			System.out.println("Client     : get the result of minus: " + cal.minus(arg1, arg2) + "\n");
-			System.out.println("Client     : get the result of multiply: " + cal.multiply(arg1, arg2) + "\n");
-		} catch (RemoteException e) {
-			System.out.println(e.getStackTrace());
-		}
+
+		System.out.println("Client     : get the result of add: " + cal.add(arg1, arg2) + "\n");
+		System.out.println("Client     : get the result of minus: " + cal.minus(arg1, arg2) + "\n");
+		System.out.println("Client     : get the result of multiply: " + cal.multiply(arg1, arg2) + "\n");
 		
 		if (arg2 != 0) { // if the second operand is not zero, then we can do division
-			try {
-				System.out.println("Client     : get the result divide: " + cal.divide(arg1, arg2) + "\n");
-			} catch (RemoteException e) {
-				System.out.println(e.getStackTrace());
-			}
+			System.out.println("Client     : get the result divide: " + cal.divide(arg1, arg2) + "\n");
 		} else { // otherwise we provide feedback information
 			System.out.println("For DIVIDE operation, the second parameter should not be 0.");
 			System.out.println();

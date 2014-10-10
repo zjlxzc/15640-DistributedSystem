@@ -12,7 +12,6 @@
 package exampleTextScraperClient;
 
 import exception.NotBoundException;
-import exception.RemoteException;
 import registry.LocateRegistry;
 import registry.SimpleRegistry;
 import remote.RemoteObjectRef;
@@ -41,7 +40,8 @@ public class TextScraperClient {
 		try {
 			ror = sr.lookup(serviceName); // get remote object reference
 		} catch (NotBoundException e) {
-			System.out.println(e.getStackTrace());
+			System.out.println("Service does not exist!");
+			System.exit(1);
 		} 
 		System.out.println("Client     : Get the remote object reference of \"" + serviceName + "\"");
 
@@ -49,12 +49,8 @@ public class TextScraperClient {
 		
 		System.out.println("Client     : call method arguments: (" + keyword + ")");
 		System.out.println();
-		
-		try {
-			System.out.println("Client     : get the result of add: " + scraper.query(keyword) + "\n");
-		} catch (RemoteException e) {
-			System.out.println(e.getStackTrace());
-		}
+
+		System.out.println("Client     : get the result of add: " + scraper.query(keyword) + "\n");
 	}
 }
 
