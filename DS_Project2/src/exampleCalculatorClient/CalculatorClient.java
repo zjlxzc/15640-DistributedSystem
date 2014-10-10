@@ -14,7 +14,6 @@ package exampleCalculatorClient;
 import registry.LocateRegistry;
 import registry.SimpleRegistry;
 import remote.RemoteObjectRef;
-import exception.AccessException;
 import exception.NotBoundException;
 import exception.RemoteException;
 
@@ -66,7 +65,8 @@ public class CalculatorClient {
 				System.out.println(e.getStackTrace());
 			}
 		} else { // otherwise we provide feedback information
-			System.out.println("The second parameter should not be 0.");
+			System.out.println("For DIVIDE operation, the second parameter should not be 0.");
+			System.out.println();
 		}
 	}
 }
