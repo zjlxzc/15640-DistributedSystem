@@ -85,7 +85,7 @@ public class RmiImpl {
 		Class<?>[] interfaces = initialclass.getInterfaces();
 		int i = 0;
 		for (; i < interfaces.length; i++) {
-			if (interfaces[i] == Remote.class) {
+			if (interfaces[i].getInterfaces()[0] == remote.Remote.class) {
 				break;
 			}
 		}
