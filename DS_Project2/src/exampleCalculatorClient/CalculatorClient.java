@@ -66,7 +66,8 @@ public class CalculatorClient {
 				System.out.println(e.getStackTrace());
 			}
 		} else { // otherwise we provide feedback information
-			System.out.println("The second parameter should not be 0.");
+			System.out.println("For DIVIDE operation, the second parameter should not be 0.");
+			System.out.println();
 		}
 	}
 }
