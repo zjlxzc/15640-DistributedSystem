@@ -15,6 +15,7 @@ import registry.LocateRegistry;
 import registry.SimpleRegistry;
 import remote.RemoteObjectRef;
 import exception.NotBoundException;
+import exception.RemoteException;
 
 public class CalculatorClient {
 
@@ -35,11 +36,18 @@ public class CalculatorClient {
 		SimpleRegistry sr = (SimpleRegistry) LocateRegistry.getRegistry(host, port); // get registry
 		System.out.println("Client     : Get Regsitry");
 		
+		try {
+			sr.list();
+		} catch (RemoteException e1) {
+			System.out.println("There is something wrong with list() function!");
+		}
+		
 		RemoteObjectRef ror = null;
 		try {
 			ror = sr.lookup(serviceName); // get remote object reference
 		} catch (NotBoundException e) {
-			System.out.println("Service does not exist!");
+			System.out.println("The service you requested does not exist!");
+			System.out.println();
 			System.exit(1);
 		}
 		System.out.println("Client     : Get the remote object reference of \"" + serviceName + "\"");
