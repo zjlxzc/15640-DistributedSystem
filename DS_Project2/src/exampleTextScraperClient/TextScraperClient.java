@@ -50,7 +50,7 @@ public class TextScraperClient {
 		System.out.println("Client     : call method arguments: (" + keyword + ")");
 		System.out.println();
 
-		System.out.println("Client     : get the result of add: " + scraper.query(keyword) + "\n");
+		System.out.println("Client     : get the result of query: " + scraper.query(keyword) + "\n");
 	}
 }
 
