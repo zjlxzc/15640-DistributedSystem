@@ -23,9 +23,7 @@ import registry.LocateRegistry;
 import registry.RegistryServer;
 import registry.SimpleRegistry;
 import remote.RORtbl;
-import remote.Remote;
 import remote.RemoteObjectRef;
-import exception.AccessException;
 import exception.AlreadyBoundException;
 import exception.RemoteException;
 

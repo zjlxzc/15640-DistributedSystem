@@ -11,7 +11,6 @@
 
 package exampleTextScraperClient;
 
-import exception.AccessException;
 import exception.NotBoundException;
 import exception.RemoteException;
 import registry.LocateRegistry;
@@ -25,7 +24,7 @@ public class TextScraperClient {
 	
 	public static void main(String[] args) {
 		if (args.length != 4) { // validate input
-			System.out.println("Invalid input. Please use IP-address 1099 textScraper \"baby strol\".");
+			System.out.println("Invalid input. Please use Registry-IPAddress 1099 TextScraper \"baby strol\".");
 			System.exit(1);
 		}
 		

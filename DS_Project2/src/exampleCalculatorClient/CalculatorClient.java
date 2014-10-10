@@ -14,7 +14,6 @@ package exampleCalculatorClient;
 import registry.LocateRegistry;
 import registry.SimpleRegistry;
 import remote.RemoteObjectRef;
-import exception.AccessException;
 import exception.NotBoundException;
 import exception.RemoteException;
 
