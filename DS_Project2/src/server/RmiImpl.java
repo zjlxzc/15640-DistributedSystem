@@ -23,9 +23,7 @@ import registry.LocateRegistry;
 import registry.RegistryServer;
 import registry.SimpleRegistry;
 import remote.RORtbl;
-import remote.Remote;
 import remote.RemoteObjectRef;
-import exception.AccessException;
 import exception.AlreadyBoundException;
 import exception.RemoteException;
 
@@ -130,22 +128,27 @@ public class RmiImpl {
 		}
 		
 		try {
-			serverSoc = new ServerSocket(servicePort);
+			serverSoc = new ServerSocket(servicePort);			
+			// Initialization completed, waiting for client, when get a request
+			// start a new thread to excute it
+			while (true) {
+				Socket client = null;
+				try {
+					client = serverSoc.accept();
+				} catch (IOException e) {
+					System.out.println("Get client failed : I/O failed");
+				}
+				Excution excute = new Excution(client);
+				new Thread(excute).start();		
+			}
 		} catch (IOException e1) {
 			System.out.println("Server initialization failed : Server socket failed");
-		}
-		
-		// Initialization completed, waiting for client, when get a request
-		// start a new thread to excute it
-		while (true) {
-			Socket client = null;
+		} finally {
 			try {
-				client = serverSoc.accept();
+				serverSoc.close();
 			} catch (IOException e) {
-				System.out.println("Get client failed : I/O failed");
+				System.out.println("Server socket error : Server socket cannot be closed");
 			}
-			Excution excute = new Excution(client);
-			new Thread(excute).start();		
 		}
 	}
 	
@@ -164,7 +167,7 @@ public class RmiImpl {
 		// when get the client, send it to the dispatcher, and let dispatcher to do the work
 		@Override
 		public void run() {
-			System.out.println("Server		: get service request from " + client.getInetAddress());
+			System.out.println("Server		: get service request from " + client.getLocalPort());
 			ObjectOutputStream out = null;
 			ObjectInputStream in = null;
 			try {
