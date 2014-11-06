@@ -8,10 +8,10 @@ public class Slave extends Node{
 	 * 
 	 */
 	private static final long serialVersionUID = -3414381471893878548L;
-	private static Coordinator coordinator;
+	private static TaskTracker coordinator;
 	public Slave(String ip, int port) throws UnknownHostException {
 		super(ip, port);
-		coordinator = new Coordinator();
+		coordinator = new TaskTracker();
 	}
 
 	@Override

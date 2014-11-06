@@ -1,4 +1,4 @@
 package managementTool;
 
-public class Scheduler {
+public class JobTracker {
 }

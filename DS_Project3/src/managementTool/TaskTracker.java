@@ -1,5 +1,5 @@
 package managementTool;
 
-public class Coordinator {
+public class TaskTracker {
 
 }
