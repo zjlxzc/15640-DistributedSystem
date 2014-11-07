@@ -1,15 +1,17 @@
-package managementTool;
+package HDFS;
 
 import java.net.UnknownHostException;
 
-public class Slave extends Node{
+import managementTool.TaskTracker;
+
+public class DataNode extends Node{
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = -3414381471893878548L;
 	private static TaskTracker coordinator;
-	public Slave(String ip, int port) throws UnknownHostException {
+	public DataNode(String ip, int port) throws UnknownHostException {
 		super(ip, port);
 		coordinator = new TaskTracker();
 	}

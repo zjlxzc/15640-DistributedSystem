@@ -1,4 +1,4 @@
-package managementTool;
+package HDFS;
 
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -7,7 +7,7 @@ import java.util.Random;
 
 public class NodeTable {
 	private static HashMap<String, Node> nodeMap;
-	private static Master master = null;
+	private static NameNode master = null;
 	Random rand = new Random();
 	public NodeTable() {
 		nodeMap = new HashMap<String, Node>();
@@ -16,15 +16,15 @@ public class NodeTable {
 	public void addNode(String ip, int port, String type) throws UnknownHostException {	
 		Node node = null;
 		if (type.equals("master")) {
-			node = new Master(ip, port);
-			master = (Master) node;
+			node = new NameNode(ip, port);
+			master = (NameNode) node;
 		} else if (type.equals("slave")) {
-			node = new Slave(ip, port);
+			node = new DataNode(ip, port);
 		}
 		nodeMap.put(ip, node);
 	}
 	
-	public Master getMaster() {
+	public NameNode getMaster() {
 		return master;
 	}
 	

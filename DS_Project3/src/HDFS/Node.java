@@ -1,4 +1,4 @@
-package managementTool;
+package HDFS;
 
 import java.io.Serializable;
 import java.net.InetAddress;
