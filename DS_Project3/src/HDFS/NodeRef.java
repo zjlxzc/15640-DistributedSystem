@@ -4,16 +4,17 @@ import java.io.Serializable;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
-public abstract class Node implements Serializable {
+
+public class NodeRef implements Serializable {
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = -1982072159825855419L;
+	private static final long serialVersionUID = 1L;
 	private InetAddress ip;
 	private int port;
-	public Node(String ip, int port) throws UnknownHostException {
+	public NodeRef(String ip, int port) throws UnknownHostException {
 		this.ip = InetAddress.getByName(ip);
-		this.port = port;
+		this.port = port;		 
 	}
 	public InetAddress getIp() {
 		return ip;
@@ -27,7 +28,4 @@ public abstract class Node implements Serializable {
 	public void setPort(int port) {
 		this.port = port;
 	}
-	public abstract void excuteJob();
-	
-	
 }

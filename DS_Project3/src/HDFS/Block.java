@@ -1,13 +1,8 @@
 package HDFS;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 
-public class Block implements Serializable {
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = -2019191705281685957L;
+public class Block {
 	private final static int DEFAULT_Capacity = 120;
 	private int id;
 	private int capacity;

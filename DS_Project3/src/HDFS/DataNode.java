@@ -1,25 +1,27 @@
 package HDFS;
 
-import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Scanner;
 
-import managementTool.TaskTracker;
-
-public class DataNode extends Node{
-
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = -3414381471893878548L;
-	private static TaskTracker coordinator;
-	public DataNode(String ip, int port) throws UnknownHostException {
-		super(ip, port);
-		coordinator = new TaskTracker();
+public class DataNode {
+	HashMap<String, ArrayList<BlockRef>> fileMap;
+	public DataNode() {
+		new Thread(new Main()).start();
+		fileMap = new HashMap<String, ArrayList<BlockRef>>();
 	}
-
-	@Override
-	public void excuteJob() {
-		// TODO Auto-generated method stub
-		
+	
+	private class Main implements Runnable {				
+		@Override
+		public void run() {			
+			Scanner scan = new Scanner(System.in);
+			while (true) {
+				Usage();
+				String str = scan.nextLine();
+				if (str.equals("L")){
+					new Thread(new ListThread()).start();
+				}
+			}
+		}
 	}
-
 }
