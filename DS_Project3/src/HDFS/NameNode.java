@@ -5,53 +5,61 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.net.InetAddress;
-import java.net.ServerSocket;
+import java.io.PrintWriter;
+import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
+import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.Scanner;
 
 public class NameNode {
 	
 	private static DataNodeTable dataNodeTable;
-	private static HashMap<String, ArrayList<BlockRef>> fileMap;
-	private static int PORT;
+	private static Hashtable<String, ArrayList<BlockRef>> fileTable;
+	private static int BLOCK_SIZE;
+	private static int REPLICA_FACTOR;
 	
 	public NameNode(String confPath) {
 		dataNodeTable = new DataNodeTable();
 		File conf = new File(confPath);
-		
-		Thread countThread = new Thread(new InitCount());
-		countThread.start();
 						
 		try {
 			BufferedReader br = new BufferedReader(new FileReader(conf));
 			String line;
+			Socket master = null;
 			while ((line = br.readLine()) != null) {
-				String[] pars = line.split(" ");				
-				if (InetAddress.getLocalHost().getHostAddress().equals(pars[1])) {
-					if (pars[0].equals("slave")) {
-						dataNodeTable.addNode(pars[1], Integer.parseInt(pars[2]));
-					} else {
-						PORT = Integer.parseInt(pars[2]);
-					}
-				}
+				String[] pars = line.split(" ");	
+				if (pars[0].equals("slave")) {
+					dataNodeTable.addNode(pars[1], Integer.parseInt(pars[2]));
+				} else if (pars[0].equals("BlockSize")) {
+					BLOCK_SIZE = Integer.parseInt(pars[1]);
+				} else if (pars[0].equals("ReplicaFactor")) {
+					REPLICA_FACTOR = Integer.parseInt(pars[1]);
+				}	
 			}
+			ArrayList<NodeRef> nodeList = dataNodeTable.getDataNodes();
+			NodeRef cur;				
+			for (int i = 0; i < nodeList.size(); i++) {
+				cur =  nodeList.get(i);
+				master = new Socket(cur.getIp(), cur.getPort());
+				PrintWriter out = new PrintWriter(master.getOutputStream(), true);
+				out.println("BlockSize");
+				out.println(BLOCK_SIZE);
+			}	
+			master.close();
 			br.close();
-			countThread = null;
 		} catch (FileNotFoundException e) {
 			System.out.println("The input file path does not exist");
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}				
-		new Thread(new Listen()).start();
+		new Thread(new Poll()).start();
 		new Thread(new Main()).start();
+		new Thread(new RMIServer()).start();
 	}
 	
 	private static void Usage() {
@@ -71,28 +79,35 @@ public class NameNode {
 				String str = scan.nextLine();
 				if (str.equals("L")){
 					new Thread(new ListThread()).start();
+				} else if (str.equals("Q")) {
+					System.exit(0);
 				}
 			}
 		}
 	}	
 	
-	private class Listen implements Runnable {
+	private class Poll implements Runnable {
 
 		@Override
 		public void run() {
-			ServerSocket master;
-			
-			try {
-				master = new ServerSocket(PORT);
+			Socket master;	
+			int i = 0;
+			try {				
 				while (true) {
-					Socket slave = master.accept();
-					BufferedReader in = new BufferedReader(new InputStreamReader(slave.getInputStream()));
-					String line = in.readLine();
-					if (line.equals("report")) {
-						new Thread(new UpdateSlave(slave)).start();
-					}
-				}				
+					ArrayList<NodeRef> nodeList = dataNodeTable.getDataNodes();
+					NodeRef cur;
+					for (i = 0; i < nodeList.size(); i++) {
+						Thread.sleep(5000);
+						master = new Socket();
+						cur =  nodeList.get(i);
+						master.connect(new InetSocketAddress(cur.getIp(), cur.getPort()), 1000);
+					}		
+				}						
 			} catch (IOException e) {
+				System.out.println(e.getMessage());
+				NodeRef errorNode = dataNodeTable.getDataNodes().get(i);
+				System.out.print(errorNode.getIp() + " : " + errorNode.getPort() + " : lost connection");
+			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}			
@@ -106,46 +121,24 @@ public class NameNode {
 		}		
 	}
 	
-	private static class UpdateSlave implements Runnable {
-		private Socket slave;
-		
-		public UpdateSlave(Socket slave) {
-			this.slave = slave;
-		}
+	private static class RMIServer implements Runnable {
 
-		@SuppressWarnings("unchecked")
 		@Override
 		public void run() {
-			HashMap<String, ArrayList<BlockRef>> nodeReport = null;
-			try {
-				ObjectInputStream in = new ObjectInputStream(slave.getInputStream());
-				nodeReport = (HashMap<String, ArrayList<BlockRef>>)in.readObject();
-				
-				
-				
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (ClassNotFoundException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}			
-		}		
-	}
-	
-	private static class InitCount implements Runnable {
-		@Override
-		public void run() {
-			System.out.print("Initializing");
-			while (true) {
-				try {
-					Thread.sleep(1000);
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				System.out.print(".");
-			}			
+//			if (System.getSecurityManager() == null) {
+//	            System.setSecurityManager(new SecurityManager());
+//	        }
+	        try {
+	            String name = "NameNodeRMI";
+	            NameNodeRMI rmi = new NameNodeRMIServent(fileTable, dataNodeTable, REPLICA_FACTOR);
+	            NameNodeRMI stub =
+	                (NameNodeRMI) UnicastRemoteObject.exportObject(rmi, 0);
+	            Registry registry = LocateRegistry.getRegistry();
+	            System.out.println(name);
+	            registry.rebind(name, stub);
+	        } catch (Exception e) {
+	            e.printStackTrace();
+	        }
 		}		
 	}	
 }

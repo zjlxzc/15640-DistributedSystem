@@ -18,13 +18,15 @@ public class StartDFS {
 		try {
 			BufferedReader br = new BufferedReader(new FileReader(conf));
 			String line;
+			String masterIP = "";
 			while ((line = br.readLine()) != null) {
-				String[] pars = line.split(" ");
+				String[] pars = line.split(" ");				
 				if (InetAddress.getLocalHost().getHostAddress().equals(pars[1])) {
-					if (pars[2].equals("master")) {
+					if (pars[0].equals("master")) {
 						new NameNode(confPath);
+						masterIP = pars[1];
 					} else {
-						new DataNode();
+						new DataNode(Integer.parseInt(pars[2]), masterIP);
 					}
 				}
 			}

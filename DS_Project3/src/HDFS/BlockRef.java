@@ -8,52 +8,37 @@ public class BlockRef implements Serializable {
 	 */
 	private static final long serialVersionUID = 1L;
 	private int id;
-	private String fileName;
-	private int startRecord;
-	private int endRecord;
+	private String parentFile;
+	private int splitNum;
 	private NodeRef nodeRef;
+	private String fileName;
 	
-	public BlockRef(NodeRef nodeRef, int id, String fileName, int start, int end) {
+	public BlockRef(NodeRef nodeRef, int id, String parentFile, int splitNum, String fileName) {
 		this.id = id;
-		this.fileName = fileName;
-		this.startRecord = start;
-		this.endRecord = end;
+		this.parentFile = parentFile;
 		this.nodeRef = nodeRef;
-	}
-	
-	public boolean equals(BlockRef ref) {
-		
+		this.splitNum = splitNum;
+		this.fileName = fileName;
 	}
 
 	public int getId() {
 		return id;
 	}
-
-	public void setId(int id) {
-		this.id = id;
+	
+	public int getSplitNum() {
+		return splitNum;
 	}
-
+	
 	public String getFileName() {
 		return fileName;
 	}
-
-	public void setFileName(String fileName) {
-		this.fileName = fileName;
+	
+	
+	public NodeRef getNodeRef() {
+		return nodeRef;
 	}
-
-	public int getStartRecord() {
-		return startRecord;
-	}
-
-	public void setStartRecord(int startRecord) {
-		this.startRecord = startRecord;
-	}
-
-	public int getEndRecord() {
-		return endRecord;
-	}
-
-	public void setEndRecord(int endRecord) {
-		this.endRecord = endRecord;
+	
+	public String getParentFile() {
+		return parentFile;
 	}
 }
