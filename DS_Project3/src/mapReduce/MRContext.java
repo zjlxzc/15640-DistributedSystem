@@ -1,23 +1,28 @@
 package mapReduce;
 
+/*
+ * @author Chun Xu (chunx)
+ * @author Jialing Zhou (jialingz)
+ * 
+ * This class is used to store key - value pair
+ */
+
 import java.util.Comparator;
 import java.util.Iterator;
-import java.util.Set;
-import java.util.TreeSet;
 import java.util.PriorityQueue;
 
-import mergeSort.ResultPair;
+import mergeSort.SingleRecord;
 
 public class MRContext {
-	private PriorityQueue<ResultPair<String, String>> context;
-	private Set<String> allKey = new TreeSet<String>();
+	private PriorityQueue<SingleRecord> context; // to get key-value pair according to key order
+	//private Set<String> allKey = new TreeSet<String>();
 	
 	public MRContext() {
-		context = new PriorityQueue<ResultPair<String, String>>(30, new Comparator<ResultPair<String, String>>() {
-			public int compare(ResultPair<String, String> rp1, ResultPair<String, String> rp2) {
-				int value = rp1.getKey().compareTo(rp2.getKey());
+		context = new PriorityQueue<SingleRecord>(30, new Comparator<SingleRecord>() {
+			public int compare(SingleRecord sr1, SingleRecord sr2) {
+				int value = sr1.getKey().compareTo(sr2.getKey());
 				if (value == 0) {
-					return rp1.getValue().compareTo(rp2.getValue());
+					return sr1.getValue().compareTo(sr2.getValue());
 				}
 				return value;
 			}
@@ -25,12 +30,12 @@ public class MRContext {
 	}
 	
 	public void context(String key, String value) {
-		ResultPair<String, String> newPair = new ResultPair<String, String>(key, value);
-		context.add(newPair);
-		allKey.add(key);
+		SingleRecord newPair = new SingleRecord(key, value);
+		context.add(newPair); // store all key-value pair
+		//allKey.add(key);
 	}
 	
-	public Iterator<ResultPair<String, String>> getIterator() {
-		return context.iterator();
+	public Iterator<SingleRecord> getIterator() {
+		return context.iterator(); // return an iterator to go through all pairs
 	}
 }

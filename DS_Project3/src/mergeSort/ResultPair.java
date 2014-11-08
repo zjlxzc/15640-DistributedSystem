@@ -23,8 +23,8 @@ public class ResultPair<K, V> implements Serializable, Comparable<ResultPair<K, 
 	}
 
 
-	public void setKey(K key) {
-		this.key = key;
+	public void setKey(K k) {
+		key = k;
 	}
 
 
@@ -33,8 +33,8 @@ public class ResultPair<K, V> implements Serializable, Comparable<ResultPair<K, 
 	}
 
 
-	public void setValue(V value) {
-		this.value = value;
+	public void setValue(V v) {
+		value = v;
 	}
 	
 	@Override

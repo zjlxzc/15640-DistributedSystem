@@ -1,9 +1,15 @@
 package mapReduce;
 
-import java.io.Serializable;
+/*
+ * @author Chun Xu (chunx)
+ * @author Jialing Zhou (jialingz)
+ * 
+ * User should implement these two methods.
+ */
+
 import java.util.Iterator;
 
-public interface MapReduce extends Serializable {
+public interface MapReduce {
 	public void map(String key, String value, MRContext context);
 	public void reduce(String key, Iterator<String> values, MRContext context);
 }
