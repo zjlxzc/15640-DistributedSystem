@@ -17,10 +17,10 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import dfs.NodeRef;
 import mapReduce.MRContext;
 import mergeSort.SingleRecord;
 import example.WordCount;
-import HDFS.NodeRef;
 
 public class FileReaderDFS extends FileReader {
 	private static String fileName;

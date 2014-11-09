@@ -1,4 +1,4 @@
-package HDFS;
+package dfs;
 
 import java.net.UnknownHostException;
 import java.util.ArrayList;

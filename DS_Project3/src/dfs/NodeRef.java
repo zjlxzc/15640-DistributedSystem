@@ -1,4 +1,4 @@
-package HDFS;
+package dfs;
 
 import java.io.Serializable;
 import java.net.InetAddress;
