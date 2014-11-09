@@ -3,6 +3,7 @@ package mapReduce;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -25,9 +26,10 @@ public class TaskTracker {
 	private int reportPort = 0;
 	
 	public TaskTracker() {
-		reportPort = (int)Math.random() + 15640;
 		try {
-			ServerSocket taskListenSocket = new ServerSocket(reportPort);
+			ServerSocket taskListenSocket = new ServerSocket(0);
+			reportPort = taskListenSocket.getLocalPort();
+			
 			Thread listenThread = new Thread(new Listen(taskListenSocket));		
 			listenThread.start();
 			
@@ -86,17 +88,23 @@ public class TaskTracker {
 		public void run() {
 			while (true) {
 				try {
-					Socket nameNode = taskListenSocket.accept();					
+					Socket nameNode = taskListenSocket.accept();		
+
+					ObjectOutputStream srcOut = new ObjectOutputStream(nameNode.getOutputStream());
 					ObjectInputStream object = new ObjectInputStream(nameNode.getInputStream());			
 					
 					String inLine = (String)object.readObject();
 					if (inLine.equals("MapperTask")) {
 						MapperTask task = (MapperTask)object.readObject();
 						trackMapper(task);
-					} else {
+					} else if (inLine.equals("ReducerTask")) {
 						ReducerTask task = (ReducerTask)object.readObject();
 						trackReducer(task);
-					}				
+					} else if (inLine.equals("ReportMapper")){
+						srcOut.writeObject(status);
+					} else {
+						break;
+					}
 					
 				} catch (Exception e) {
 					System.out.println(e);
