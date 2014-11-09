@@ -102,10 +102,9 @@ public class TaskTracker {
 						trackReducer(task);
 					} else if (inLine.equals("ReportMapper")){
 						srcOut.writeObject(status);
-					} else {
-						break;
+					} else if (inLine.equals("ReportReducer")) {
+						srcOut.writeObject(reducerStatus);;
 					}
-					
 				} catch (Exception e) {
 					System.out.println(e);
 				}				
