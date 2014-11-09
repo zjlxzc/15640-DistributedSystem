@@ -81,14 +81,16 @@ public class DataNode {
 				while (true) {									
 					remote = listenSoc.accept();
 					BufferedReader in = new BufferedReader(new InputStreamReader(remote.getInputStream()));
+					PrintWriter out = new PrintWriter(remote.getOutputStream(), true);
 					String first = in.readLine();
 					if (first.equals("BlockSize")) {
 						BLOCK_SIZE = Integer.parseInt(in.readLine());
 						System.out.println("block size: " + BLOCK_SIZE);
 					} else if (first.equals("BlockTransfer")) {
 						new Thread(new BlockReceiver(in)).start();
-					} else if (first.equals("MapReduceTask")) {
-						new Thread(new MapReduceTask(remote)).start();
+					} else if (first.equals("StartTaskTracker")) {
+						TaskTracker taskTracker = new TaskTracker();
+						out.println("" + taskTracker.getPort());
 					}
 				} 				
 			}catch (IOException e) {
@@ -281,29 +283,6 @@ public class DataNode {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (ClassNotFoundException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}			
-		}
-	}
-	
-	private class MapReduceTask implements Runnable {
-		
-		private Socket master;
-		public MapReduceTask(Socket master) {
-			this.master = master;
-		}
-		@Override
-		public void run() {
-			try {
-				ObjectOutputStream out = new ObjectOutputStream(master.getOutputStream());
-				ObjectInputStream in = new ObjectInputStream(master.getInputStream());
-				Task task = (Task)in.readObject();
-				TaskTracker taskTracker = TaskTracker.getInstance();
-				taskTracker.
-				
-				
-			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}			
