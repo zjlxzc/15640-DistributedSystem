@@ -52,11 +52,19 @@ public class DataNode {
 				Usage();
 				String str = scan.nextLine();
 				if (str.equals("U")) {
-					System.out.println("Please input the file name:");
+					System.out.println("Please enter the file name:");
 					String fileName = scan.nextLine();
 					new Thread(new Upload(fileName)).start();
 				} else if (str.equals("Q")) {
 					System.exit(0);
+				} else if (str.equals("S")) {
+					System.out.println("Please enter the input file name: ");
+					String inputFile = scan.nextLine();
+					System.out.println("Please enter the output path: ");
+					String outputPath = scan.nextLine();
+					System.out.println("Please enter the MapReduce file name: ");
+					String mapReduceFile = scan.nextLine();
+					new Thread(new MapReduceJob(inputFile, outputPath, mapReduceFile)).start();
 				}
 			}
 		}
@@ -79,6 +87,8 @@ public class DataNode {
 						System.out.println("block size: " + BLOCK_SIZE);
 					} else if (first.equals("BlockTransfer")) {
 						new Thread(new BlockReceiver(in)).start();
+					} else if (first.equals("MapReduceTask")) {
+						
 					}
 				} 				
 			}catch (IOException e) {
@@ -151,8 +161,6 @@ public class DataNode {
 		public void run() {
 			Socket master = null;			
 			try {
-				System.out.println(masterIP);
-				System.out.println(masterPort);
 				master = new Socket(masterIP, masterPort);
 				ObjectOutputStream out = new ObjectOutputStream(master.getOutputStream());
 				ObjectInputStream in = new ObjectInputStream(master.getInputStream());
@@ -237,6 +245,42 @@ public class DataNode {
 				}
 				blockList.add(receiveBlockRef);
 			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}			
+		}
+	}
+	
+	private class MapReduceJob implements Runnable {
+		private String inputFile;
+		private String outputPath;
+		private String mapReduceFile;
+		
+		public MapReduceJob(String inputFile, String outputPath, String mapReduceFile) {
+			this.inputFile = inputFile;
+			this.outputPath = outputPath;
+			this.mapReduceFile = mapReduceFile;
+		}
+
+		@Override
+		public void run() {
+			Socket master = null;					
+			try {
+				Class<?> mapReduceClass = Class.forName(mapReduceFile);				
+				master = new Socket(masterIP, masterPort);
+				ObjectOutputStream out = new ObjectOutputStream(master.getOutputStream());
+				ObjectInputStream in = new ObjectInputStream(master.getInputStream());
+				out.writeObject("MapReduceNewJob");
+				out.writeObject(inputFile);
+				out.writeObject(outputPath);
+				out.writeObject(mapReduceClass);
+			} catch (UnknownHostException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (ClassNotFoundException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}			

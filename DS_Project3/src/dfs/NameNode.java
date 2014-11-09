@@ -21,6 +21,8 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Scanner;
 
+import mapReduce.JobTracker;
+
 public class NameNode {
 	
 	private DataNodeTable dataNodeTable;
@@ -90,7 +92,7 @@ public class NameNode {
 					new Thread(new ListThread()).start();
 				} else if (str.equals("Q")) {
 					System.exit(0);
-				}
+				} 
 			}
 		}
 	}	
@@ -146,6 +148,8 @@ public class NameNode {
 						new Thread(new BlockAdder(in, out)).start();
 					} else if (first.equals("update")) {
 						new Thread(new Updater(slave)).start();
+					} else if (first.equals("MapReduceNewJob")) {
+						new Thread(new MapReduceJob(in, out)).start();
 					}
 				}				
 			} catch (IOException e) {
@@ -275,6 +279,38 @@ public class NameNode {
 			} catch (ClassNotFoundException e) {
 				e.printStackTrace();
 			}
+		}
+	}
+	
+	private class MapReduceJob implements Runnable {
+		private ObjectOutputStream out = null;
+		private ObjectInputStream in = null;
+		public MapReduceJob(ObjectInputStream in, ObjectOutputStream out) {
+			this.out = out;
+			this.in = in;
+		}
+		@Override
+		public void run() {
+			try {
+				String inputFile = (String)in.readObject();
+				String outputPath = (String)in.readObject();
+				Class<?> mapReduceClass = (Class<?>)in.readObject();
+				Hashtable<NodeRef, ArrayList<BlockRef>> refTable = metaTable.get(inputFile);
+				
+				int totalBlockNum = 0;
+				for (ArrayList<BlockRef> blockList : refTable.values()) {
+					totalBlockNum += blockList.size();
+				}
+				int splitNum = totalBlockNum / REPLICA_FACTOR;
+				JobTracker jobTracker = JobTracker.getInstance();
+				jobTracker.createJob(inputFile, splitNum, refTable, outputPath, mapReduceClass);
+			} catch (ClassNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}			
 		}
 	}
 }

@@ -1,51 +1,30 @@
 package mapReduce;
 
+import java.util.ArrayList;
+
 public class Job {
 	private int jobID;
-	private String status;
-	private String mapReducePath;
-	private String inputPath;
+	private String inputFile;
 	private String outputPath;
+	private Class<?> mapReduceClass;
+	private ArrayList<Task> tasks;
 	
-	public Job(int jobID, String mapperPath, String reducerPath, String mapReducePath, 
-					String inputPath, String outputPath) {
+	public Job(int jobID, String inputFile, String outputPath,
+				Class<?> mapReduceClass, ArrayList<Task> tasks) {
+		
 		this.jobID = jobID;
-		status = "Initializing";
-		this.mapReducePath = mapReducePath;
-		this.inputPath = inputPath;
+		this.inputFile = inputFile;
 		this.outputPath = outputPath;
+		this.mapReduceClass = mapReduceClass;
+		this.tasks = tasks;
 	}
 
 	public int getJobID() {
 		return jobID;
 	}
 
-	public void setJobID(int jobID) {
-		this.jobID = jobID;
-	}
-
-	public String getStatus() {
-		return status;
-	}
-
-	public void setStatus(String status) {
-		this.status = status;
-	}
-	
-	public String getMapReducerPath() {
-		return mapReducePath;
-	}
-
-	public void setMapReducerPath(String mapReducePath) {
-		this.mapReducePath = mapReducePath;
-	}
-
-	public String getInputPath() {
-		return inputPath;
-	}
-
-	public void setInputPath(String inputPath) {
-		this.inputPath = inputPath;
+	public String getInputFile() {
+		return inputFile;
 	}
 
 	public String getOutputPath() {
@@ -55,5 +34,20 @@ public class Job {
 	public void setOutputPath(String outputPath) {
 		this.outputPath = outputPath;
 	}
-	
+
+	public Class<?> getMapReduceClass() {
+		return mapReduceClass;
+	}
+
+	public void setMapReduceClass(Class<?> mapReduceClass) {
+		this.mapReduceClass = mapReduceClass;
+	}
+
+	public ArrayList<Task> getTasks() {
+		return tasks;
+	}
+
+	public void addTasks(Task task) {
+		tasks.add(task);
+	}	
 }
