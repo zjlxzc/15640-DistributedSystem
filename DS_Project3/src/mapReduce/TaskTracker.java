@@ -109,4 +109,7 @@ public class TaskTracker {
 		return reportPort;
 	}
 	
+	public String getReducerStatus() {
+		return reducerStatus;
+	}
 }
