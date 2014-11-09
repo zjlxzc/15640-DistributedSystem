@@ -12,12 +12,12 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.rmi.NotBoundException;
-import java.rmi.registry.LocateRegistry;
-import java.rmi.registry.Registry;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Scanner;
+
+import mapReduce.Task;
+import mapReduce.TaskTracker;
 
 public class DataNode {
 	HashMap<String, ArrayList<BlockRef>> fileMap;
@@ -88,7 +88,7 @@ public class DataNode {
 					} else if (first.equals("BlockTransfer")) {
 						new Thread(new BlockReceiver(in)).start();
 					} else if (first.equals("MapReduceTask")) {
-						
+						new Thread(new MapReduceTask(remote)).start();
 					}
 				} 				
 			}catch (IOException e) {
@@ -281,6 +281,29 @@ public class DataNode {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (ClassNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}			
+		}
+	}
+	
+	private class MapReduceTask implements Runnable {
+		
+		private Socket master;
+		public MapReduceTask(Socket master) {
+			this.master = master;
+		}
+		@Override
+		public void run() {
+			try {
+				ObjectOutputStream out = new ObjectOutputStream(master.getOutputStream());
+				ObjectInputStream in = new ObjectInputStream(master.getInputStream());
+				Task task = (Task)in.readObject();
+				TaskTracker taskTracker = TaskTracker.getInstance();
+				taskTracker.
+				
+				
+			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}			

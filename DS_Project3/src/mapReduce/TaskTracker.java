@@ -87,9 +87,7 @@ public class TaskTracker {
 			while (true) {
 				Socket master;
 				try {
-					master = taskListenSocket.accept();	
-					
-					
+					master = taskListenSocket.accept();					
 					if (mapRed.equals("mapper")) {
 						trackMapper(blocks.size());
 					} else {

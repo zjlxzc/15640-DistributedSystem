@@ -4,50 +4,33 @@ import java.util.ArrayList;
 
 public class Job {
 	private int jobID;
-	private String inputFile;
-	private String outputPath;
-	private Class<?> mapReduceClass;
-	private ArrayList<Task> tasks;
+	private ArrayList<MapperTask> mapperTasks;
+	private ArrayList<ReducerTask> reducerTasks;
 	
-	public Job(int jobID, String inputFile, String outputPath,
-				Class<?> mapReduceClass, ArrayList<Task> tasks) {
+	public Job(int jobID, ArrayList<MapperTask> mapperTasks, ArrayList<ReducerTask> reducerTasks) {
 		
 		this.jobID = jobID;
-		this.inputFile = inputFile;
-		this.outputPath = outputPath;
-		this.mapReduceClass = mapReduceClass;
-		this.tasks = tasks;
+		this.mapperTasks = mapperTasks;
+		this.reducerTasks = reducerTasks;
 	}
 
 	public int getJobID() {
 		return jobID;
 	}
 
-	public String getInputFile() {
-		return inputFile;
-	}
-
-	public String getOutputPath() {
-		return outputPath;
-	}
-
-	public void setOutputPath(String outputPath) {
-		this.outputPath = outputPath;
-	}
-
-	public Class<?> getMapReduceClass() {
-		return mapReduceClass;
-	}
-
-	public void setMapReduceClass(Class<?> mapReduceClass) {
-		this.mapReduceClass = mapReduceClass;
-	}
-
-	public ArrayList<Task> getTasks() {
-		return tasks;
-	}
-
-	public void addTasks(Task task) {
-		tasks.add(task);
+	public void addMapperTasks(MapperTask mapperTask) {
+		mapperTasks.add(mapperTask);
 	}	
+
+	public void addReducerTasks(ReducerTask reducerTask) {
+		reducerTasks.add(reducerTask);
+	}
+
+	public ArrayList<MapperTask> getMapperTasks() {
+		return mapperTasks;
+	}
+
+	public ArrayList<ReducerTask> getReducerTasks() {
+		return reducerTasks;
+	}
 }

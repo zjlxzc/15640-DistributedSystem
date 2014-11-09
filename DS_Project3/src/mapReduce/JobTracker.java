@@ -64,12 +64,18 @@ public class JobTracker {
 		ArrayList<NodeRef> reducers = new ArrayList<NodeRef>();
 		reducers.add(reducer);
 		
-		Job job = new Job(jobID, inputFile, outputPath, mapReduceClass, new ArrayList<Task>());
+		Job job = new Job(jobID, new ArrayList<MapperTask>(), new ArrayList<ReducerTask>());
 		jobList.add(job);
 		
+		for (NodeRef node : reducers) {
+			ReducerTask task = new ReducerTask(node, taskID, mapReduceClass, outputPath);
+			job.addReducerTasks(task);
+			taskID++;
+		}
+		
 		for (NodeRef node : assignment.keySet()) {
-			Task task = new Task(node, taskID, mapReduceClass, outputPath, assignment.get(node), reducers);
-			job.addTasks(task);
+			MapperTask task = new MapperTask(node, taskID, mapReduceClass, assignment.get(node), reducers);
+			job.addMapperTasks(task);
 			taskID++;
 		}
 		
@@ -87,15 +93,29 @@ public class JobTracker {
 		public void run() {
 			Socket soc = null;
 			try {
-				for (Task task : job.getTasks()) {
-					NodeRef cur = task.getNode();				
+				boolean stop = false;
+				for (ReducerTask reducerTask : job.getReducerTasks()) {
+					NodeRef cur = reducerTask.getNode();				
 					soc = new Socket(cur.getIp(), cur.getPort());
 					ObjectOutputStream out = new ObjectOutputStream(soc.getOutputStream());
 					ObjectInputStream in = new ObjectInputStream(soc.getInputStream());
 					out.writeObject("MapReduceTask");
-					out.writeObject(task);
+					out.writeObject(reducerTask);
+					String ret = (String)in.readObject();
+					if (!ret.equals("ReduceSuccess")) {
+						System.out.println("Reduce Task Failed at " + cur.getIp());
+						stop = true;
+						break;
+					}
 				}
+				if (!stop) {
+					
+				}
+				
 			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (ClassNotFoundException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} finally {
