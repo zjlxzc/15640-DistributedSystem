@@ -13,9 +13,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.Map;
 
 import mapReduce.MRContext;
 import mergeSort.SingleRecord;
@@ -25,26 +24,23 @@ import dfs.NodeRef;
 public class FileReaderDFS implements Runnable {
 	private int count;
 	private String fileName;
-	private HashMap<Integer, NodeRef> reducer; // store all reducer of this job
-	private HashMap<Integer, Socket> sockets; // store all connection of this
+	private ArrayList<NodeRef> reducers; // store all reducer of this job
+	private ArrayList<Socket> sockets; // store all connection of this
 												// job
 
-	public FileReaderDFS(String fileName, HashMap<Integer, NodeRef> map)
+	public FileReaderDFS(String fileName, ArrayList<NodeRef> reducers)
 			throws FileNotFoundException {
 		this.fileName = fileName;
-		reducer = map;
+		this.reducers = reducers;
 	}
 
 	// public int read() throws IOException {
 	// }
 
 	public void connectReducer() throws IOException {
-		for (Map.Entry<Integer, NodeRef> e : reducer.entrySet()) { // connect to
-																	// each
-																	// reducer
-			Socket clientSocket = new Socket(e.getValue().getIp(), e.getValue()
-					.getPort());
-			sockets.put(e.getKey(), clientSocket);
+		for (NodeRef node : reducers) { // connect to each reducer
+			Socket clientSocket = new Socket(node.getIp(), node.getPort());
+			sockets.add(clientSocket);
 		}
 	}
 
@@ -79,7 +75,7 @@ public class FileReaderDFS implements Runnable {
 			while (iterator.hasNext()) { // iterator each key-value pair and
 											// send to corresponding reducer
 				pair = iterator.next();
-				int hashValue = pair.hashCode() % reducer.size();
+				int hashValue = pair.hashCode() % reducers.size();
 
 				Socket clientSocket = sockets.get(hashValue); // get client
 																// socket
