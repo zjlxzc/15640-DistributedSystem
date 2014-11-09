@@ -1,19 +1,19 @@
-package managementTool;
+package mapReduce;
 
 public class Job {
 	private int jobID;
-	private String mapperPath;
-	private String reducerPath;
+	private String status;
+	private String mapReducePath;
 	private String inputPath;
 	private String outputPath;
 	
-	public Job(int jobID, String mapperPath, String reducerPath, 
+	public Job(int jobID, String mapperPath, String reducerPath, String mapReducePath, 
 					String inputPath, String outputPath) {
 		this.jobID = jobID;
+		status = "Initializing";
+		this.mapReducePath = mapReducePath;
 		this.inputPath = inputPath;
 		this.outputPath = outputPath;
-		this.mapperPath = mapperPath;
-		this.reducerPath = reducerPath;
 	}
 
 	public int getJobID() {
@@ -24,20 +24,20 @@ public class Job {
 		this.jobID = jobID;
 	}
 
-	public String getMapperPath() {
-		return mapperPath;
+	public String getStatus() {
+		return status;
 	}
 
-	public void setMapperPath(String mapperPath) {
-		this.mapperPath = mapperPath;
+	public void setStatus(String status) {
+		this.status = status;
+	}
+	
+	public String getMapReducerPath() {
+		return mapReducePath;
 	}
 
-	public String getReducerPath() {
-		return reducerPath;
-	}
-
-	public void setReducerPath(String reducerPath) {
-		this.reducerPath = reducerPath;
+	public void setMapReducerPath(String mapReducePath) {
+		this.mapReducePath = mapReducePath;
 	}
 
 	public String getInputPath() {

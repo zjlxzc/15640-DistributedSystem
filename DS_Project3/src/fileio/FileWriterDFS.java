@@ -22,29 +22,12 @@ import example.WordCount;
 import mapReduce.MRContext;
 import mergeSort.SingleRecord;
 
-public class FileWriterDFS extends FileWriter{
-	private static String fileName;
+public class FileWriterDFS implements Runnable{
+	private String fileName;
 	private boolean flag = true; // this variable indicate if the mapper job is done
 	
-	public FileWriterDFS(String filePath, String line) throws IOException {
-		super(filePath);
-	}
-	
-	public void writeLine() throws IOException {
-		ServerSocket reducer = new ServerSocket();
-		MRContext context = new MRContext(); // store result to an object
-		
-		while (flag) {
-			Socket clientSocket = reducer.accept();
-			InputStreamReader inStream = new InputStreamReader(clientSocket.getInputStream());
-			BufferedReader br = new BufferedReader(inStream); // reader client input stream			
-			String[] inLine = br.readLine().split("\t");
-			context.context(inLine[0], inLine[1]);
-		}
-		
-		reducer(context);
-		
-		reducer.close();
+	public FileWriterDFS(String fileName) throws IOException {
+		this.fileName = fileName;
 	}
 	
 	public void reducer(MRContext context) throws IOException {
@@ -68,5 +51,27 @@ public class FileWriterDFS extends FileWriter{
 		BufferedWriter writer = new BufferedWriter(new FileWriter(fileName));
 		writer.write(context.getIterator().next().getKey() + "\t" + context.getIterator().next().getValue());
 		writer.close();
+	}
+
+	@Override
+	public void run() {
+		ServerSocket reducer;
+		try {
+			reducer = new ServerSocket();		
+			MRContext context = new MRContext(); // store result to an object
+		
+			while (flag) {
+				Socket clientSocket = reducer.accept();
+				InputStreamReader inStream = new InputStreamReader(clientSocket.getInputStream());
+				BufferedReader br = new BufferedReader(inStream); // reader client input stream			
+				String[] inLine = br.readLine().split("\t");
+				context.context(inLine[0], inLine[1]);
+			}
+		
+			reducer(context);		
+			reducer.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}	
 	}
 }
