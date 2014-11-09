@@ -5,10 +5,13 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.UnknownHostException;
 import java.rmi.NotBoundException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
@@ -21,14 +24,16 @@ public class DataNode {
 	private int BLOCK_SIZE;
 	private int PORT;
 	private int blockID;
-	private String master;
-	public DataNode(int port, String master) {
+	private String masterIP;
+	private int masterPort;
+	public DataNode(int port, String masterIP, int masterPort) {
 		new Thread(new Main()).start();
 		new Thread(new Listen()).start();
 		fileMap = new HashMap<String, ArrayList<BlockRef>>();
 		PORT = port;
 		blockID = 0;
-		this.master = master;
+		this.masterIP = masterIP;
+		this.masterPort = masterPort;
 	}
 	
 	private static void Usage() {
@@ -47,7 +52,9 @@ public class DataNode {
 				Usage();
 				String str = scan.nextLine();
 				if (str.equals("U")) {
-					new Thread(new Upload()).start();
+					System.out.println("Please input the file name:");
+					String fileName = scan.nextLine();
+					new Thread(new Upload(fileName)).start();
 				} else if (str.equals("Q")) {
 					System.exit(0);
 				}
@@ -89,49 +96,83 @@ public class DataNode {
 	}
 	
 	private class Upload implements Runnable {
-
+		private String fileName;
+		public Upload(String fileName) {
+			this.fileName = fileName;
+		}
 		@Override
 		public void run() {
-			try {
-//				if (System.getSecurityManager() == null) {
-//		            System.setSecurityManager(new SecurityManager());
-//		        }
-	            String name = "NameNodeRMI";
-	            Registry registry = LocateRegistry.getRegistry(master);
-	            NameNodeRMI nameNode = (NameNodeRMI) registry.lookup(name);				
-				
-				Scanner scan = new Scanner(System.in);
-				System.out.println("Please input the file name:");
-				String fileName = scan.nextLine();
+			try {											
 				File inputFile = new File(fileName);
-				scan.close();
 				BufferedReader br = new BufferedReader(new FileReader(inputFile));
 				String line;
 				NodeRef me = new NodeRef(InetAddress.getLocalHost().getHostName(), PORT);
 				int splitNum = 1;
 				ArrayList<BlockRef> blockList = new ArrayList<BlockRef>();
-				while ((line = br.readLine()) != null) {
-					Block curBlock = new Block(blockID, BLOCK_SIZE);
-					while(!curBlock.isFull()) {
-						curBlock.addRecord(line);
+				Block curBlock = new Block(blockID, BLOCK_SIZE);;
+				while ((line = br.readLine()) != null) {						
+					curBlock.addRecord(line);
+					if (curBlock.isFull()) {
+						BlockRef curRef = curBlock.generateRef(me, fileName, splitNum);
+						blockList.add(curRef);
+						new Thread(new BlockAdder(fileName, curRef)).start();
+						blockID++;
+						splitNum++;
+						curBlock = new Block(blockID, BLOCK_SIZE);
 					}
+				}
+				if (curBlock.getSize() != 0) {
 					BlockRef curRef = curBlock.generateRef(me, fileName, splitNum);
 					blockList.add(curRef);
-					ArrayList<NodeRef> addList = nameNode.addBlock(fileName, me);
-					new Thread(new BlockTransfer(addList, curRef)).start();
+					new Thread(new BlockAdder(fileName, curRef)).start();
 					blockID++;
-					splitNum++;					
-				}
+					splitNum++;
+				}				
 				fileMap.put(fileName, blockList);
 				br.close();
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-			} catch (NotBoundException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
 			}
 		}
+	}
+	
+	private class BlockAdder implements Runnable {
+		private String fileName;
+		private BlockRef curRef;
+		
+		public BlockAdder(String fileName, BlockRef curRef) {
+			this.fileName = fileName;
+			this.curRef = curRef;
+		}
+		
+		@SuppressWarnings("unchecked")
+		@Override
+		public void run() {
+			Socket master = null;			
+			try {
+				System.out.println(masterIP);
+				System.out.println(masterPort);
+				master = new Socket(masterIP, masterPort);
+				ObjectOutputStream out = new ObjectOutputStream(master.getOutputStream());
+				ObjectInputStream in = new ObjectInputStream(master.getInputStream());
+				out.writeObject("addBlock");
+				out.writeObject(fileName);
+				out.writeObject(curRef);
+				ArrayList<NodeRef> addList = (ArrayList<NodeRef>)in.readObject();
+				new Thread(new BlockTransfer(addList, curRef)).start();			
+			} catch (UnknownHostException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (ClassNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}			
+		}
+		
 	}
 	
 	private class BlockTransfer implements Runnable {
@@ -150,6 +191,7 @@ public class DataNode {
 				BufferedReader br = null;				
 				File outFile = new File(sourceBlock.getFileName());
 				for (NodeRef node : addList) {
+					System.out.println("start transfer block to: " + node.getIp());
 					soc = new Socket(node.getIp(), node.getPort());		
 					PrintWriter out = new PrintWriter(soc.getOutputStream(), true);
 					br = new BufferedReader(new FileReader(outFile));

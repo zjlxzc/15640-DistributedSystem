@@ -8,25 +8,26 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.util.Scanner;
 
-public class StartDFS {
+public class HDFS {
 	public static void main(String[] args) {
-		System.out.println("Please input configuration file:");
-		Scanner scan = new Scanner(System.in);
-		String confPath = scan.nextLine();
-		File conf = new File(confPath);
+		File conf = new File(args[0]);
 						
 		try {
 			BufferedReader br = new BufferedReader(new FileReader(conf));
 			String line;
 			String masterIP = "";
+			int masterPort = 0;
 			while ((line = br.readLine()) != null) {
-				String[] pars = line.split(" ");				
+				String[] pars = line.split(" ");	
+				if (pars[0].equals("master")) {
+					masterIP = pars[1];
+					masterPort = Integer.parseInt(pars[2]);
+				}				
 				if (InetAddress.getLocalHost().getHostAddress().equals(pars[1])) {
 					if (pars[0].equals("master")) {
-						new NameNode(confPath);
-						masterIP = pars[1];
+						new NameNode(args[0], Integer.parseInt(pars[2]));						
 					} else {
-						new DataNode(Integer.parseInt(pars[2]), masterIP);
+						new DataNode(Integer.parseInt(pars[2]), masterIP, masterPort);
 					}
 				}
 			}

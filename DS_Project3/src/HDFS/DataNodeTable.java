@@ -37,8 +37,7 @@ public class DataNodeTable {
 	public void list() {
 		for (String key : nodeMap.keySet()) {
 			NodeRef node = nodeMap.get(key);
-			System.out.println(node.getIp() + " : " + node.getPort() 
-					+ " : " + node.getClass().getSimpleName());
+			System.out.println(node.getIp() + " : " + node.getPort());
 		}		
 	}	
 }

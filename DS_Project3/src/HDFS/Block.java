@@ -1,5 +1,6 @@
 package HDFS;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -23,14 +24,16 @@ public class Block {
 	}
 	
 	public void addRecord(String record) {
-		records.add(record);
-		size++;
+		this.records.add(record);
+		this.size++;
 	}
 	
 	public BlockRef generateRef(NodeRef node, String parentFile, int splitNum) {
-		String filename = parentFile + "_" + id;
+		String filename = parentFile + "_" + splitNum;
 		try {
-			PrintWriter out = new PrintWriter(filename);
+			File outputFile = new File(filename);
+			System.out.println("generate:" + filename);
+			PrintWriter out = new PrintWriter(outputFile);
 			for (int i = 0; i < records.size(); i++) {
 				out.println(records.get(i));
 			}
@@ -43,22 +46,22 @@ public class Block {
 		return ref;
 	}
 	public boolean isFull() {
-		return size == this.capacity;
+		return this.size == this.capacity;
 	}
 	
 	public int getSize() {
-		return size;
+		return this.size;
 	}
 	
 	public int getId() {
-		return id;
+		return this.id;
 	}
 
 	public int getCapacity() {
-		return capacity;
+		return this.capacity;
 	}
 
 	public ArrayList<String> getRecords() {
-		return records;
+		return this.records;
 	}
 }
