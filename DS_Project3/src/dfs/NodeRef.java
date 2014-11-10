@@ -28,8 +28,4 @@ public class NodeRef implements Serializable {
 	public void setPort(int port) {
 		this.port = port;
 	}
-	
-	public boolean equals(NodeRef node) {
-		return this.ip.toString().equals(node.getIp().toString());
-	}
 }

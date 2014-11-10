@@ -18,7 +18,7 @@ import dfs.NodeRef;
 public class JobTracker {
 	private static JobTracker jobTracker = null;
 	private static int jobID;
-	private ArrayList<Job> jobList; 
+	private static ArrayList<Job> jobList; 
 	
 	public JobTracker() {
 		jobID = 1;		
@@ -27,6 +27,7 @@ public class JobTracker {
 	public static JobTracker getInstance() {
 		if (jobTracker == null) {
 			jobTracker = new JobTracker();
+			jobList = new ArrayList<Job>();
 		}
 		return jobTracker;
 	}
