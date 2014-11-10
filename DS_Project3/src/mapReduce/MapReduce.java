@@ -1,6 +1,6 @@
 package mapReduce;
 
-/*
+/**
  * @author Chun Xu (chunx)
  * @author Jialing Zhou (jialingz)
  * 

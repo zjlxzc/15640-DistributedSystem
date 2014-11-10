@@ -48,7 +48,7 @@ public class TaskTracker {
 		int num = task.getBlockList().size();
 		
 		for (int i = 0; i < num; i++) {
-			FileReaderDFS map = new FileReaderDFS(blocks.get(i).getFileName(), reducers);
+			FileReaderDFS map = new FileReaderDFS(blocks.get(i).getFileName(), reducers, task.getClass());
 			Thread mapper = new Thread(map);
 			mapper.start();
 			stat.put(blocks.get(i).getId(), "Starting");

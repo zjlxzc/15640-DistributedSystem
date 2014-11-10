@@ -12,26 +12,29 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Iterator;
 
 import mapReduce.MRContext;
+import mapReduce.MapReduce;
 import mergeSort.SingleRecord;
-import example.WordCount;
 import dfs.NodeRef;
 
 public class FileReaderDFS implements Runnable {
 	private int count;
 	private String fileName;
 	private ArrayList<NodeRef> reducers; // store all reducer of this job
-	private ArrayList<Socket> sockets; // store all connection of this
-												// job
-
-	public FileReaderDFS(String fileName, ArrayList<NodeRef> reducers)
+	private ArrayList<Socket> sockets; // store all connection of this job
+	private Class<?> MRClass;
+	
+	public FileReaderDFS(String fileName, ArrayList<NodeRef> reducers, Class<?> MRClass)
 			throws FileNotFoundException {
 		this.fileName = fileName;
 		this.reducers = reducers;
+		this.MRClass = MRClass;
 	}
 
 	// public int read() throws IOException {
@@ -46,15 +49,18 @@ public class FileReaderDFS implements Runnable {
 
 	@Override
 	public void run() {
-		WordCount wc = new WordCount();
-
+		Constructor<?> constructor = null;
+		MapReduce mr = null;
 		BufferedReader reader = null;
+		
 		try {
+			constructor = MRClass.getConstructor();
+			mr = (MapReduce)constructor.newInstance();
 			reader = new BufferedReader(new FileReader(fileName));
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		} catch (Exception e1) {
+			e1.printStackTrace();
 		}
+		
 		String line = "";
 		MRContext context = null;
 		try {
@@ -63,7 +69,7 @@ public class FileReaderDFS implements Runnable {
 			context = new MRContext(); // store result to an object
 
 			while (line != null) { // read file line by line
-				wc.map("", line, context); // call user map method
+				mr.map("", line, context); // call user map method
 				line = reader.readLine();
 				count++;
 			}
