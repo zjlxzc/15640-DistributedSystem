@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
@@ -26,14 +27,16 @@ import mapReduce.JobTracker;
 public class NameNode {
 	
 	private DataNodeTable dataNodeTable;
-	private Hashtable<String, Hashtable<NodeRef, ArrayList<BlockRef>>> metaTable;
+	
+	//table<filename, table<nodeIp, blockList>>
+	private Hashtable<String, Hashtable<String, ArrayList<BlockRef>>> metaTable;
 	private int BLOCK_SIZE;
 	private int REPLICA_FACTOR;
 	private int PORT;
 	
 	public NameNode(String confPath, int port) {
 		this.dataNodeTable = new DataNodeTable();
-		this.metaTable = new Hashtable<String, Hashtable<NodeRef, ArrayList<BlockRef>>>();
+		this.metaTable = new Hashtable<String, Hashtable<String, ArrayList<BlockRef>>>();
 		File conf = new File(confPath);
 		this.PORT = port;
 						
@@ -181,35 +184,40 @@ public class NameNode {
 			try {				
 				String fileName = (String)in.readObject();
 				BlockRef sourceBlock = (BlockRef)in.readObject();
-				System.out.println("Get the block add request from: " + sourceBlock.getNodeRef().getIp());
+				System.out.println("Get the block add request from: " + sourceBlock.getNodeRef().getIp() + "to add block of "
+							+ sourceBlock.getFileName() + " of the file " + fileName);
 				NodeRef sourceNode = sourceBlock.getNodeRef();
 				ArrayList<NodeRef> ret = new ArrayList<NodeRef>();
 				ArrayList<NodeRef> nodeList = dataNodeTable.getDataNodes();
 				Random rand = new Random();
-				if (!metaTable.contains(fileName)) {
+				if (!metaTable.containsKey(fileName)) {
 					int cnt = 1;
 					int total = nodeList.size();
+					HashSet<String> ips = new HashSet<String>();
 					while (cnt < REPLICA_FACTOR) {
 						int index = 0;
 						NodeRef des = null;
-						while (des == null || des.getIp().equals(sourceNode.getIp())) {
+						while (des == null || des.getIp().equals(sourceNode.getIp()) ||
+								(!ips.isEmpty() && ips.contains(des.getIp().toString()))) {
 							index = rand.nextInt(total);
 							des = nodeList.get(index);						
 						}
 						ret.add(des);
+						ips.add(des.getIp().toString());
 						System.out.println("First: send the block des: " + des.getIp());
 						cnt++;
 					}
-					Hashtable<NodeRef, ArrayList<BlockRef>> newNodeTable = new Hashtable<NodeRef, ArrayList<BlockRef>>();
+					Hashtable<String, ArrayList<BlockRef>> newNodeTable = new Hashtable<String, ArrayList<BlockRef>>();
 					ArrayList<BlockRef> newBlockList = new ArrayList<BlockRef>();
 					newBlockList.add(sourceBlock);
-					newNodeTable.put(sourceNode, newBlockList);
+					newNodeTable.put(sourceNode.getIp().toString(), newBlockList);
 					metaTable.put(fileName, newNodeTable);
 				} else {
 					HashMap<NodeRef, Integer> freq = new HashMap<NodeRef, Integer>();
-					Hashtable<NodeRef, ArrayList<BlockRef>> map = metaTable.get(fileName);
-					for (NodeRef node : map.keySet()) {
-						freq.put(node, map.get(node).size());
+					Hashtable<String, ArrayList<BlockRef>> map = metaTable.get(fileName);
+					for (String nodeIP : map.keySet()) {
+						NodeRef node = dataNodeTable.getDataNode(nodeIP);
+						freq.put(node, map.get(nodeIP).size());
 					}
 					for (NodeRef node : nodeList) {
 						if (!freq.containsKey(node)) {
@@ -221,21 +229,30 @@ public class NameNode {
 					Collections.sort(sort, new ValueComparator());
 					int cnt = 1;
 					int total = sort.size();
+					HashSet<String> ips = new HashSet<String>();
 					while (cnt < REPLICA_FACTOR) {
 						int index = 0;
 						NodeRef des = null;
-						while (des == null || des.getIp().equals(sourceNode.getIp())) {
+						while (des == null || des.getIp().equals(sourceNode.getIp()) ||
+								(!ips.isEmpty() && ips.contains(des.getIp().toString()))) {
 							index = rand.nextInt(total);
 							des = sort.get(index).getKey();							
 						}
+						ips.add(des.getIp().toString());
 						ret.add(des);
 						System.out.println("Second: send the block des: " + des.getIp());
 						cnt++;
 					}
-					Hashtable<NodeRef, ArrayList<BlockRef>> nodeTable = metaTable.get(fileName);
-					ArrayList<BlockRef> blockList = nodeTable.get(sourceNode);
+					Hashtable<String, ArrayList<BlockRef>> nodeTable = metaTable.get(fileName);
+					for (String ip : nodeTable.keySet()) {
+						System.out.println("NodeTable : " + ip);
+						System.out.println(nodeTable.get(ip));
+					}
+					ArrayList<BlockRef> blockList = nodeTable.get(sourceNode.getIp().toString());
+					System.out.println(blockList);
+					System.out.println(sourceBlock.getFileName());
 					blockList.add(sourceBlock);
-					nodeTable.put(sourceNode, blockList);
+					nodeTable.put(sourceNode.getIp().toString(), blockList);
 					metaTable.put(fileName, nodeTable);
 				}
 				out.writeObject(ret);
@@ -271,8 +288,8 @@ public class NameNode {
 				Hashtable<String, ArrayList<BlockRef>> nodeTable = 
 						(Hashtable<String, ArrayList<BlockRef>>)in.readObject();
 				for (String filename : nodeTable.keySet()) {
-					Hashtable<NodeRef, ArrayList<BlockRef>> fileTable = metaTable.get(filename);
-					fileTable.put(sourceNode, nodeTable.get(filename));
+					Hashtable<String, ArrayList<BlockRef>> fileTable = metaTable.get(filename);
+					fileTable.put(sourceNode.getIp().toString(), nodeTable.get(filename));
 				}			
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -295,8 +312,12 @@ public class NameNode {
 				String inputFile = (String)in.readObject();
 				String outputPath = (String)in.readObject();
 				Class<?> mapReduceClass = (Class<?>)in.readObject();
-				Hashtable<NodeRef, ArrayList<BlockRef>> refTable = metaTable.get(inputFile);
-				
+				Hashtable<String, ArrayList<BlockRef>> ipTable = metaTable.get(inputFile);
+				Hashtable<NodeRef, ArrayList<BlockRef>> refTable = new Hashtable<NodeRef, ArrayList<BlockRef>>();
+				for (String ip : ipTable.keySet()) {
+					refTable.put(dataNodeTable.getDataNode(ip), ipTable.get(ip));
+				}
+								
 				int totalBlockNum = 0;
 				for (ArrayList<BlockRef> blockList : refTable.values()) {
 					totalBlockNum += blockList.size();

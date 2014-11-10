@@ -258,16 +258,14 @@ public class JobTracker {
 						jobTracker = new Socket(taskTracker.getIp(), taskTracker.getPort());
 						out = new ObjectOutputStream(jobTracker.getOutputStream());
 						in = new ObjectInputStream(jobTracker.getInputStream());
-						out.writeObject("ReportMapper");
+						out.writeObject("ReportReducer");
 						String report = (String)in.readObject();
 						if (report.equals("finished")) {
 							reducerStatus.remove(task.getTaskID());
 						}
 					}
-				}
-				
-				System.out.println("Job Finished!");
-				
+				}				
+				System.out.println("Job Finished!");				
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
