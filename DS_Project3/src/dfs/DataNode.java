@@ -218,10 +218,6 @@ public class DataNode {
 					while ((line = br.readLine()) != null) {
 						out.println(line);
 					}
-//					String ret = in.readLine();
-//					if (ret.equals("finished")) {
-//						System.out.println("finished");
-//					}
 					br.close();
 					soc.close();					
 				}
@@ -282,7 +278,7 @@ public class DataNode {
 		public void run() {
 			Socket master = null;					
 			try {
-				Class<?> mapReduceClass = Class.forName(mapReduceFile);				
+				Class<?> mapReduceClass = Class.forName(mapReduceFile);			
 				master = new Socket(masterIP, masterPort);
 				ObjectOutputStream out = new ObjectOutputStream(master.getOutputStream());
 				ObjectInputStream in = new ObjectInputStream(master.getInputStream());
@@ -299,7 +295,7 @@ public class DataNode {
 			} catch (ClassNotFoundException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-			}			
+			} 		
 		}
 	}
 }

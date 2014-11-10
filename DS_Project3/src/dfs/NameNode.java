@@ -79,8 +79,9 @@ public class NameNode {
 	private static void Usage() {
 		System.out.println("Please enter command:\n");
 		System.out.println("[L]ist all the nodes");
+		System.out.println("List all the [J]obs");
 		System.out.println("[Q]uit");
-		System.out.println("Please input:[S/L/E/Q]:");
+		System.out.println("Please input:[L/J/Q]:");
 	}
 
 	
@@ -95,7 +96,10 @@ public class NameNode {
 					new Thread(new ListThread()).start();
 				} else if (str.equals("Q")) {
 					System.exit(0);
-				} 
+				} else if (str.equals("J")) {
+					JobTracker jobTracker = JobTracker.getInstance();
+					jobTracker.getInstance();
+				}
 			}
 		}
 	}	
