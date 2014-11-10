@@ -226,7 +226,7 @@ public class NameNode {
 					while (cnt < REPLICA_FACTOR) {
 						int index = 0;
 						NodeRef des = null;
-						while (des == null || des.equals(sourceNode) ||
+						while (des == null || des.getIp().getHostAddress().equals(sourceNode.getIp().getHostAddress()) ||
 								(!ips.isEmpty() && ips.contains(des.getIp().toString()))) {
 							index = rand.nextInt(total);
 							des = nodeList.get(index);						
@@ -262,7 +262,7 @@ public class NameNode {
 					while (cnt < REPLICA_FACTOR) {
 						int index = 0;
 						NodeRef des = null;
-						while (des == null || des.equals(sourceNode) ||
+						while (des == null || des.getIp().getHostAddress().equals(sourceNode.getIp().getHostAddress()) ||
 								(!ips.isEmpty() && ips.contains(des.getIp().toString()))) {
 							index = rand.nextInt(total);
 							des = sort.get(index).getKey();							
@@ -326,7 +326,7 @@ public class NameNode {
 				}
 				for (String filename : nodeTable.keySet()) {
 					Hashtable<String, ArrayList<BlockRef>> fileTable = metaTable.get(filename);
-					fileTable.put(sourceNode.getIp().toString(), nodeTable.get(filename));
+					fileTable.put(sourceNode.getIp().getHostAddress(), nodeTable.get(filename));
 				}		
 				out.writeObject("Reported");
 			} catch (IOException e) {
@@ -351,8 +351,11 @@ public class NameNode {
 				String outputPath = (String)in.readObject();
 				Class<?> mapReduceClass = (Class<?>)in.readObject();
 				Hashtable<String, ArrayList<BlockRef>> ipTable = metaTable.get(inputFile);
+				System.out.println(ipTable);
 				Hashtable<NodeRef, ArrayList<BlockRef>> refTable = new Hashtable<NodeRef, ArrayList<BlockRef>>();
 				for (String ip : ipTable.keySet()) {
+					System.out.println(ip);
+					System.out.println(dataNodeTable.getDataNode(ip));
 					refTable.put(dataNodeTable.getDataNode(ip), ipTable.get(ip));
 				}
 								

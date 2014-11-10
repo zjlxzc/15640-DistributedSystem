@@ -15,7 +15,10 @@ public class DataNodeTable {
 	
 	public void addNode(String ip, int port) throws UnknownHostException {	
 		NodeRef ref = new NodeRef(ip, port);
-		nodeMap.put(ip, ref);
+		nodeMap.put(ref.getIp().getHostAddress(), ref);
+		System.out.println("IN DataNodeTable: " + ref.getIp() + "**" + ref.getIp().getHostAddress() + "&&" + ref.getIp().toString());
+		String s = ref.getIp() + "";
+		System.out.println("IN DataNodeTable: " + s);
 	}
 	
 	public NameNode getMaster() {
