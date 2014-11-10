@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -14,14 +13,14 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.Scanner;
 
-import mapReduce.Task;
 import mapReduce.TaskTracker;
 
 public class DataNode {
-	HashMap<String, ArrayList<BlockRef>> fileMap;
+	//<filename, blockList>
+	Hashtable<String, ArrayList<BlockRef>> fileTable;
 	private int BLOCK_SIZE;
 	private int PORT;
 	private int blockID;
@@ -30,7 +29,7 @@ public class DataNode {
 	public DataNode(int port, String masterIP, int masterPort) {
 		new Thread(new Main()).start();
 		new Thread(new Listen()).start();
-		fileMap = new HashMap<String, ArrayList<BlockRef>>();
+		fileTable = new Hashtable<String, ArrayList<BlockRef>>();
 		PORT = port;
 		blockID = 0;
 		this.masterIP = masterIP;
@@ -40,9 +39,10 @@ public class DataNode {
 	private static void Usage() {
 		System.out.println("Please enter command:\n");
 		System.out.println("[U]pload file");
+		System.out.println("List all the [F]iles");
 		System.out.println("[S]ubmit job");
 		System.out.println("[Q]uit");
-		System.out.println("Please input:[S/U/Q]:");
+		System.out.println("Please input:[F/S/U/Q]:");
 	}
 	
 	private class Main implements Runnable {				
@@ -66,7 +66,9 @@ public class DataNode {
 					System.out.println("Please enter the MapReduce file name: ");
 					String mapReduceFile = scan.nextLine();
 					new Thread(new MapReduceJob(inputFile, outputPath, mapReduceFile)).start();
-				}
+				} else if (str.equals("F")){
+					new Thread(new ListFileThread()).start();
+				} 
 			}
 		}
 	}
@@ -110,6 +112,24 @@ public class DataNode {
 		}		
 	}
 	
+	private class ListFileThread implements Runnable {		
+		@Override
+		public void run() {
+			if (fileTable == null || fileTable.isEmpty()) {
+				System.out.println("There is no file in the system!");
+			} else {
+				for (String file : fileTable.keySet()) {
+					System.out.println("File Name : " + file);
+					for (BlockRef block : fileTable.get(file)) {
+						System.out.print(block.getFileName() + " ");
+					}
+					System.out.println();
+					System.out.println("===================================================");
+				}
+			}			
+		}		
+	}
+	
 	private class Upload implements Runnable {
 		private String fileName;
 		public Upload(String fileName) {
@@ -144,7 +164,7 @@ public class DataNode {
 					blockID++;
 					splitNum++;
 				}				
-				fileMap.put(fileName, blockList);
+				fileTable.put(fileName, blockList);
 				br.close();
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
@@ -254,18 +274,20 @@ public class DataNode {
 				}
 				BlockRef receiveBlockRef = receiveBlock.generateRef(me, parentFile, splitNum);
 				ArrayList<BlockRef> blockList;
-				if (fileMap.containsKey(parentFile)) {
-					blockList = fileMap.get(parentFile);
+				if (fileTable.containsKey(parentFile)) {
+					blockList = fileTable.get(parentFile);
 				} else {
 					blockList = new ArrayList<BlockRef>();
 				}
 				blockList.add(receiveBlockRef);
+				fileTable.put(parentFile, blockList);
 				System.out.println("Received " + receiveBlockRef.getFileName());
 				Socket report = new Socket(masterIP, masterPort);
 				ObjectOutputStream out = new ObjectOutputStream(report.getOutputStream());
 				ObjectInputStream in = new ObjectInputStream(report.getInputStream());
 				out.writeObject("update");
-				out.writeObject(fileMap);
+				out.writeObject(me);
+				out.writeObject(fileTable);
 				out.flush();
 				report.close();
 			} catch (IOException e) {

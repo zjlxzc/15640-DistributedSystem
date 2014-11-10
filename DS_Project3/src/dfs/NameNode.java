@@ -93,7 +93,7 @@ public class NameNode {
 			while (true) {
 				Usage();
 				String str = scan.nextLine();
-				if (str.equals("L")){
+				if (str.equals("F")){
 					new Thread(new ListFileThread()).start();
 				} else if (str.equals("Q")) {
 					System.exit(0);
@@ -179,7 +179,7 @@ public class NameNode {
 					if (first.equals("addBlock")) {
 						new Thread(new BlockAdder(in, out)).start();
 					} else if (first.equals("update")) {
-						new Thread(new Updater(slave)).start();
+						new Thread(new Updater(in, out)).start();
 					} else if (first.equals("MapReduceNewJob")) {
 						new Thread(new MapReduceJob(in, out)).start();
 					}
@@ -303,20 +303,26 @@ public class NameNode {
 	}
 	
 	private class Updater implements Runnable {
-		private Socket slave;
-		public Updater(Socket slave) {
-			this.slave = slave;
+		private ObjectOutputStream out;
+		private ObjectInputStream in;
+		
+		public Updater(ObjectInputStream in, ObjectOutputStream out) {
+			this.out = out;
+			this.in = in;;
 		}
 		
 		@Override
+		@SuppressWarnings("unchecked")
 		public void run() {		
-			try {		
-				ObjectInputStream in = new ObjectInputStream(slave.getInputStream());
-				NodeRef sourceNode = dataNodeTable.getDataNode(slave.getRemoteSocketAddress().toString());
-				
-				@SuppressWarnings("unchecked")
+			try {	
+				NodeRef sourceNode = (NodeRef)in.readObject();
+				System.out.println("Get report from : " + sourceNode.getIp().toString());
 				Hashtable<String, ArrayList<BlockRef>> nodeTable = 
 						(Hashtable<String, ArrayList<BlockRef>>)in.readObject();
+				for (String filename : nodeTable.keySet()) {
+					System.out.println(filename);
+					System.out.println(nodeTable.get(filename).toString());
+				}
 				for (String filename : nodeTable.keySet()) {
 					Hashtable<String, ArrayList<BlockRef>> fileTable = metaTable.get(filename);
 					fileTable.put(sourceNode.getIp().toString(), nodeTable.get(filename));
