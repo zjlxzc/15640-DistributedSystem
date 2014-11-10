@@ -1,5 +1,12 @@
 package mapReduce;
 
+/*
+ * @author Chun Xu (chunx)
+ * @author Jialing Zhou (jialingz)
+ * 
+ * This class is used to do reducer job.
+ */
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -16,19 +23,18 @@ import fileio.FileWriterDFS;
 
 public class TaskTracker {
 	
-	private Class<?> MRClass;
+	private static Class<?> MRClass;
 	private static Hashtable<Integer, Hashtable<Integer, String>> status;
 	private static String reducerStatus;
 	private static boolean isFinished = false;
 	private static int recordCount = 10;
-	
-	//private Thread reportThread;
+
 	private int reportPort = 0;
 	
 	public TaskTracker() {
 		try {
-			ServerSocket taskListenSocket = new ServerSocket(0);
-			reportPort = taskListenSocket.getLocalPort();
+			ServerSocket taskListenSocket = new ServerSocket(0); // start a new socket to listen to name node
+			reportPort = taskListenSocket.getLocalPort(); // get generated port
 			
 			Thread listenThread = new Thread(new Listen(taskListenSocket));		
 			listenThread.start();
@@ -41,24 +47,25 @@ public class TaskTracker {
 	}
 	
 	public static void trackMapper(MapperTask task) throws FileNotFoundException {
-		int taskID = task.getTaskID();
-		ArrayList<BlockRef> blocks = task.getBlockList();
-		ArrayList<NodeRef> reducers = task.getReducers();
-		Hashtable<Integer, String> stat = new Hashtable<Integer, String>();
+		int taskID = task.getTaskID(); // get taskID
+		ArrayList<BlockRef> blocks = task.getBlockList(); // get all file blocks
+		ArrayList<NodeRef> reducers = task.getReducers(); // get required reducers
+		Hashtable<Integer, String> stat = new Hashtable<Integer, String>(); // to store status
 		int num = task.getBlockList().size();
+		MRClass = task.getClass(); // get user map-reduce class
 		
 		for (int i = 0; i < num; i++) {
-			FileReaderDFS map = new FileReaderDFS(blocks.get(i).getFileName(), reducers, task.getClass());
-			Thread mapper = new Thread(map);
+			FileReaderDFS map = new FileReaderDFS(blocks.get(i).getFileName(), reducers, MRClass);
+			Thread mapper = new Thread(map); // create a new thread to do map job
 			mapper.start();
-			stat.put(blocks.get(i).getId(), "Starting");
+			stat.put(blocks.get(i).getId(), "Starting"); // record current status
 			
 			while (true) {
-				if (map.getCount() != recordCount) {
+				if (map.getCount() != recordCount) { // to check if map is done
 					isFinished = false;
 				} else {
 					isFinished = true;
-					stat.put(blocks.get(i).getId(), "Finished");
+					stat.put(blocks.get(i).getId(), "Finished"); // update map status
 					break;
 				}
 			}
@@ -88,21 +95,21 @@ public class TaskTracker {
 		public void run() {
 			while (true) {
 				try {
-					Socket nameNode = taskListenSocket.accept();		
+					Socket nameNode = taskListenSocket.accept(); // get name node socket	
 
 					ObjectOutputStream srcOut = new ObjectOutputStream(nameNode.getOutputStream());
 					ObjectInputStream object = new ObjectInputStream(nameNode.getInputStream());			
 					
-					String inLine = (String)object.readObject();
+					String inLine = (String)object.readObject(); // get name node information
 					if (inLine.equals("MapperTask")) {
-						MapperTask task = (MapperTask)object.readObject();
+						MapperTask task = (MapperTask)object.readObject(); // get map task
 						trackMapper(task);
 					} else if (inLine.equals("ReducerTask")) {
-						ReducerTask task = (ReducerTask)object.readObject();
+						ReducerTask task = (ReducerTask)object.readObject(); // get reduce task
 						trackReducer(task);
-					} else if (inLine.equals("ReportMapper")){
+					} else if (inLine.equals("ReportMapper")){ // send map information
 						srcOut.writeObject(status);
-					} else if (inLine.equals("ReportReducer")) {
+					} else if (inLine.equals("ReportReducer")) { // send reduce information
 						srcOut.writeObject(reducerStatus);;
 					}
 				} catch (Exception e) {
@@ -113,10 +120,10 @@ public class TaskTracker {
 	}
 	
 	public int getPort() {
-		return reportPort;
+		return reportPort; // return port to name node
 	}
 	
 	public String getReducerStatus() {
-		return reducerStatus;
+		return reducerStatus; // return reducer status
 	}
 }

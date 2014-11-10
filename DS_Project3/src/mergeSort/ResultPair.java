@@ -1,11 +1,17 @@
 package mergeSort;
 
+/*
+ * @author Chun Xu (chunx)
+ * @author Jialing Zhou (jialingz)
+ * 
+ * This class is used to represent the data structure of a pair.
+ */
+
 import java.io.Serializable;
 
 public class ResultPair<K, V> implements Serializable, Comparable<ResultPair<K, V>>{
-	/**
-	 * 
-	 */
+	
+	//generated serial version id
 	private static final long serialVersionUID = 6877195955715125141L;
 	private K key;
 	private V value;
@@ -22,16 +28,13 @@ public class ResultPair<K, V> implements Serializable, Comparable<ResultPair<K, 
 		return key;
 	}
 
-
 	public void setKey(K k) {
 		key = k;
 	}
 
-
 	public V getValue() {
 		return value;
 	}
-
 
 	public void setValue(V v) {
 		value = v;
@@ -44,6 +47,7 @@ public class ResultPair<K, V> implements Serializable, Comparable<ResultPair<K, 
 		int oKeyHash = o.key.hashCode();
 		int oValueHash = o.value.hashCode();
 		
+		// if the two pairs have the same hash code of keys, then comparing hash code of values
 		return keyHash == valueHash ? valueHash - oValueHash : keyHash - oKeyHash;
 	}
 
