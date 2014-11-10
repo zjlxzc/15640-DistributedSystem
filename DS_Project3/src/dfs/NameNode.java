@@ -226,7 +226,7 @@ public class NameNode {
 					while (cnt < REPLICA_FACTOR) {
 						int index = 0;
 						NodeRef des = null;
-						while (des == null || des.getIp().equals(sourceNode.getIp()) ||
+						while (des == null || des.equals(sourceNode) ||
 								(!ips.isEmpty() && ips.contains(des.getIp().toString()))) {
 							index = rand.nextInt(total);
 							des = nodeList.get(index);						
@@ -239,7 +239,7 @@ public class NameNode {
 					Hashtable<String, ArrayList<BlockRef>> newNodeTable = new Hashtable<String, ArrayList<BlockRef>>();
 					ArrayList<BlockRef> newBlockList = new ArrayList<BlockRef>();
 					newBlockList.add(sourceBlock);
-					newNodeTable.put(sourceNode.getIp().toString(), newBlockList);
+					newNodeTable.put(sourceNode.getIp().getHostAddress(), newBlockList);
 					metaTable.put(fileName, newNodeTable);
 				} else {
 					HashMap<NodeRef, Integer> freq = new HashMap<NodeRef, Integer>();
@@ -262,7 +262,7 @@ public class NameNode {
 					while (cnt < REPLICA_FACTOR) {
 						int index = 0;
 						NodeRef des = null;
-						while (des == null || des.getIp().equals(sourceNode.getIp()) ||
+						while (des == null || des.equals(sourceNode) ||
 								(!ips.isEmpty() && ips.contains(des.getIp().toString()))) {
 							index = rand.nextInt(total);
 							des = sort.get(index).getKey();							
@@ -277,15 +277,16 @@ public class NameNode {
 						System.out.println("NodeTable : " + ip);
 						System.out.println(nodeTable.get(ip));
 					}
-					ArrayList<BlockRef> blockList = nodeTable.get(sourceNode.getIp().toString());
+					ArrayList<BlockRef> blockList = nodeTable.get(sourceNode.getIp().getHostAddress());
 					System.out.println(blockList);
 					System.out.println(sourceBlock.getFileName());
 					blockList.add(sourceBlock);
-					nodeTable.put(sourceNode.getIp().toString(), blockList);
+					nodeTable.put(sourceNode.getIp().getHostAddress(), blockList);
 					metaTable.put(fileName, nodeTable);
 				}
 				out.writeObject(ret);
 				out.flush();
+				
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -326,7 +327,8 @@ public class NameNode {
 				for (String filename : nodeTable.keySet()) {
 					Hashtable<String, ArrayList<BlockRef>> fileTable = metaTable.get(filename);
 					fileTable.put(sourceNode.getIp().toString(), nodeTable.get(filename));
-				}			
+				}		
+				out.writeObject("Reported");
 			} catch (IOException e) {
 				e.printStackTrace();
 			} catch (ClassNotFoundException e) {

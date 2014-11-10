@@ -30,7 +30,6 @@ public class NodeRef implements Serializable {
 	}
 	
 	public boolean equals(NodeRef node) {
-		return this.ip.toString().equals(node.getIp()) &&
-				this.port == node.getPort();
+		return this.ip.toString().equals(node.getIp().toString());
 	}
 }

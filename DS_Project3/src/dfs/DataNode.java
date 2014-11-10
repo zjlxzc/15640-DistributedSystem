@@ -37,12 +37,11 @@ public class DataNode {
 	}
 	
 	private static void Usage() {
-		System.out.println("Please enter command:\n");
-		System.out.println("[U]pload file");
-		System.out.println("List all the [F]iles");
-		System.out.println("[S]ubmit job");
-		System.out.println("[Q]uit");
-		System.out.println("Please input:[F/S/U/Q]:");
+		System.out.println("Please enter command:");
+		System.out.println("To upload a file to DFS : upload [filename]");
+		System.out.println("To list all the nodes information: nodes");
+		System.out.println("To submit a mapreduce job: job [input_file] [output_path] [mapreduce_class]");
+		System.out.println("To quit the system: quit");
 	}
 	
 	private class Main implements Runnable {				
@@ -50,7 +49,7 @@ public class DataNode {
 		public void run() {			
 			Scanner scan = new Scanner(System.in);
 			while (true) {
-				Usage();
+				//String[] str = scan.nextLine().split(" ");
 				String str = scan.nextLine();
 				if (str.equals("U")) {
 					System.out.println("Please enter the file name:");
@@ -142,6 +141,7 @@ public class DataNode {
 				BufferedReader br = new BufferedReader(new FileReader(inputFile));
 				String line;
 				NodeRef me = new NodeRef(InetAddress.getLocalHost().getHostName(), PORT);
+				System.out.println(InetAddress.getLocalHost().getHostName());
 				int splitNum = 1;
 				ArrayList<BlockRef> blockList = new ArrayList<BlockRef>();
 				Block curBlock = new Block(blockID, BLOCK_SIZE);;
@@ -191,14 +191,14 @@ public class DataNode {
 			Socket master = null;			
 			try {
 				master = new Socket(masterIP, masterPort);
-				ObjectOutputStream out = new ObjectOutputStream(master.getOutputStream());
-				ObjectInputStream in = new ObjectInputStream(master.getInputStream());
-				out.writeObject("addBlock");
-				out.writeObject(fileName);
-				out.writeObject(curRef);
-				out.flush();
-				ArrayList<NodeRef> addList = (ArrayList<NodeRef>)in.readObject();
-				new Thread(new BlockTransfer(addList, curRef)).start();			
+				ObjectOutputStream masterOut = new ObjectOutputStream(master.getOutputStream());
+				ObjectInputStream masterIn = new ObjectInputStream(master.getInputStream());
+				masterOut.writeObject("addBlock");
+				masterOut.writeObject(fileName);
+				masterOut.writeObject(curRef);
+				masterOut.flush();
+				ArrayList<NodeRef> addList = (ArrayList<NodeRef>)masterIn.readObject();
+				new Thread(new BlockTransfer(addList, curRef)).start();	
 			} catch (UnknownHostException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -210,7 +210,6 @@ public class DataNode {
 				e.printStackTrace();
 			}			
 		}
-		
 	}
 	
 	private class BlockTransfer implements Runnable {
@@ -221,27 +220,34 @@ public class DataNode {
 			this.addList = addList;
 			this.sourceBlock = sourceBlock;
 		}
-		
 		@Override
-		public void run() {			
+		public void run() {
 			try {				
 				File outFile = new File(sourceBlock.getFileName());
 				for (NodeRef node : addList) {
-					System.out.println("start transfer block to: " + node.getIp() + " : " + node.getPort());
-					Socket soc = new Socket(node.getIp(), node.getPort());		
-					PrintWriter out = new PrintWriter(soc.getOutputStream(), true);
-					//BufferedReader in = new BufferedReader(new InputStreamReader(soc.getInputStream()));
-					BufferedReader br = new BufferedReader(new FileReader(outFile));
-					String line;
-					out.println("BlockTransfer");
-					out.println(sourceBlock.getParentFile());
-					out.println(sourceBlock.getSplitNum());
-					while ((line = br.readLine()) != null) {
-						out.println(line);
-					}	
-					br.close();
-					soc.close();
-					Thread.sleep(1000);
+					boolean transfered = false;
+					while (!transfered) {
+						System.out.println("start transfer block to: " + node.getIp() + " : " + node.getPort());
+						Socket soc = new Socket(node.getIp(), node.getPort());		
+						PrintWriter out = new PrintWriter(soc.getOutputStream(), true);
+						BufferedReader in = new BufferedReader(new InputStreamReader(soc.getInputStream()));
+						BufferedReader br = new BufferedReader(new FileReader(outFile));
+						String line;
+						out.println("BlockTransfer");
+						out.println(sourceBlock.getParentFile());
+						out.println(sourceBlock.getSplitNum());
+						while ((line = br.readLine()) != null) {
+							out.println(line);
+						}	
+						out.println("end of block");
+						br.close();
+						String response = in.readLine();
+						if (response.equals("Received")) {
+							transfered = true;
+						}
+						soc.close();
+						Thread.sleep(1000);
+					}					
 				}				
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
@@ -250,8 +256,8 @@ public class DataNode {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}			
-		}			
-	}
+		}		
+	}	
 	
 	private class BlockReceiver implements Runnable {
 		private BufferedReader in;
@@ -270,8 +276,12 @@ public class DataNode {
 				String line;
 				System.out.println("Start to receive block");
 				while ((line = in.readLine()) != null) {
+					if (line.equals("end of block")) {
+						break;
+					}
 					receiveBlock.addRecord(line);
 				}
+				System.out.println("get all the block");
 				BlockRef receiveBlockRef = receiveBlock.generateRef(me, parentFile, splitNum);
 				ArrayList<BlockRef> blockList;
 				if (fileTable.containsKey(parentFile)) {
@@ -282,15 +292,28 @@ public class DataNode {
 				blockList.add(receiveBlockRef);
 				fileTable.put(parentFile, blockList);
 				System.out.println("Received " + receiveBlockRef.getFileName());
-				Socket report = new Socket(masterIP, masterPort);
-				ObjectOutputStream out = new ObjectOutputStream(report.getOutputStream());
-				ObjectInputStream in = new ObjectInputStream(report.getInputStream());
-				out.writeObject("update");
-				out.writeObject(me);
-				out.writeObject(fileTable);
-				out.flush();
-				report.close();
+				
+				// Report to the master
+				boolean reported = false;
+				while (!reported) {
+					Socket report = new Socket(masterIP, masterPort);
+					ObjectOutputStream masterOut = new ObjectOutputStream(report.getOutputStream());
+					ObjectInputStream masterIn = new ObjectInputStream(report.getInputStream());
+					masterOut.writeObject("update");
+					masterOut.writeObject(me);
+					masterOut.writeObject(fileTable);
+					masterOut.flush();
+					String response = (String)masterIn.readObject();
+					if (response.equals("Reported")) {
+						reported = true;
+					}
+					report.close();
+				}		
+				out.println("Received");
 			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (ClassNotFoundException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}			
