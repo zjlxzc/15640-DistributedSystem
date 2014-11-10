@@ -61,7 +61,7 @@ public class FileWriterDFS implements Runnable{
 			MRContext context = new MRContext(); // store result to an object
 		
 			while (flag) {
-				Socket clientSocket = reducer.accept();
+				Socket clientSocket = reducer.accept(); // get client socket
 				InputStreamReader inStream = new InputStreamReader(clientSocket.getInputStream());
 				BufferedReader br = new BufferedReader(inStream); // reader client input stream			
 				String[] inLine = br.readLine().split("\t");
