@@ -78,8 +78,9 @@ public class DataNode {
 			ServerSocket listenSoc = null;
 			try {
 				listenSoc = new ServerSocket(PORT);
+				System.out.println("LcoalAddress : " + InetAddress.getLocalHost().toString() + " : " + PORT);
 				Socket remote;
-				while (true) {									
+				while (true) {	
 					remote = listenSoc.accept();
 					BufferedReader in = new BufferedReader(new InputStreamReader(remote.getInputStream()));
 					PrintWriter out = new PrintWriter(remote.getOutputStream(), true);
@@ -88,6 +89,7 @@ public class DataNode {
 						BLOCK_SIZE = Integer.parseInt(in.readLine());
 						System.out.println("block size: " + BLOCK_SIZE);
 					} else if (first.equals("BlockTransfer")) {
+						System.out.println("Get the transfer request");
 						new Thread(new BlockReceiver(in, out)).start();
 					} else if (first.equals("StartTaskTracker")) {
 						TaskTracker taskTracker = new TaskTracker();
@@ -174,6 +176,7 @@ public class DataNode {
 				out.writeObject("addBlock");
 				out.writeObject(fileName);
 				out.writeObject(curRef);
+				out.flush();
 				ArrayList<NodeRef> addList = (ArrayList<NodeRef>)in.readObject();
 				new Thread(new BlockTransfer(addList, curRef)).start();			
 			} catch (UnknownHostException e) {
@@ -201,27 +204,29 @@ public class DataNode {
 		
 		@Override
 		public void run() {			
-			try {
-				Socket soc = null;
-				BufferedReader br = null;				
+			try {				
 				File outFile = new File(sourceBlock.getFileName());
 				for (NodeRef node : addList) {
-					System.out.println("start transfer block to: " + node.getIp());
-					soc = new Socket(node.getIp(), node.getPort());		
+					System.out.println("start transfer block to: " + node.getIp() + " : " + node.getPort());
+					Socket soc = new Socket(node.getIp(), node.getPort());		
 					PrintWriter out = new PrintWriter(soc.getOutputStream(), true);
-					BufferedReader in = new BufferedReader(new InputStreamReader(soc.getInputStream()));
-					br = new BufferedReader(new FileReader(outFile));
+					//BufferedReader in = new BufferedReader(new InputStreamReader(soc.getInputStream()));
+					BufferedReader br = new BufferedReader(new FileReader(outFile));
 					String line;
 					out.println("BlockTransfer");
 					out.println(sourceBlock.getParentFile());
 					out.println(sourceBlock.getSplitNum());
 					while ((line = br.readLine()) != null) {
 						out.println(line);
-					}
+					}	
 					br.close();
-					soc.close();					
-				}
+					soc.close();
+					Thread.sleep(1000);
+				}				
 			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}			
@@ -255,7 +260,14 @@ public class DataNode {
 					blockList = new ArrayList<BlockRef>();
 				}
 				blockList.add(receiveBlockRef);
-				//out.println("finished");
+				System.out.println("Received " + receiveBlockRef.getFileName());
+				Socket report = new Socket(masterIP, masterPort);
+				ObjectOutputStream out = new ObjectOutputStream(report.getOutputStream());
+				ObjectInputStream in = new ObjectInputStream(report.getInputStream());
+				out.writeObject("update");
+				out.writeObject(fileMap);
+				out.flush();
+				report.close();
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

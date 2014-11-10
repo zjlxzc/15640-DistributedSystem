@@ -78,10 +78,11 @@ public class NameNode {
 	
 	private static void Usage() {
 		System.out.println("Please enter command:\n");
-		System.out.println("[L]ist all the nodes");
+		System.out.println("List all the [F]iles");
+		System.out.println("List all the [N]odes");
 		System.out.println("List all the [J]obs");
 		System.out.println("[Q]uit");
-		System.out.println("Please input:[L/J/Q]:");
+		System.out.println("Please input:[F/N/J/Q]:");
 	}
 
 	
@@ -93,12 +94,14 @@ public class NameNode {
 				Usage();
 				String str = scan.nextLine();
 				if (str.equals("L")){
-					new Thread(new ListThread()).start();
+					new Thread(new ListFileThread()).start();
 				} else if (str.equals("Q")) {
 					System.exit(0);
 				} else if (str.equals("J")) {
 					JobTracker jobTracker = JobTracker.getInstance();
-					jobTracker.getInstance();
+					jobTracker.ListJobs();					
+				} else if (str.equals("N")) {
+					new Thread(new ListNodeThread()).start();
 				}
 			}
 		}
@@ -132,10 +135,32 @@ public class NameNode {
 		}		
 	}
 	
-	private class ListThread implements Runnable {		
+	private class ListFileThread implements Runnable {		
 		@Override
 		public void run() {
-			dataNodeTable.list();	
+			if (metaTable == null || metaTable.isEmpty()) {
+				System.out.println("There is no file in the system!");
+			} else {
+				for (String file : metaTable.keySet()) {
+					System.out.println("File Name : " + file);
+					Hashtable<String, ArrayList<BlockRef>> curTable = metaTable.get(file);
+					for (String ip : curTable.keySet()) {
+						System.out.println(ip);
+						for (BlockRef block : curTable.get(ip)) {
+							System.out.print(block.getFileName() + " ");
+						}
+						System.out.println();
+					}
+					System.out.println("===================================================");
+				}
+			}			
+		}		
+	}
+	
+	private class ListNodeThread implements Runnable {		
+		@Override
+		public void run() {
+			dataNodeTable.list();
 		}		
 	}
 	
@@ -260,6 +285,7 @@ public class NameNode {
 					metaTable.put(fileName, nodeTable);
 				}
 				out.writeObject(ret);
+				out.flush();
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
