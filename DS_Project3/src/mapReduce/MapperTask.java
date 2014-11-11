@@ -17,8 +17,8 @@ public class MapperTask extends Task{
 	public MapperTask(NodeRef node, int taskID, Class<?> mapReduce,
 			ArrayList<BlockRef> blockList, ArrayList<NodeRef> reducers) {
 		super(node, taskID, mapReduce);
-		this.blockList = new ArrayList<BlockRef>();
-		this.reducers = new ArrayList<NodeRef>();
+		this.blockList = blockList;
+		this.reducers = reducers;
 	}
 	
 	public void addBlock(BlockRef ref) {

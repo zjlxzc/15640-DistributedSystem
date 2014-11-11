@@ -1,8 +1,14 @@
 package mapReduce;
 
+import java.io.Serializable;
+
 import dfs.NodeRef;
 
-public class Task {
+public class Task implements Serializable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	protected int taskID;
 	protected NodeRef node;
 	protected String status;

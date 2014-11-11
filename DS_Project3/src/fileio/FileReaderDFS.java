@@ -11,6 +11,7 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.lang.reflect.Constructor;
 import java.net.Socket;
@@ -34,12 +35,18 @@ public class FileReaderDFS implements Runnable {
 		this.fileName = fileName;
 		this.reducers = reducers;
 		this.MRClass = MRClass;
+		sockets = new ArrayList<Socket>(); 
 	}
 
-	public void connectReducer() throws IOException {
+	public void connectReducer() throws IOException, ClassNotFoundException {
 		for (NodeRef node : reducers) { // connect to each reducer
 			Socket clientSocket = new Socket(node.getIp(), node.getPort());
-			sockets.add(clientSocket);
+			ObjectOutputStream sendInfor = new ObjectOutputStream(clientSocket.getOutputStream());
+			sendInfor.writeObject("StartSend"); // write out object
+			sendInfor.flush();
+			ObjectInputStream sendIn = new ObjectInputStream(clientSocket.getInputStream());
+			int port = (int)sendIn.readObject();
+			sockets.add(new Socket(node.getIp(), port));
 		}
 	}
 
@@ -69,10 +76,15 @@ public class FileReaderDFS implements Runnable {
 				count++;
 			}
 
-			connectReducer();
+			try {
+				connectReducer();
+			} catch (ClassNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			Iterator<SingleRecord> iterator = context.getIterator();
 			SingleRecord pair = null;
-
+			
 			while (iterator.hasNext()) { // iterator each key-value pair and
 											// send to corresponding reducer
 				pair = iterator.next();

@@ -1,5 +1,7 @@
 package mergeSort;
 
+import java.io.Serializable;
+
 /*
  * @author Chun Xu (chunx)
  * @author Jialing Zhou (jialingz)
@@ -7,7 +9,7 @@ package mergeSort;
  * This class is the structure of a single key-value pair
  */
 
-public class SingleRecord implements Comparable<SingleRecord>{
+public class SingleRecord implements Serializable, Comparable<SingleRecord>{
 	private String key;
 	private String value;
 	
@@ -40,20 +42,20 @@ public class SingleRecord implements Comparable<SingleRecord>{
 	// the hash code will be used to do calculation to find corresponding reducer
 	public int hashCode() {
 		int len = key.length();
-        int[] array = new int[26];
+        int[] array = new int[256];
         for (int i = 0; i < len; i++) {
-            array[key.charAt(i) - 'a']++;
+            array[key.charAt(i)]++;
         }
         
-        int a = 378551;
-        int b = 63689;
-        int hash = 0;
+        long a = 378551;
+        long b = 63689;
+        long hash = 0;
         
         for (int value : array) {
             hash = hash * a + value;
             a = a * b;
         }
         
-        return hash;
+        return (int)hash;
 	}
 }

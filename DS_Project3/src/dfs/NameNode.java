@@ -71,7 +71,7 @@ public class NameNode {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}				
-		new Thread(new Poll()).start();
+		//new Thread(new Poll()).start();
 		new Thread(new Main()).start();
 		new Thread(new ListenToSlave()).start();
 	}
@@ -189,6 +189,7 @@ public class NameNode {
 					} else if (first.equals("update")) {
 						new Thread(new Updater(in, out)).start();
 					} else if (first.equals("MapReduceNewJob")) {
+						System.out.println("Master: " + first);
 						new Thread(new MapReduceJob(in, out)).start();
 					}
 				}				
@@ -325,7 +326,6 @@ public class NameNode {
 					Hashtable<String, ArrayList<BlockRef>> fileTable = metaTable.get(filename);
 					fileTable.put(sourceNode.getIp().getHostAddress(), nodeTable.get(filename));
 				}		
-				out.writeObject("Reported");
 			} catch (IOException e) {
 				e.printStackTrace();
 			} catch (ClassNotFoundException e) {
@@ -346,10 +346,11 @@ public class NameNode {
 		public void run() {
 			try {
 				String inputFile = (String)in.readObject();
+				System.out.println("mapreducejob: " + inputFile);
 				String outputPath = (String)in.readObject();
+				System.out.println("mapreducejob: " + outputPath);
 				Class<?> mapReduceClass = (Class<?>)in.readObject();
 				Hashtable<String, ArrayList<BlockRef>> ipTable = metaTable.get(inputFile);
-				System.out.println(ipTable);
 				Hashtable<NodeRef, ArrayList<BlockRef>> refTable = new Hashtable<NodeRef, ArrayList<BlockRef>>();
 				for (String ip : ipTable.keySet()) {
 					refTable.put(dataNodeTable.getDataNode(ip), ipTable.get(ip));

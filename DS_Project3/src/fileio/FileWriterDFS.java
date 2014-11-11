@@ -21,14 +21,18 @@ import java.util.Iterator;
 
 import example.WordCount;
 import mapReduce.MRContext;
+import mapReduce.Task;
 import mergeSort.SingleRecord;
 
 public class FileWriterDFS implements Runnable{
 	private String fileName;
 	private boolean flag = true; // this variable indicate if the mapper job is done
+	private Task task;
+	private int newPort;
 	
-	public FileWriterDFS(String fileName) throws IOException {
+	public FileWriterDFS(String fileName, Task task) throws IOException {
 		this.fileName = fileName;
+		this.task = task;
 	}
 	
 	public void reducer(MRContext context) throws IOException {
@@ -52,15 +56,17 @@ public class FileWriterDFS implements Runnable{
 		BufferedWriter writer = new BufferedWriter(new FileWriter(new File(fileName)));
 		writer.write(context.getIterator().next().getKey() + "\t" + context.getIterator().next().getValue());
 		writer.close();
+		task.setStatus("finished");
 	}
 
 	@Override
 	public void run() {
 		ServerSocket reducer;
 		try {
-			reducer = new ServerSocket();		
+			reducer = new ServerSocket(0);	
+			newPort = reducer.getLocalPort();
 			MRContext context = new MRContext(); // store result to an object
-		
+			System.out.println("flag : " + flag);	
 			while (flag) {
 				Socket clientSocket = reducer.accept(); // get client socket
 				InputStreamReader inStream = new InputStreamReader(clientSocket.getInputStream());
@@ -68,11 +74,27 @@ public class FileWriterDFS implements Runnable{
 				String[] inLine = br.readLine().split("\t");
 				context.context(inLine[0], inLine[1]);
 			}
-		
+			System.out.println("after flage : ");	
 			reducer(context);		
 			reducer.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}	
+	}
+
+	public boolean isFlag() {
+		return flag;
+	}
+
+	public void setFlag(boolean flag) {
+		this.flag = flag;
+	}
+
+	public int getNewPort() {
+		return newPort;
+	}
+
+	public void setNewPort(int newPort) {
+		this.newPort = newPort;
 	}
 }
