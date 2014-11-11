@@ -38,9 +38,11 @@ public class JobTracker {
 		HashSet<String> splitNameSet = new HashSet<String>();
 		HashMap<NodeRef, ArrayList<BlockRef>> assignment = new HashMap<NodeRef, ArrayList<BlockRef>>();
 		int taskID = 1;
-		for (NodeRef node : refTable.keySet()) {
-			ArrayList<BlockRef> blockList = refTable.get(node);
-			while (splitNum > 0) {
+		
+		while (splitNum > 0) {
+			for (NodeRef node : refTable.keySet()) {
+				ArrayList<BlockRef> blockList = refTable.get(node);
+			
 				int i = 0;
 				for (; i < blockList.size(); i++) {
 					String curSplitName = blockList.get(i).getFileName();
@@ -54,6 +56,7 @@ public class JobTracker {
 						}
 						splitNameSet.add(curSplitName);
 						splitNum--;
+						break;
 					}
 				}
 			}			
