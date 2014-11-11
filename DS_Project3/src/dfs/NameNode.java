@@ -77,32 +77,40 @@ public class NameNode {
 	}
 	
 	private static void Usage() {
-		System.out.println("Please enter command:\n");
-		System.out.println("List all the [F]iles");
-		System.out.println("List all the [N]odes");
-		System.out.println("List all the [J]obs");
-		System.out.println("[Q]uit");
-		System.out.println("Please input:[F/N/J/Q]:");
+		System.out.println("Please enter command:");
+		System.out.println("To list all the nodes information: nodes");
+		System.out.println("To list all the files information: files");
+		System.out.println("To list all the jobs information: jobs");
+		System.out.println("To quit the system: quit");
 	}
 
 	
 	private class Main implements Runnable {				
 		@Override
-		public void run() {			
+		public void run() {		
+			Usage();
 			Scanner scan = new Scanner(System.in);
-			while (true) {
-				Usage();
-				String str = scan.nextLine();
-				if (str.equals("F")){
+			while (true) {								
+				String[] str = scan.nextLine().split(" ");
+				if (str[0].equals("files")){
+					System.out.println("Files distribution on DFS:");
+					System.out.println("===================================================");
 					new Thread(new ListFileThread()).start();
-				} else if (str.equals("Q")) {
+				} else if (str[0].equals("quit")) {
+					System.out.println("ByeBye");
+					scan.close();
 					System.exit(0);
-				} else if (str.equals("J")) {
+				} else if (str[0].equals("jobs")) {
 					JobTracker jobTracker = JobTracker.getInstance();
 					jobTracker.ListJobs();					
-				} else if (str.equals("N")) {
+				} else if (str[0].equals("nodes")) {
+					System.out.println("DataNodes available on DFS:");
+					System.out.println("===================================================");
 					new Thread(new ListNodeThread()).start();
-				}
+				} else {
+					System.out.println("The input command is wrong.");
+					Usage();
+				}				
 			}
 		}
 	}	
@@ -213,8 +221,6 @@ public class NameNode {
 			try {				
 				String fileName = (String)in.readObject();
 				BlockRef sourceBlock = (BlockRef)in.readObject();
-				System.out.println("Get the block add request from: " + sourceBlock.getNodeRef().getIp() + "to add block of "
-							+ sourceBlock.getFileName() + " of the file " + fileName);
 				NodeRef sourceNode = sourceBlock.getNodeRef();
 				ArrayList<NodeRef> ret = new ArrayList<NodeRef>();
 				ArrayList<NodeRef> nodeList = dataNodeTable.getDataNodes();
@@ -233,7 +239,8 @@ public class NameNode {
 						}
 						ret.add(des);
 						ips.add(des.getIp().toString());
-						System.out.println("First: send the block des: " + des.getIp());
+						System.out.println("Send " + sourceBlock.getFileName() + " from " + sourceNode.getIp().getHostAddress()
+									+ " to " + des.getIp().getHostAddress());
 						cnt++;
 					}
 					Hashtable<String, ArrayList<BlockRef>> newNodeTable = new Hashtable<String, ArrayList<BlockRef>>();
@@ -269,17 +276,12 @@ public class NameNode {
 						}
 						ips.add(des.getIp().toString());
 						ret.add(des);
-						System.out.println("Second: send the block des: " + des.getIp());
+						System.out.println("Send " + sourceBlock.getFileName() + " from " + sourceNode.getIp().getHostAddress()
+								+ " to " + des.getIp().getHostAddress());
 						cnt++;
 					}
 					Hashtable<String, ArrayList<BlockRef>> nodeTable = metaTable.get(fileName);
-					for (String ip : nodeTable.keySet()) {
-						System.out.println("NodeTable : " + ip);
-						System.out.println(nodeTable.get(ip));
-					}
 					ArrayList<BlockRef> blockList = nodeTable.get(sourceNode.getIp().getHostAddress());
-					System.out.println(blockList);
-					System.out.println(sourceBlock.getFileName());
 					blockList.add(sourceBlock);
 					nodeTable.put(sourceNode.getIp().getHostAddress(), blockList);
 					metaTable.put(fileName, nodeTable);
@@ -317,13 +319,8 @@ public class NameNode {
 		public void run() {		
 			try {	
 				NodeRef sourceNode = (NodeRef)in.readObject();
-				System.out.println("Get report from : " + sourceNode.getIp().toString());
 				Hashtable<String, ArrayList<BlockRef>> nodeTable = 
 						(Hashtable<String, ArrayList<BlockRef>>)in.readObject();
-				for (String filename : nodeTable.keySet()) {
-					System.out.println(filename);
-					System.out.println(nodeTable.get(filename).toString());
-				}
 				for (String filename : nodeTable.keySet()) {
 					Hashtable<String, ArrayList<BlockRef>> fileTable = metaTable.get(filename);
 					fileTable.put(sourceNode.getIp().getHostAddress(), nodeTable.get(filename));
@@ -338,6 +335,7 @@ public class NameNode {
 	}
 	
 	private class MapReduceJob implements Runnable {
+		@SuppressWarnings("unused")
 		private ObjectOutputStream out = null;
 		private ObjectInputStream in = null;
 		public MapReduceJob(ObjectInputStream in, ObjectOutputStream out) {
@@ -354,8 +352,6 @@ public class NameNode {
 				System.out.println(ipTable);
 				Hashtable<NodeRef, ArrayList<BlockRef>> refTable = new Hashtable<NodeRef, ArrayList<BlockRef>>();
 				for (String ip : ipTable.keySet()) {
-					System.out.println(ip);
-					System.out.println(dataNodeTable.getDataNode(ip));
 					refTable.put(dataNodeTable.getDataNode(ip), ipTable.get(ip));
 				}
 								

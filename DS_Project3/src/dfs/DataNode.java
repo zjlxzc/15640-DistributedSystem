@@ -29,6 +29,7 @@ public class DataNode {
 	public DataNode(int port, String masterIP, int masterPort) {
 		new Thread(new Main()).start();
 		new Thread(new Listen()).start();
+		
 		fileTable = new Hashtable<String, ArrayList<BlockRef>>();
 		PORT = port;
 		blockID = 0;
@@ -39,35 +40,38 @@ public class DataNode {
 	private static void Usage() {
 		System.out.println("Please enter command:");
 		System.out.println("To upload a file to DFS : upload [filename]");
-		System.out.println("To list all the nodes information: nodes");
+		System.out.println("To list all the file information: files");
 		System.out.println("To submit a mapreduce job: job [input_file] [output_path] [mapreduce_class]");
 		System.out.println("To quit the system: quit");
 	}
 	
 	private class Main implements Runnable {				
 		@Override
-		public void run() {			
+		public void run() {		
+			Usage();
 			Scanner scan = new Scanner(System.in);
-			while (true) {
-				//String[] str = scan.nextLine().split(" ");
-				String str = scan.nextLine();
-				if (str.equals("U")) {
-					System.out.println("Please enter the file name:");
-					String fileName = scan.nextLine();
+			while (true) {							
+				String[] str = scan.nextLine().split(" ");
+				if (str[0].equals("upload")) {
+					String fileName = str[1];
 					new Thread(new Upload(fileName)).start();
-				} else if (str.equals("Q")) {
+				} else if (str[0].equals("quit")) {
+					System.out.println("ByeBye");
+					scan.close();
 					System.exit(0);
-				} else if (str.equals("S")) {
-					System.out.println("Please enter the input file name: ");
-					String inputFile = scan.nextLine();
-					System.out.println("Please enter the output path: ");
-					String outputPath = scan.nextLine();
-					System.out.println("Please enter the MapReduce file name: ");
-					String mapReduceFile = scan.nextLine();
+				} else if (str[0].equals("job")) {
+					String inputFile = str[1];
+					String outputPath = str[2];
+					String mapReduceFile = str[3];
 					new Thread(new MapReduceJob(inputFile, outputPath, mapReduceFile)).start();
-				} else if (str.equals("F")){
+				} else if (str[0].equals("files")){
+					System.out.println("Files on this node:");
+					System.out.println("===================================================");
 					new Thread(new ListFileThread()).start();
-				} 
+				} else {
+					System.out.println("The input command is wrong.");
+					Usage();
+				}
 			}
 		}
 	}
@@ -90,8 +94,8 @@ public class DataNode {
 						BLOCK_SIZE = Integer.parseInt(in.readLine());
 						System.out.println("block size: " + BLOCK_SIZE);
 					} else if (first.equals("BlockTransfer")) {
-						System.out.println("Get the transfer request");
-						new Thread(new BlockReceiver(in, out)).start();
+						System.out.println("Start to receive from " + remote.getRemoteSocketAddress());
+						new Thread(new BlockReceiver(remote)).start();
 					} else if (first.equals("StartTaskTracker")) {
 						TaskTracker taskTracker = new TaskTracker();
 						out.println("" + taskTracker.getPort());
@@ -141,7 +145,6 @@ public class DataNode {
 				BufferedReader br = new BufferedReader(new FileReader(inputFile));
 				String line;
 				NodeRef me = new NodeRef(InetAddress.getLocalHost().getHostName(), PORT);
-				System.out.println(InetAddress.getLocalHost().getHostName());
 				int splitNum = 1;
 				ArrayList<BlockRef> blockList = new ArrayList<BlockRef>();
 				Block curBlock = new Block(blockID, BLOCK_SIZE);;
@@ -227,7 +230,7 @@ public class DataNode {
 				for (NodeRef node : addList) {
 					boolean transfered = false;
 					while (!transfered) {
-						System.out.println("start transfer block to: " + node.getIp() + " : " + node.getPort());
+						System.out.println("Send to " + node.getIp().getHostAddress());
 						Socket soc = new Socket(node.getIp(), node.getPort());		
 						PrintWriter out = new PrintWriter(soc.getOutputStream(), true);
 						BufferedReader in = new BufferedReader(new InputStreamReader(soc.getInputStream()));
@@ -246,42 +249,44 @@ public class DataNode {
 							transfered = true;
 						}
 						soc.close();
-						Thread.sleep(1000);
 					}					
 				}				
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}			
+			}		
 		}		
 	}	
 	
 	private class BlockReceiver implements Runnable {
-		private BufferedReader in;
-		private PrintWriter out;
-		public BlockReceiver(BufferedReader in, PrintWriter out) {
-			this.in = in;
-			this.out = out;
+//		private BufferedReader in;
+//		private PrintWriter out;
+//		public BlockReceiver(BufferedReader in, PrintWriter out) {
+//			this.in = in;
+//			this.out = out;
+//		}
+		private Socket soc;
+		public BlockReceiver(Socket soc) {
+			this.soc = soc;
 		}
+		
 		@Override
 		public void run() {
 			try {
+				BufferedReader in = new BufferedReader(new InputStreamReader(soc.getInputStream()));
+				PrintWriter out = new PrintWriter(soc.getOutputStream(), true);
 				String parentFile = in.readLine();
 				int splitNum = Integer.parseInt(in.readLine());
 				Block receiveBlock = new Block(blockID, BLOCK_SIZE);
 				NodeRef me = new NodeRef(InetAddress.getLocalHost().getHostName(), PORT);
 				String line;
-				System.out.println("Start to receive block");
+				System.out.println("Start to receive " + parentFile + "_" + splitNum);
 				while ((line = in.readLine()) != null) {
 					if (line.equals("end of block")) {
 						break;
 					}
 					receiveBlock.addRecord(line);
 				}
-				System.out.println("get all the block");
 				BlockRef receiveBlockRef = receiveBlock.generateRef(me, parentFile, splitNum);
 				ArrayList<BlockRef> blockList;
 				if (fileTable.containsKey(parentFile)) {
@@ -291,7 +296,6 @@ public class DataNode {
 				}
 				blockList.add(receiveBlockRef);
 				fileTable.put(parentFile, blockList);
-				System.out.println("Received " + receiveBlockRef.getFileName());
 				
 				// Report to the master
 				boolean reported = false;
@@ -338,6 +342,7 @@ public class DataNode {
 				Class<?> mapReduceClass = Class.forName(mapReduceFile);			
 				master = new Socket(masterIP, masterPort);
 				ObjectOutputStream out = new ObjectOutputStream(master.getOutputStream());
+				@SuppressWarnings("unused")
 				ObjectInputStream in = new ObjectInputStream(master.getInputStream());
 				out.writeObject("MapReduceNewJob");
 				out.writeObject(inputFile);
