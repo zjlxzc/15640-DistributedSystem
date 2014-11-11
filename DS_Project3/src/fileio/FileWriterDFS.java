@@ -9,6 +9,7 @@ package fileio;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -48,7 +49,7 @@ public class FileWriterDFS implements Runnable{
 			wc.reduce(key, map.get(key).iterator(), contextReducer);
 		}
 		
-		BufferedWriter writer = new BufferedWriter(new FileWriter(fileName));
+		BufferedWriter writer = new BufferedWriter(new FileWriter(new File(fileName)));
 		writer.write(context.getIterator().next().getKey() + "\t" + context.getIterator().next().getValue());
 		writer.close();
 	}
