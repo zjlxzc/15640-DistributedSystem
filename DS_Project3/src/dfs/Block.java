@@ -32,7 +32,6 @@ public class Block {
 		String filename = parentFile + "_" + splitNum;
 		try {
 			File outputFile = new File(filename);
-			System.out.println("generate:" + filename);
 			PrintWriter out = new PrintWriter(outputFile);
 			for (int i = 0; i < records.size(); i++) {
 				out.println(records.get(i));
