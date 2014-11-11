@@ -29,18 +29,13 @@ public class TaskTracker {
 	private static boolean isFinished = false;
 	private static int recordCount = 10;
 
-	private int reportPort = 0;
+	private static int reportPort = 0;
 	
 	public TaskTracker() {
 		try {
-			ServerSocket taskListenSocket = new ServerSocket(0); // start a new socket to listen to name node
-			reportPort = taskListenSocket.getLocalPort(); // get generated port
-			
-			Thread listenThread = new Thread(new Listen(taskListenSocket));		
+			Thread listenThread = new Thread(new Listen());		
 			listenThread.start();
 			
-		} catch (IOException e) {
-			System.out.println(e);
 		} catch (Exception e) {
 			System.out.println(e);
 		}
@@ -88,8 +83,9 @@ public class TaskTracker {
 	
 	private static class Listen implements Runnable {
 		ServerSocket taskListenSocket;
-		public Listen(ServerSocket taskListenSocket) {
-			this.taskListenSocket = taskListenSocket;
+		public Listen() throws IOException {
+			taskListenSocket = new ServerSocket(0); // start a new socket to listen to name node
+			reportPort = taskListenSocket.getLocalPort(); // get generated port
 		}
 		
 		public void run() {
