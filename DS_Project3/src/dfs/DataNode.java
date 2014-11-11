@@ -232,6 +232,7 @@ public class DataNode {
 					while (!transfered) {
 						System.out.println("Send to " + node.getIp().getHostAddress());
 						Socket soc = new Socket(node.getIp(), node.getPort());		
+						System.out.println(node.getIp() + " : " + node.getPort());
 						PrintWriter out = new PrintWriter(soc.getOutputStream(), true);
 						BufferedReader in = new BufferedReader(new InputStreamReader(soc.getInputStream()));
 						BufferedReader br = new BufferedReader(new FileReader(outFile));
@@ -245,6 +246,7 @@ public class DataNode {
 						out.println("end of block");
 						br.close();
 						String response = in.readLine();
+						System.out.println("Block Transfer: " + response);
 						if (response.equals("Received")) {
 							transfered = true;
 						}
