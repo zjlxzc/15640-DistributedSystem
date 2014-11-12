@@ -205,6 +205,9 @@ public class DataNode {
 				masterOut.writeObject(curRef);
 				masterOut.flush();
 				ArrayList<NodeRef> addList = (ArrayList<NodeRef>)masterIn.readObject();
+				masterIn.close();
+				masterOut.close();
+				master.close();
 				new Thread(new BlockTransfer(addList, curRef)).start();	
 			} catch (UnknownHostException e) {
 				// TODO Auto-generated catch block
@@ -254,6 +257,8 @@ public class DataNode {
 						if (response.equals("Received")) {
 							transfered = true;
 						}
+						in.close();
+						out.close();
 						soc.close();
 					}					
 				}				
@@ -313,6 +318,8 @@ public class DataNode {
 				masterOut.writeObject(me);
 				masterOut.writeObject(fileTable);
 				masterOut.flush();
+				masterIn.close();
+				masterOut.close();
 				report.close();	
 				out.println("Received");
 			} catch (IOException e) {

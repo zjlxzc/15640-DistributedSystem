@@ -124,7 +124,6 @@ public class TaskTracker {
 						srcOut.writeObject(reduce.getNewPort());
 						srcOut.flush();
 					}
-					nameNode.close();
 				} catch (Exception e) {
 					System.out.println(e);
 				}				

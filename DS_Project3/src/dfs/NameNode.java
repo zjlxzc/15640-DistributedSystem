@@ -62,8 +62,9 @@ public class NameNode {
 				PrintWriter out = new PrintWriter(master.getOutputStream(), true);
 				out.println("BlockSize");
 				out.println(BLOCK_SIZE);
-			}	
-			master.close();
+				out.close();
+				master.close();
+			}				
 			br.close();
 		} catch (FileNotFoundException e) {
 			System.out.println("The input file path does not exist");

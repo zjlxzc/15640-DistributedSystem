@@ -94,6 +94,8 @@ public class JobTracker {
 				ips.put(node.getIp().getHostAddress(), port);
 				job.addReducerTasks(task);
 				taskID++;
+				in.close();
+				out.close();
 				soc.close();
 			}
 			ips = new HashMap<String, Integer>();
@@ -108,6 +110,9 @@ public class JobTracker {
 					refToTaskTracker = new NodeRef(node.getIp().getHostAddress(), port);	
 					System.out.println(refToTaskTracker.getIp() + " : " + refToTaskTracker.getPort());
 					ips.put(node.getIp().getHostAddress(), port);
+					in.close();
+					out.close();
+					soc.close();
 				} else {
 					String curIp = node.getIp().getHostAddress();
 					refToTaskTracker = new NodeRef(curIp, ips.get(curIp));
@@ -118,7 +123,7 @@ public class JobTracker {
 				System.out.println(task.getBlockList());
 				job.addMapperTasks(task);
 				taskID++;
-				soc.close();
+
 			}			
 		}catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -181,6 +186,8 @@ public class JobTracker {
 						stop = true;
 						break;
 					}
+					in.close();
+					out.close();
 					soc.close();
 				}
 				if (!stop) {
@@ -198,6 +205,8 @@ public class JobTracker {
 							stop = true;
 							break;							
 						}
+						in.close();
+						out.close();
 						soc.close();
 					}
 				}
@@ -210,13 +219,6 @@ public class JobTracker {
 			} catch (ClassNotFoundException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-			} finally {
-				try {
-					soc.close();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
 			}
 		}		
 	}
@@ -270,6 +272,8 @@ public class JobTracker {
 								}
 							}
 						}
+						in.close();
+						out.close();
 						jobTracker.close();
 					}					
 				}
