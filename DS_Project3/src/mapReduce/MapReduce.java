@@ -1,10 +1,10 @@
 package mapReduce;
 
-/**
+/*
  * @author Chun Xu (chunx)
  * @author Jialing Zhou (jialingz)
  * 
- * User should implement these two methods.
+ * User should implement these two required methods.
  */
 
 import java.util.Iterator;

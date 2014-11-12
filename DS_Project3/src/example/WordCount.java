@@ -4,7 +4,7 @@ package example;
  * @author Chun Xu (chunx)
  * @author Jialing Zhou (jialingz)
  * 
- * This class is an example to do map-reduce processing.
+ * This class is a word count example to do map-reduce processing.
  */
 
 import java.util.Iterator;
@@ -13,7 +13,7 @@ import mapReduce.MapReduce;
 
 public class WordCount implements MapReduce{
 	 	    
-	@Override
+	@Override // implement map method
 	public void map(String key, String value, MRContext context){
 		String[] token = value.split("\\W");
 		for (String word : token) {
@@ -21,13 +21,13 @@ public class WordCount implements MapReduce{
 		}
 	}
 
-	@Override
+	@Override // implement reduce method
 	public void reduce (String key, Iterator<String> values, MRContext context) {
 		int sum = 0;
 		while (values.hasNext()) {
 			sum++; // aggregate the occurrence
 			values.next();
 		}
-		context.context(key, String.valueOf(sum));
+		context.context(key, String.valueOf(sum)); // use context object to store result
 	}
 }
