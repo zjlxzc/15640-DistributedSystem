@@ -25,10 +25,10 @@ import mapReduce.Task;
 import mergeSort.SingleRecord;
 
 public class FileWriterDFS implements Runnable{
-	private String fileName;
+	private String fileName; // the name of output file
 	private boolean flag = true; // this variable indicate if the mapper job is done
-	private Task task;
-	private int newPort;
+	private Task task; // reducer task
+	private int newPort; // port of a new socket
 	
 	public FileWriterDFS(String fileName, Task task) throws IOException {
 		this.fileName = fileName;
@@ -37,7 +37,7 @@ public class FileWriterDFS implements Runnable{
 	
 	public void reducer(MRContext context) throws IOException {
 		HashMap<String, ArrayList<String>> map = new HashMap<String, ArrayList<String>>();
-		Iterator<SingleRecord> iterator = context.getIterator();
+		Iterator<SingleRecord> iterator = context.getIterator(); // get all key-value pair
 		
 		while (iterator.hasNext()) {
 			SingleRecord sr = (SingleRecord)iterator.next();
@@ -48,34 +48,34 @@ public class FileWriterDFS implements Runnable{
 		}
 		
 		MRContext contextReducer = new MRContext(); // store result to an object
-		WordCount wc = new WordCount();
+		WordCount wc = new WordCount(); // create an instance of word count example
 		for (String key : map.keySet()) {
-			wc.reduce(key, map.get(key).iterator(), contextReducer);
+			wc.reduce(key, map.get(key).iterator(), contextReducer); // call user-defined reducer method
 		}
 		
 		BufferedWriter writer = new BufferedWriter(new FileWriter(new File(fileName)));
 		writer.write(context.getIterator().next().getKey() + "\t" + context.getIterator().next().getValue());
 		writer.close();
-		task.setStatus("finished");
+		task.setStatus("finished"); // set current status
 	}
 
 	@Override
 	public void run() {
 		ServerSocket reducer;
 		try {
-			reducer = new ServerSocket(0);	
+			reducer = new ServerSocket(0);	// create a new socket
 			newPort = reducer.getLocalPort();
-			MRContext context = new MRContext(); // store result to an object
+			MRContext context = new MRContext(); // store result to a context object
 			System.out.println("flag : " + flag);	
-			while (flag) {
+			while (flag) { // true means mapper is still running
 				Socket clientSocket = reducer.accept(); // get client socket
 				InputStreamReader inStream = new InputStreamReader(clientSocket.getInputStream());
 				BufferedReader br = new BufferedReader(inStream); // reader client input stream			
 				String[] inLine = br.readLine().split("\t");
 				context.context(inLine[0], inLine[1]);
 			}
-			System.out.println("after flage : ");	
-			reducer(context);		
+			System.out.println("after flag : ");	
+			reducer(context); // after map phase, it can start to do reduce process
 			reducer.close();
 		} catch (IOException e) {
 			e.printStackTrace();

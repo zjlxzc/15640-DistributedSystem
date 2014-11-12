@@ -39,15 +39,17 @@ public class FileReaderDFS implements Runnable {
 	}
 
 	public void connectReducer() throws IOException, ClassNotFoundException {
+		Socket clientSocket = null;
 		for (NodeRef node : reducers) { // connect to each reducer
-			Socket clientSocket = new Socket(node.getIp(), node.getPort());
+			clientSocket = new Socket(node.getIp(), node.getPort());
 			ObjectOutputStream sendInfor = new ObjectOutputStream(clientSocket.getOutputStream());
-			sendInfor.writeObject("StartSend"); // write out object
+			sendInfor.writeObject("StartSend"); // write out information as a signal
 			sendInfor.flush();
 			ObjectInputStream sendIn = new ObjectInputStream(clientSocket.getInputStream());
 			int port = (int)sendIn.readObject();
 			sockets.add(new Socket(node.getIp(), port));
 		}
+		clientSocket.close();
 	}
 
 	@Override
@@ -58,7 +60,7 @@ public class FileReaderDFS implements Runnable {
 		
 		try {
 			constructor = MRClass.getConstructor(); // get constructor
-			mr = (MapReduce)constructor.newInstance(); // create a new instance
+			mr = (MapReduce)constructor.newInstance(); // create a new corresponding instance
 			reader = new BufferedReader(new FileReader(fileName)); // read file
 		} catch (Exception e1) {
 			e1.printStackTrace();
@@ -79,7 +81,6 @@ public class FileReaderDFS implements Runnable {
 			try {
 				connectReducer();
 			} catch (ClassNotFoundException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			Iterator<SingleRecord> iterator = context.getIterator();
@@ -88,11 +89,11 @@ public class FileReaderDFS implements Runnable {
 			while (iterator.hasNext()) { // iterator each key-value pair and
 											// send to corresponding reducer
 				pair = iterator.next();
-				int hashValue = pair.hashCode() % reducers.size();
+				int hashValue = pair.hashCode() % reducers.size(); // get correct reducer number
 				Socket clientSocket = sockets.get(hashValue); // get client socket
 				ObjectOutputStream sendPair = new ObjectOutputStream(
 						clientSocket.getOutputStream());
-				sendPair.writeObject(pair); // write out object
+				sendPair.writeObject(pair); // write out key-value object
 				sendPair.flush();
 			}
 			reader.close();
@@ -101,7 +102,7 @@ public class FileReaderDFS implements Runnable {
 		}
 	}
 
-	// return current number of lines that have been processed
+	// return current number of lines that have been processed to indicate if this task is done
 	public int getCount() {
 		return count;
 	}

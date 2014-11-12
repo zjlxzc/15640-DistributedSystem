@@ -35,7 +35,7 @@ public class TaskTracker {
 	public TaskTracker() {
 		status = new Hashtable<Integer, Hashtable<Integer, String>>();
 		try {
-			Thread listenThread = new Thread(new Listen());		
+			Thread listenThread = new Thread(new Listen());	// start a new thread to listen
 			listenThread.start();
 		} catch (Exception e) {
 			System.out.println(e);

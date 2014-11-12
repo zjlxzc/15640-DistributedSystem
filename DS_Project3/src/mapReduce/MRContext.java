@@ -15,7 +15,6 @@ import mergeSort.SingleRecord;
 
 public class MRContext {
 	private PriorityQueue<SingleRecord> context; // to get key-value pair according to key order
-	//private Set<String> allKey = new TreeSet<String>();
 	
 	public MRContext() {
 		context = new PriorityQueue<SingleRecord>(30, new Comparator<SingleRecord>() {
@@ -32,7 +31,6 @@ public class MRContext {
 	public void context(String key, String value) {
 		SingleRecord newPair = new SingleRecord(key, value);
 		context.add(newPair); // store all key-value pair
-		//allKey.add(key);
 	}
 	
 	public Iterator<SingleRecord> getIterator() {
