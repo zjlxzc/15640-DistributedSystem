@@ -95,7 +95,7 @@ public class DataNode {
 						System.out.println("block size: " + BLOCK_SIZE);
 					} else if (first.equals("BlockTransfer")) {
 						System.out.println("Start to receive from " + remote.getRemoteSocketAddress());
-						new Thread(new BlockReceiver(remote)).start();
+						new Thread(new BlockReceiver(in, out)).start();
 					} else if (first.equals("StartTaskTracker")) {
 						System.out.println(first);
 						TaskTracker taskTracker = new TaskTracker();
@@ -240,7 +240,7 @@ public class DataNode {
 						PrintWriter out = new PrintWriter(soc.getOutputStream(), true);
 						BufferedReader in = new BufferedReader(new InputStreamReader(soc.getInputStream()));
 						BufferedReader br = new BufferedReader(new FileReader(outFile));
-						String line;
+						String line = "";
 						out.println("BlockTransfer");
 						out.println(sourceBlock.getParentFile());
 						out.println(sourceBlock.getSplitNum());
@@ -260,34 +260,34 @@ public class DataNode {
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-			}		
+			} 	
 		}		
 	}	
 	
 	private class BlockReceiver implements Runnable {
-//		private BufferedReader in;
-//		private PrintWriter out;
-//		public BlockReceiver(BufferedReader in, PrintWriter out) {
-//			this.in = in;
-//			this.out = out;
-//		}
-		private Socket soc;
-		public BlockReceiver(Socket soc) {
-			this.soc = soc;
+		private BufferedReader in;
+		private PrintWriter out;
+		public BlockReceiver(BufferedReader in, PrintWriter out) {
+			this.in = in;
+			this.out = out;
 		}
+//		private Socket soc;
+//		public BlockReceiver(Socket soc) {
+//			this.soc = soc;
+//		}
 		
 		@Override
 		public void run() {
 			try {
-				BufferedReader in = new BufferedReader(new InputStreamReader(soc.getInputStream()));
-				PrintWriter out = new PrintWriter(soc.getOutputStream(), true);
+//				BufferedReader in = new BufferedReader(new InputStreamReader(soc.getInputStream()));
+//				PrintWriter out = new PrintWriter(soc.getOutputStream(), true);
 				String parentFile = in.readLine();
 				System.out.println(parentFile);
 				int splitNum = Integer.parseInt(in.readLine());
 				System.out.println(splitNum);
 				Block receiveBlock = new Block(blockID, BLOCK_SIZE);
 				NodeRef me = new NodeRef(InetAddress.getLocalHost().getHostName(), PORT);
-				String line;
+				String line = "";
 				System.out.println("Start to receive " + parentFile + "_" + splitNum);
 				while ((line = in.readLine()) != null) {
 					if (line.equals("end of block")) {

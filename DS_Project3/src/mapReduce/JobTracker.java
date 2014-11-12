@@ -94,6 +94,7 @@ public class JobTracker {
 				ips.put(node.getIp().getHostAddress(), port);
 				job.addReducerTasks(task);
 				taskID++;
+				soc.close();
 			}
 			ips = new HashMap<String, Integer>();
 			for (NodeRef node : assignment.keySet()) {
@@ -117,6 +118,7 @@ public class JobTracker {
 				System.out.println(task.getBlockList());
 				job.addMapperTasks(task);
 				taskID++;
+				soc.close();
 			}			
 		}catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -179,6 +181,7 @@ public class JobTracker {
 						stop = true;
 						break;
 					}
+					soc.close();
 				}
 				if (!stop) {
 					for (MapperTask mapperTask : job.getMapperTasks()) {
@@ -195,6 +198,7 @@ public class JobTracker {
 							stop = true;
 							break;							
 						}
+						soc.close();
 					}
 				}
 				if (!stop) {
@@ -234,19 +238,22 @@ public class JobTracker {
 					}
 					mapperStatus.put(task.getTaskID(), blockIDs);
 				}
-								
-				
+				System.out.println("MapperTasks: " + mapperTasks.toString());
 				Socket jobTracker = null;
 				while (!mapperStatus.isEmpty()) {
 					for (MapperTask task : mapperTasks) {
-						
+						System.out.println("MapperStatus: " + mapperStatus.toString());
+						System.out.println("CurTask : " + task.getTaskID());
 						NodeRef taskTracker = task.getNode();
 						jobTracker = new Socket(taskTracker.getIp(), taskTracker.getPort());
-						ObjectOutputStream out = new ObjectOutputStream(jobTracker.getOutputStream());
+						System.out.println(jobTracker.getLocalAddress() + " : " + jobTracker.getLocalPort());
+						System.out.println("IN JOBTRA1 " + task.getNode().getIp() + " * " + task.getNode().getPort());
+						ObjectOutputStream out = new ObjectOutputStream(jobTracker.getOutputStream());	
 						ObjectInputStream in = new ObjectInputStream(jobTracker.getInputStream());
-						System.out.println("IN JOBTRA3 " + task.getNode().getIp() + " * " + task.getNode().getPort());
+						System.out.println("IN JOBTRA2 " + task.getNode().getIp() + " * " + task.getNode().getPort());
 						out.writeObject("ReportMapper");
-						out.flush();
+						out.flush();						
+						System.out.println("IN JOBTRA3 " + task.getNode().getIp() + " * " + task.getNode().getPort());
 						Hashtable<Integer, Hashtable<Integer, String>> nodeReport = 
 								(Hashtable<Integer, Hashtable<Integer, String>>)in.readObject();
 						System.out.println("JobTracker MapperReport: " + nodeReport.toString());
@@ -254,6 +261,7 @@ public class JobTracker {
 							HashSet<Integer> blockIDs = mapperStatus.get(taskID);
 							Hashtable<Integer, String> blockReport = nodeReport.get(taskID);
 							for (Integer blockID : blockReport.keySet()) {
+								
 								if (blockReport.get(blockID).equals("finished")) {
 									blockIDs.remove(blockID);
 								}
@@ -262,6 +270,7 @@ public class JobTracker {
 								}
 							}
 						}
+						jobTracker.close();
 					}					
 				}
 				System.out.println("Mappers Finished!");

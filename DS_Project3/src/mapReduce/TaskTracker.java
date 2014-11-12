@@ -94,7 +94,6 @@ public class TaskTracker {
 			while (true) {
 				try {
 					Socket nameNode = taskListenSocket.accept(); // get name node socket	
-
 					ObjectOutputStream srcOut = new ObjectOutputStream(nameNode.getOutputStream());
 					ObjectInputStream object = new ObjectInputStream(nameNode.getInputStream());			
 					
@@ -125,6 +124,7 @@ public class TaskTracker {
 						srcOut.writeObject(reduce.getNewPort());
 						srcOut.flush();
 					}
+					nameNode.close();
 				} catch (Exception e) {
 					System.out.println(e);
 				}				
