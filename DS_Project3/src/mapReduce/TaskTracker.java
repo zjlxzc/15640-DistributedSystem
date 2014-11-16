@@ -111,6 +111,7 @@ public class TaskTracker {
 					} else if (inLine.equals("ReportReducer")) { // send reduce information
 						srcOut.writeObject(reducerStatus);
 						srcOut.flush();
+						System.out.println("reducer status : " + reducerStatus);
 					} else if (inLine.equals("MapperFinished")) {
 						reduce.setFlag(false);
 						System.out.println("TaskTracker : flag set to false");

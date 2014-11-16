@@ -72,7 +72,7 @@ public class FileWriterDFS implements Runnable{
 		for (String key : map.keySet()) {
 			mr.reduce(key, map.get(key).iterator(), contextReducer); // call user-defined reducer method
 			System.out.println("sisisis" + context.getIterator().next().getKey() + "\t" + context.getIterator().next().getValue());
-			writer.write(context.getIterator().next().getKey() + "\t" + context.getIterator().next().getValue());
+			writer.write(context.getIterator().next().getKey() + "\t" + context.getIterator().next().getValue() + "\n");
 		}
 		writer.close();
 		task.setStatus("finished"); // set current status
