@@ -27,7 +27,6 @@ public class TaskTracker {
 	private static Hashtable<Integer, Hashtable<Integer, String>> status;
 	private static String reducerStatus;
 	private static boolean isFinished = false;
-	private static int recordCount = 10;
 
 	private static int reportPort = 0;
 	private static FileWriterDFS reduce;
@@ -69,6 +68,7 @@ public class TaskTracker {
 		reducer.start();
 		
 		reducerStatus = task.getStatus();
+		System.out.println("after sssstrackReducer : " + reducerStatus);	
 	}
 	
 	public boolean isFinished() {
@@ -86,36 +86,37 @@ public class TaskTracker {
 			while (true) {
 				try {
 					Socket nameNode = taskListenSocket.accept(); // get name node socket	
-					ObjectInputStream object = new ObjectInputStream(nameNode.getInputStream());
-					ObjectOutputStream srcOut = new ObjectOutputStream(nameNode.getOutputStream());								
+					ObjectOutputStream srcOut = new ObjectOutputStream(nameNode.getOutputStream());
+					ObjectInputStream object = new ObjectInputStream(nameNode.getInputStream());			
 					
 					String inLine = (String)object.readObject(); // get name node information
-					System.out.println(inLine);
+					System.out.println("INLINE: " + inLine);
 					if (inLine.equals("MapperTask")) {
 						MapperTask task = (MapperTask)object.readObject(); // get map task
+						System.out.println("IN MapperTask");
+						srcOut.writeObject("MapperSuccess");
+						srcOut.flush();
 						trackMapper(task);
 					} else if (inLine.equals("ReduceTask")) {
 						ReducerTask task = (ReducerTask)object.readObject(); // get reduce task
+						srcOut.writeObject("ReduceSuccess");
+						srcOut.flush();
 						trackReducer(task);
+						System.out.println("IN ReducerTask");
 					} else if (inLine.equals("ReportMapper")){ // send map information
 						System.out.println("TASKTRACK " + status.toString());
 						srcOut.writeObject(status);
 						srcOut.flush();
 					} else if (inLine.equals("ReportReducer")) { // send reduce information
-						System.out.println("ReportReducer " + reducerStatus.toString());
 						srcOut.writeObject(reducerStatus);
 						srcOut.flush();
-						System.out.println("ReportReducer after " + reducerStatus.toString());
 					} else if (inLine.equals("MapperFinished")) {
 						reduce.setFlag(false);
 					} else if (inLine.equals("StartSend")) {
-						srcOut.writeObject(String.valueOf(reduce.getNewPort()));
+						srcOut.writeObject(reduce.getNewPort());
 						srcOut.flush();
 					}
-					object.close();
-					srcOut.close();
 					nameNode.close();
-					System.out.println("Socket Close");
 				} catch (Exception e) {
 					System.out.println(e);
 				}				
@@ -146,7 +147,7 @@ public class TaskTracker {
 			stat.put(blockID, "Starting"); // record current status
 			
 			while (true) {
-				if (map.getCount() != recordCount) { // to check if map is done
+				if (map.getEnd()) { // to check if map is done
 					isFinished = false;
 				} else {
 					isFinished = true;
@@ -154,7 +155,6 @@ public class TaskTracker {
 					break;
 				}
 			}
-		}
-		
+		}	
 	}
 }

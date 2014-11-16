@@ -7,12 +7,15 @@ package fileio;
  * This class is used to do reducer job.
  */
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.lang.reflect.Constructor;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -21,6 +24,7 @@ import java.util.Iterator;
 
 import example.WordCount;
 import mapReduce.MRContext;
+import mapReduce.MapReduce;
 import mapReduce.Task;
 import mergeSort.SingleRecord;
 
@@ -29,10 +33,12 @@ public class FileWriterDFS implements Runnable{
 	private boolean flag = true; // this variable indicate if the mapper job is done
 	private Task task; // reducer task
 	private int newPort; // port of a new socket
+	private Class<?> MRClass; // get the class of map-reduce job
 	
 	public FileWriterDFS(String fileName, Task task) throws IOException {
 		this.fileName = fileName;
 		this.task = task;
+		this.MRClass = task.getMapReducer();
 	}
 	
 	public void reducer(MRContext context) throws IOException {
@@ -49,10 +55,22 @@ public class FileWriterDFS implements Runnable{
 		
 		BufferedWriter writer = new BufferedWriter(new FileWriter(new File(fileName)));
 		MRContext contextReducer = new MRContext(); // store result to an object
-		WordCount wc = new WordCount(); // create an instance of word count example
+		
+		Constructor<?> constructor = null;
+		MapReduce mr = null;
+		BufferedReader reader = null;
+		try {
+			constructor = MRClass.getConstructor(); // get constructor
+			mr = (MapReduce)constructor.newInstance(); // create a new corresponding instance
+			reader = new BufferedReader(new FileReader(fileName)); // read file
+		} catch (Exception e1) {
+			e1.printStackTrace();
+		}
+		
+		//WordCount wc = new WordCount(); // create an instance of word count example
 		
 		for (String key : map.keySet()) {
-			wc.reduce(key, map.get(key).iterator(), contextReducer); // call user-defined reducer method
+			mr.reduce(key, map.get(key).iterator(), contextReducer); // call user-defined reducer method
 			System.out.println("sisisis" + context.getIterator().next().getKey() + "\t" + context.getIterator().next().getValue());
 			writer.write(context.getIterator().next().getKey() + "\t" + context.getIterator().next().getValue());
 		}
