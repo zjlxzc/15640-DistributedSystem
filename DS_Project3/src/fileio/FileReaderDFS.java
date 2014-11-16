@@ -29,6 +29,7 @@ public class FileReaderDFS implements Runnable {
 	private ArrayList<NodeRef> reducers; // store all reducer of this job
 	private ArrayList<NodeRef> sockets; // store all connection of this job
 	private Class<?> MRClass; // get the class of map-reduce job
+	private boolean isEnd = false;
 	
 	public FileReaderDFS() {
 	}
@@ -110,6 +111,8 @@ public class FileReaderDFS implements Runnable {
 				sendPair.close();
 				clientSocket.close();
 			}
+			
+			isEnd = true;
 			reader.close();
 			
 		} catch (IOException e) {
@@ -120,5 +123,9 @@ public class FileReaderDFS implements Runnable {
 	// return current number of lines that have been processed to indicate if this task is done
 	public int getCount() {
 		return count;
+	}
+	
+	public boolean getEnd() {
+		return isEnd;
 	}
 }
