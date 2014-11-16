@@ -227,32 +227,26 @@ public class JobTracker {
 					}
 					mapperStatus.put(task.getTaskID(), blockIDs);
 				}
-				System.out.println("MapperTasks: " + mapperTasks.toString());
 				Socket jobTracker = null;
 				while (!mapperStatus.isEmpty()) {
 					for (MapperTask task : mapperTasks) {
-						System.out.println("MapperStatus: " + mapperStatus.toString());
-						System.out.println("CurTask : " + task.getTaskID());
+						if (!mapperStatus.containsKey(task.getTaskID())) {
+							continue;
+						}
+						System.out.println("In For : " + mapperStatus.toString());
 						NodeRef taskTracker = task.getNode();
 						jobTracker = new Socket(taskTracker.getIp(), taskTracker.getPort());
-						System.out.println(jobTracker.getLocalAddress() + " : " + jobTracker.getLocalPort());
-						System.out.println("IN JOBTRA1 " + task.getNode().getIp() + " * " + task.getNode().getPort());
 						ObjectOutputStream out = new ObjectOutputStream(jobTracker.getOutputStream());							
-						System.out.println("IN JOBTRA2 " + task.getNode().getIp() + " * " + task.getNode().getPort());
 						out.writeObject("ReportMapper");
 						out.flush();	
-						Thread.sleep(1000);
-						System.out.println("IN JOBTRA3 " + task.getNode().getIp() + " * " + task.getNode().getPort());
 						ObjectInputStream in = new ObjectInputStream(jobTracker.getInputStream());
-						System.out.println("IN JOBTRA4 " + task.getNode().getIp() + " * " + task.getNode().getPort());
 						Hashtable<Integer, Hashtable<Integer, String>> nodeReport = 
 								(Hashtable<Integer, Hashtable<Integer, String>>)in.readObject();
-						System.out.println("JobTracker MapperReport: " + nodeReport.toString());
+						System.out.println("Node Report : " + nodeReport.toString());
 						for (Integer taskID : nodeReport.keySet()) {
 							HashSet<Integer> blockIDs = mapperStatus.get(taskID);
 							Hashtable<Integer, String> blockReport = nodeReport.get(taskID);
-							for (Integer blockID : blockReport.keySet()) {
-								
+							for (Integer blockID : blockReport.keySet()) {								
 								if (blockReport.get(blockID).equals("finished")) {
 									blockIDs.remove(blockID);
 								}
@@ -264,7 +258,8 @@ public class JobTracker {
 						in.close();
 						out.close();
 						jobTracker.close();
-					}					
+					}
+					System.out.println("Out of For : " + mapperStatus.toString());
 				}
 				System.out.println("Mappers Finished!");
 				

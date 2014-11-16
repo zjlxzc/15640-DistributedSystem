@@ -115,7 +115,6 @@ public class TaskTracker {
 					object.close();
 					srcOut.close();
 					nameNode.close();
-					System.out.println("Socket Close");
 				} catch (Exception e) {
 					System.out.println(e);
 				}				
