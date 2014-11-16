@@ -52,8 +52,7 @@ public class FileReaderDFS implements Runnable {
 			sendInfor.writeObject("StartSend"); // write out information as a signal
 			sendInfor.flush();
 			
-			String ppp = (String)sendIn.readObject();
-			int port = Integer.parseInt(ppp);
+			int port = (Integer)sendIn.readObject();
 			sockets.add(new NodeRef(node.getIp().getHostAddress(), port));
 			sendIn.close();
 			sendInfor.close();
@@ -106,13 +105,13 @@ public class FileReaderDFS implements Runnable {
 						clientSocket.getInputStream());
 				sendPair.writeObject(pair); // write out key-value object
 				sendPair.flush();
-				//System.out.println("IN MAPPER" + pair.getKey() + " : " + pair.getValue());
 				inPair.close();
 				sendPair.close();
 				clientSocket.close();
 			}
 			
 			isEnd = true;
+			System.out.println("Get Mapper End");
 			reader.close();
 			
 		} catch (IOException e) {

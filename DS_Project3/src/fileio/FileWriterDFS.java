@@ -22,7 +22,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 
-import example.WordCount;
 import mapReduce.MRContext;
 import mapReduce.MapReduce;
 import mapReduce.Task;
@@ -47,6 +46,7 @@ public class FileWriterDFS implements Runnable{
 		
 		while (iterator.hasNext()) {
 			SingleRecord sr = (SingleRecord)iterator.next();
+			System.out.println("In Reducer while :" + sr.getKey() + sr.getValue());
 			if (!map.containsKey(sr.getKey())) { // put all values of the same key to a hash map
 				map.put(sr.getKey(), new ArrayList<String>());
 			}
@@ -95,7 +95,9 @@ public class FileWriterDFS implements Runnable{
 				SingleRecord record = (SingleRecord)inStream.readObject();
 				//System.out.println(flag + " * IN Reducer" + record.getKey() + "**" + record.getValue());
 				context.context(record.getKey(), record.getValue());
+				System.out.println("flag in the while " + flag);
 			}
+			System.out.println("flag is set to false");
 			reducer(context); // after map phase, it can start to do reduce process
 			inStream.close();
 			outStream.close();

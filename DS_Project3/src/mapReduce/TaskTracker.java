@@ -11,6 +11,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -112,6 +113,12 @@ public class TaskTracker {
 						srcOut.flush();
 					} else if (inLine.equals("MapperFinished")) {
 						reduce.setFlag(false);
+						System.out.println("TaskTracker : flag set to false");
+						Socket toRed = new Socket(InetAddress.getLocalHost(), reduce.getNewPort());
+						ObjectOutputStream redOut = new ObjectOutputStream(toRed.getOutputStream());
+						redOut.writeObject("");
+						redOut.flush();
+						toRed.close();
 					} else if (inLine.equals("StartSend")) {
 						srcOut.writeObject(reduce.getNewPort());
 						srcOut.flush();
@@ -144,17 +151,16 @@ public class TaskTracker {
 		}
 		@Override
 		public void run() {
-			stat.put(blockID, "Starting"); // record current status
-			
-			while (true) {
-				if (map.getEnd()) { // to check if map is done
-					isFinished = false;
-				} else {
-					isFinished = true;
-					stat.put(blockID, "finished"); // update map status
-					break;
+			stat.put(blockID, "Starting"); // record current status			
+			while (!map.getEnd()) {	    // to check if map is done
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
 			}
+			stat.put(blockID, "finished"); // update map status
 		}	
 	}
 }

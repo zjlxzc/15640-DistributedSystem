@@ -260,6 +260,7 @@ public class JobTracker {
 						jobTracker.close();
 					}
 					System.out.println("Out of For : " + mapperStatus.toString());
+					Thread.sleep(5000);
 				}
 				System.out.println("Mappers Finished!");
 				

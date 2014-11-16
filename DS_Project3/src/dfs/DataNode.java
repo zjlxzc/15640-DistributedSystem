@@ -162,7 +162,7 @@ public class DataNode {
 						blockID++;
 						splitNum++;
 						curBlock = new Block(blockID, BLOCK_SIZE);
-						Thread.sleep(2000);
+						Thread.sleep(1000);
 					}
 				}
 				if (curBlock.getSize() != 0) {
