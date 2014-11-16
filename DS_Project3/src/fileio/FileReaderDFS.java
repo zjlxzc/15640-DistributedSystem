@@ -30,6 +30,9 @@ public class FileReaderDFS implements Runnable {
 	private ArrayList<Socket> sockets; // store all connection of this job
 	private Class<?> MRClass; // get the class of map-reduce job
 	
+	public FileReaderDFS() {
+	}
+	
 	public FileReaderDFS(String fileName, ArrayList<NodeRef> reducers, Class<?> MRClass)
 			throws FileNotFoundException {
 		this.fileName = fileName;

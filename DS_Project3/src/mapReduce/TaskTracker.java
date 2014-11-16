@@ -54,17 +54,10 @@ public class TaskTracker {
 			FileReaderDFS map = new FileReaderDFS(blocks.get(i).getFileName(), reducers, MRClass);
 			Thread mapper = new Thread(map); // create a new thread to do map job
 			mapper.start();
-			stat.put(blocks.get(i).getId(), "Starting"); // record current status
 			
-			while (true) {
-				if (map.getCount() != recordCount) { // to check if map is done
-					isFinished = false;
-				} else {
-					isFinished = true;
-					stat.put(blocks.get(i).getId(), "finished"); // update map status
-					break;
-				}
-			}
+			SeparateMapper separate = new SeparateMapper(stat, map, blocks.get(i).getId());
+			Thread singleMapper = new Thread(separate);
+			singleMapper.start();
 		}
 		status.put(taskID, stat);
 	}
@@ -138,5 +131,32 @@ public class TaskTracker {
 	
 	public String getReducerStatus() {
 		return reducerStatus; // return reducer status
+	}
+	
+	private static class SeparateMapper implements Runnable {
+		Hashtable<Integer, String> stat = new Hashtable<Integer, String>(); // to store status
+		FileReaderDFS map = new FileReaderDFS();
+		int blockID = 0;
+		
+		public SeparateMapper(Hashtable<Integer, String> status, FileReaderDFS map, int id) {
+			stat = status;
+			this.map = map;
+			blockID = id;
+		}
+		@Override
+		public void run() {
+			stat.put(blockID, "Starting"); // record current status
+			
+			while (true) {
+				if (map.getCount() != recordCount) { // to check if map is done
+					isFinished = false;
+				} else {
+					isFinished = true;
+					stat.put(blockID, "finished"); // update map status
+					break;
+				}
+			}
+		}
+		
 	}
 }
