@@ -4,10 +4,8 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -87,11 +85,12 @@ public class DataNode {
 				Socket remote;
 				while (true) {	
 					remote = listenSoc.accept();
-					BufferedReader in = new BufferedReader(new InputStreamReader(remote.getInputStream()));
-					PrintWriter out = new PrintWriter(remote.getOutputStream(), true);
-					String first = in.readLine();
+					ObjectInputStream in = new ObjectInputStream(remote.getInputStream());	
+					ObjectOutputStream out = new ObjectOutputStream(remote.getOutputStream());
+								
+					String first = (String)in.readObject();
 					if (first.equals("BlockSize")) {
-						BLOCK_SIZE = Integer.parseInt(in.readLine());
+						BLOCK_SIZE = (int)in.readObject();
 						System.out.println("block size: " + BLOCK_SIZE);
 					} else if (first.equals("BlockTransfer")) {
 						System.out.println("Start to receive from " + remote.getRemoteSocketAddress());
@@ -99,13 +98,17 @@ public class DataNode {
 					} else if (first.equals("StartTaskTracker")) {
 						System.out.println(first);
 						TaskTracker taskTracker = new TaskTracker();
-						out.println("" + taskTracker.getPort());
+						out.writeObject("" + taskTracker.getPort());
+						out.flush();
 						System.out.println(taskTracker.getPort());
 					}
 				} 				
 			}catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();	
+			} catch (ClassNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			} finally {
 				try {
 					listenSoc.close();
@@ -199,12 +202,13 @@ public class DataNode {
 				ObjectOutputStream masterOut = new ObjectOutputStream(master.getOutputStream());
 				ObjectInputStream masterIn = new ObjectInputStream(master.getInputStream());
 				masterOut.writeObject("addBlock");
-				masterOut.flush();
 				masterOut.writeObject(fileName);
-				masterOut.flush();
 				masterOut.writeObject(curRef);
 				masterOut.flush();
 				ArrayList<NodeRef> addList = (ArrayList<NodeRef>)masterIn.readObject();
+				masterIn.close();
+				masterOut.close();
+				master.close();
 				new Thread(new BlockTransfer(addList, curRef)).start();	
 			} catch (UnknownHostException e) {
 				// TODO Auto-generated catch block
@@ -234,30 +238,34 @@ public class DataNode {
 				for (NodeRef node : addList) {
 					boolean transfered = false;
 					while (!transfered) {
-						System.out.println("Send to " + node.getIp().getHostAddress());
 						Socket soc = new Socket(node.getIp(), node.getPort());		
-						System.out.println(node.getIp() + " : " + node.getPort());
-						PrintWriter out = new PrintWriter(soc.getOutputStream(), true);
-						BufferedReader in = new BufferedReader(new InputStreamReader(soc.getInputStream()));
+						ObjectOutputStream out = new ObjectOutputStream(soc.getOutputStream());
+						ObjectInputStream in = new ObjectInputStream(soc.getInputStream());						
 						BufferedReader br = new BufferedReader(new FileReader(outFile));
 						String line = "";
-						out.println("BlockTransfer");
-						out.println(sourceBlock.getParentFile());
-						out.println(sourceBlock.getSplitNum());
+						out.writeObject("BlockTransfer");
+						out.writeObject(sourceBlock.getParentFile());
+						out.writeObject(sourceBlock.getSplitNum());
 						while ((line = br.readLine()) != null) {
-							out.println(line);
+							out.writeObject(line);
 						}	
-						out.println("end of block");
+						out.writeObject("end of block");
 						br.close();
-						String response = in.readLine();
+						String response = (String)in.readObject();
 						System.out.println("Block Transfer: " + response);
 						if (response.equals("Received")) {
 							transfered = true;
 						}
+						out.flush();
+						in.close();
+						out.close();
 						soc.close();
 					}					
 				}				
 			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (ClassNotFoundException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} 	
@@ -265,9 +273,9 @@ public class DataNode {
 	}	
 	
 	private class BlockReceiver implements Runnable {
-		private BufferedReader in;
-		private PrintWriter out;
-		public BlockReceiver(BufferedReader in, PrintWriter out) {
+		private ObjectInputStream in;		
+		private ObjectOutputStream out;
+		public BlockReceiver(ObjectInputStream in, ObjectOutputStream out) {
 			this.in = in;
 			this.out = out;
 		}
@@ -281,15 +289,13 @@ public class DataNode {
 			try {
 //				BufferedReader in = new BufferedReader(new InputStreamReader(soc.getInputStream()));
 //				PrintWriter out = new PrintWriter(soc.getOutputStream(), true);
-				String parentFile = in.readLine();
-				System.out.println(parentFile);
-				int splitNum = Integer.parseInt(in.readLine());
-				System.out.println(splitNum);
+				String parentFile = (String)in.readObject();
+				int splitNum = (int)in.readObject();
 				Block receiveBlock = new Block(blockID, BLOCK_SIZE);
 				NodeRef me = new NodeRef(InetAddress.getLocalHost().getHostName(), PORT);
 				String line = "";
-				System.out.println("Start to receive " + parentFile + "_" + splitNum);
-				while ((line = in.readLine()) != null) {
+				
+				while ((line = (String)in.readObject()) != null) {
 					if (line.equals("end of block")) {
 						break;
 					}
@@ -313,9 +319,15 @@ public class DataNode {
 				masterOut.writeObject(me);
 				masterOut.writeObject(fileTable);
 				masterOut.flush();
+				masterIn.close();
+				masterOut.close();
 				report.close();	
-				out.println("Received");
+				out.writeObject("Received");
+				in.close();
 			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (ClassNotFoundException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} 		
@@ -340,13 +352,14 @@ public class DataNode {
 				Class<?> mapReduceClass = Class.forName(mapReduceFile);			
 				master = new Socket(masterIP, masterPort);
 				ObjectOutputStream out = new ObjectOutputStream(master.getOutputStream());
-				@SuppressWarnings("unused")
 				ObjectInputStream in = new ObjectInputStream(master.getInputStream());
 				out.writeObject("MapReduceNewJob");
 				out.writeObject(inputFile);
 				out.writeObject(outputPath);
 				out.writeObject(mapReduceClass);
 				out.flush();
+				in.close();
+				out.close();
 			} catch (UnknownHostException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

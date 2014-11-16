@@ -4,6 +4,10 @@ import dfs.NodeRef;
 
 public class ReducerTask extends Task{
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private String outputPath;
 	
 	public ReducerTask() {

@@ -27,7 +27,7 @@ public class FileReaderDFS implements Runnable {
 	private int count;
 	private String fileName;
 	private ArrayList<NodeRef> reducers; // store all reducer of this job
-	private ArrayList<Socket> sockets; // store all connection of this job
+	private ArrayList<NodeRef> sockets; // store all connection of this job
 	private Class<?> MRClass; // get the class of map-reduce job
 	
 	public FileReaderDFS() {
@@ -38,21 +38,26 @@ public class FileReaderDFS implements Runnable {
 		this.fileName = fileName;
 		this.reducers = reducers;
 		this.MRClass = MRClass;
-		sockets = new ArrayList<Socket>(); 
+		sockets = new ArrayList<NodeRef>(); 
 	}
 
 	public void connectReducer() throws IOException, ClassNotFoundException {
+		
 		Socket clientSocket = null;
 		for (NodeRef node : reducers) { // connect to each reducer
 			clientSocket = new Socket(node.getIp(), node.getPort());
 			ObjectOutputStream sendInfor = new ObjectOutputStream(clientSocket.getOutputStream());
+			ObjectInputStream sendIn = new ObjectInputStream(clientSocket.getInputStream());
 			sendInfor.writeObject("StartSend"); // write out information as a signal
 			sendInfor.flush();
-			ObjectInputStream sendIn = new ObjectInputStream(clientSocket.getInputStream());
-			int port = (int)sendIn.readObject();
-			sockets.add(new Socket(node.getIp(), port));
+			
+			String ppp = (String)sendIn.readObject();
+			int port = Integer.parseInt(ppp);
+			sockets.add(new NodeRef(node.getIp().getHostAddress(), port));
+			sendIn.close();
+			sendInfor.close();
+			clientSocket.close();
 		}
-		clientSocket.close();
 	}
 
 	@Override
@@ -60,7 +65,6 @@ public class FileReaderDFS implements Runnable {
 		Constructor<?> constructor = null;
 		MapReduce mr = null;
 		BufferedReader reader = null;
-		
 		try {
 			constructor = MRClass.getConstructor(); // get constructor
 			mr = (MapReduce)constructor.newInstance(); // create a new corresponding instance
@@ -80,7 +84,7 @@ public class FileReaderDFS implements Runnable {
 				line = reader.readLine();
 				count++;
 			}
-
+			//System.out.println("IN MAPPER" + count);
 			try {
 				connectReducer();
 			} catch (ClassNotFoundException e) {
@@ -93,13 +97,21 @@ public class FileReaderDFS implements Runnable {
 											// send to corresponding reducer
 				pair = iterator.next();
 				int hashValue = pair.hashCode() % reducers.size(); // get correct reducer number
-				Socket clientSocket = sockets.get(hashValue); // get client socket
+				NodeRef nr = sockets.get(hashValue);
+				Socket clientSocket = new Socket(nr.getIp(), nr.getPort());
 				ObjectOutputStream sendPair = new ObjectOutputStream(
 						clientSocket.getOutputStream());
+				ObjectInputStream inPair = new ObjectInputStream(
+						clientSocket.getInputStream());
 				sendPair.writeObject(pair); // write out key-value object
 				sendPair.flush();
+				//System.out.println("IN MAPPER" + pair.getKey() + " : " + pair.getValue());
+				inPair.close();
+				sendPair.close();
+				clientSocket.close();
 			}
 			reader.close();
+			
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
