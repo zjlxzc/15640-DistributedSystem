@@ -17,6 +17,9 @@ public class SingleRecord implements Serializable, Comparable<SingleRecord>{
 	private String key;
 	private String value;
 	
+	public SingleRecord() {	
+	}
+	
 	public SingleRecord(String k, String v) {
 		key = k;
 		value = v;

@@ -92,10 +92,14 @@ public class FileWriterDFS implements Runnable{
 				inStream = new ObjectInputStream(clientSocket.getInputStream());
 				outStream = new ObjectOutputStream(clientSocket.getOutputStream());
 				
-				SingleRecord record = (SingleRecord)inStream.readObject();
-				//System.out.println(flag + " * IN Reducer" + record.getKey() + "**" + record.getValue());
-				context.context(record.getKey(), record.getValue());
-				System.out.println("flag in the while " + flag);
+				Object obj = inStream.readObject();
+				System.out.println("SingleRecord is NULL: " + obj == null + " **" + obj.toString().length());
+				
+				SingleRecord record = new SingleRecord();
+				if (obj instanceof SingleRecord) {
+					record = (SingleRecord)obj;
+					context.context(record.getKey(), record.getValue());
+				}
 			}
 			System.out.println("flag is set to false");
 			reducer(context); // after map phase, it can start to do reduce process
