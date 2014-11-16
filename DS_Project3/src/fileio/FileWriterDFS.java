@@ -7,12 +7,12 @@ package fileio;
  * This class is used to do reducer job.
  */
 
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -42,19 +42,20 @@ public class FileWriterDFS implements Runnable{
 		while (iterator.hasNext()) {
 			SingleRecord sr = (SingleRecord)iterator.next();
 			if (!map.containsKey(sr.getKey())) { // put all values of the same key to a hash map
-				map.put(sr.getValue(), new ArrayList<String>());
+				map.put(sr.getKey(), new ArrayList<String>());
 			}
 			map.get(sr.getKey()).add(sr.getValue());
 		}
 		
+		BufferedWriter writer = new BufferedWriter(new FileWriter(new File(fileName)));
 		MRContext contextReducer = new MRContext(); // store result to an object
 		WordCount wc = new WordCount(); // create an instance of word count example
+		
 		for (String key : map.keySet()) {
 			wc.reduce(key, map.get(key).iterator(), contextReducer); // call user-defined reducer method
+			System.out.println("sisisis" + context.getIterator().next().getKey() + "\t" + context.getIterator().next().getValue());
+			writer.write(context.getIterator().next().getKey() + "\t" + context.getIterator().next().getValue());
 		}
-		
-		BufferedWriter writer = new BufferedWriter(new FileWriter(new File(fileName)));
-		writer.write(context.getIterator().next().getKey() + "\t" + context.getIterator().next().getValue());
 		writer.close();
 		task.setStatus("finished"); // set current status
 	}
@@ -66,18 +67,25 @@ public class FileWriterDFS implements Runnable{
 			reducer = new ServerSocket(0);	// create a new socket
 			newPort = reducer.getLocalPort();
 			MRContext context = new MRContext(); // store result to a context object
-			System.out.println("flag : " + flag);	
+			ObjectOutputStream outStream = null;
+			ObjectInputStream inStream = null;
 			while (flag) { // true means mapper is still running
 				Socket clientSocket = reducer.accept(); // get client socket
-				InputStreamReader inStream = new InputStreamReader(clientSocket.getInputStream());
-				BufferedReader br = new BufferedReader(inStream); // reader client input stream			
-				String[] inLine = br.readLine().split("\t");
-				context.context(inLine[0], inLine[1]);
+				inStream = new ObjectInputStream(clientSocket.getInputStream());
+				outStream = new ObjectOutputStream(clientSocket.getOutputStream());
+				
+				SingleRecord record = (SingleRecord)inStream.readObject();
+				//System.out.println(flag + " * IN Reducer" + record.getKey() + "**" + record.getValue());
+				context.context(record.getKey(), record.getValue());
 			}
-			System.out.println("after flag : ");	
 			reducer(context); // after map phase, it can start to do reduce process
+			inStream.close();
+			outStream.close();
 			reducer.close();
 		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}	
 	}

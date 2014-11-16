@@ -17,7 +17,9 @@ public class WordCount implements MapReduce{
 	public void map(String key, String value, MRContext context){
 		String[] token = value.split("\\W");
 		for (String word : token) {
-			context.context(word, "1"); // indicate the occurrence of a single word is 1
+			if (word.length() != 0) {
+				context.context(word, "1"); // indicate the occurrence of a single word is 1
+			}
 		}
 	}
 

@@ -7,7 +7,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.PrintWriter;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -59,9 +58,12 @@ public class NameNode {
 			for (int i = 0; i < nodeList.size(); i++) {
 				cur =  nodeList.get(i);
 				master = new Socket(cur.getIp(), cur.getPort());
-				PrintWriter out = new PrintWriter(master.getOutputStream(), true);
-				out.println("BlockSize");
-				out.println(BLOCK_SIZE);
+				ObjectOutputStream out = new ObjectOutputStream(master.getOutputStream());
+				ObjectInputStream in = new ObjectInputStream(master.getInputStream());
+				out.writeObject("BlockSize");
+				out.writeObject(BLOCK_SIZE);
+				out.flush();
+				in.close();
 				out.close();
 				master.close();
 			}				
@@ -116,6 +118,7 @@ public class NameNode {
 		}
 	}	
 	
+	@SuppressWarnings("unused")
 	private class Poll implements Runnable {
 
 		@Override
@@ -182,15 +185,15 @@ public class NameNode {
 				master = new ServerSocket(PORT);
 				while(true) {
 					Socket slave = master.accept();
-					ObjectOutputStream out = new ObjectOutputStream(slave.getOutputStream());
 					ObjectInputStream in = new ObjectInputStream(slave.getInputStream());
+					ObjectOutputStream out = new ObjectOutputStream(slave.getOutputStream());
+					
 					String first = (String)in.readObject();
 					if (first.equals("addBlock")) {
 						new Thread(new BlockAdder(in, out)).start();
 					} else if (first.equals("update")) {
 						new Thread(new Updater(in, out)).start();
 					} else if (first.equals("MapReduceNewJob")) {
-						System.out.println("Master: " + first);
 						new Thread(new MapReduceJob(in, out)).start();
 					}
 				}				
@@ -290,7 +293,8 @@ public class NameNode {
 				}
 				out.writeObject(ret);
 				out.flush();
-				
+				in.close();
+				out.close();				
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -326,7 +330,9 @@ public class NameNode {
 				for (String filename : nodeTable.keySet()) {
 					Hashtable<String, ArrayList<BlockRef>> fileTable = metaTable.get(filename);
 					fileTable.put(sourceNode.getIp().getHostAddress(), nodeTable.get(filename));
-				}		
+				}
+				in.close();
+				out.close();
 			} catch (IOException e) {
 				e.printStackTrace();
 			} catch (ClassNotFoundException e) {
@@ -336,7 +342,6 @@ public class NameNode {
 	}
 	
 	private class MapReduceJob implements Runnable {
-		@SuppressWarnings("unused")
 		private ObjectOutputStream out = null;
 		private ObjectInputStream in = null;
 		public MapReduceJob(ObjectInputStream in, ObjectOutputStream out) {
@@ -347,9 +352,7 @@ public class NameNode {
 		public void run() {
 			try {
 				String inputFile = (String)in.readObject();
-				System.out.println("mapreducejob: " + inputFile);
 				String outputPath = (String)in.readObject();
-				System.out.println("mapreducejob: " + outputPath);
 				Class<?> mapReduceClass = (Class<?>)in.readObject();
 				Hashtable<String, ArrayList<BlockRef>> ipTable = metaTable.get(inputFile);
 				Hashtable<NodeRef, ArrayList<BlockRef>> refTable = new Hashtable<NodeRef, ArrayList<BlockRef>>();
@@ -364,6 +367,8 @@ public class NameNode {
 				int splitNum = totalBlockNum / REPLICA_FACTOR;
 				JobTracker jobTracker = JobTracker.getInstance();
 				jobTracker.createJob(inputFile, splitNum, refTable, outputPath, mapReduceClass);
+				in.close();
+				out.close();
 			} catch (ClassNotFoundException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

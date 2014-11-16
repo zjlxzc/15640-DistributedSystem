@@ -1,11 +1,8 @@
 package mapReduce;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -68,8 +65,6 @@ public class JobTracker {
 			if (assignment.get(node).size() < min) {
 				reducer = node;
 			}
-			System.out.println("NodeRef:  " + node.getIp());
-			System.out.println("BlockList: " + assignment.get(node));
 		}
 		ArrayList<NodeRef> reducers = new ArrayList<NodeRef>();
 		reducers.add(reducer);
@@ -82,31 +77,33 @@ public class JobTracker {
 		
 		
 		try {
-			HashMap<String, Integer> ips = new HashMap<String, Integer>();
+			ArrayList<NodeRef> newReducers = new ArrayList<NodeRef>();
 			for (NodeRef node : reducers) {			
 				soc = new Socket(node.getIp(), node.getPort());
-				BufferedReader in = new BufferedReader(new InputStreamReader(soc.getInputStream()));
-				PrintWriter out = new PrintWriter(soc.getOutputStream(), true);
-				out.println("StartTaskTracker");
-				int port = Integer.parseInt(in.readLine());
+				ObjectOutputStream out = new ObjectOutputStream(soc.getOutputStream());
+				ObjectInputStream in = new ObjectInputStream(soc.getInputStream());				
+				out.writeObject("StartTaskTracker");
+				out.flush();
+				int port = Integer.parseInt((String)in.readObject());
 				NodeRef refToTaskTracker = new NodeRef(node.getIp().getHostAddress(), port);		
 				ReducerTask task = new ReducerTask(refToTaskTracker, taskID, mapReduceClass, outputPath);
-				ips.put(node.getIp().getHostAddress(), port);
 				job.addReducerTasks(task);
 				taskID++;
+				newReducers.add(refToTaskTracker);
 				in.close();
 				out.close();
 				soc.close();
 			}
-			ips = new HashMap<String, Integer>();
+			HashMap<String, Integer> ips = new HashMap<String, Integer>();
 			for (NodeRef node : assignment.keySet()) {
 				NodeRef refToTaskTracker = null;
 				if (!ips.containsKey(node.getIp().getHostAddress())) {
 					soc = new Socket(node.getIp(), node.getPort());
-					BufferedReader in = new BufferedReader(new InputStreamReader(soc.getInputStream()));
-					PrintWriter out = new PrintWriter(soc.getOutputStream(), true);
-					out.println("StartTaskTracker");
-					int port = Integer.parseInt(in.readLine());
+					ObjectOutputStream out = new ObjectOutputStream(soc.getOutputStream());
+					ObjectInputStream in = new ObjectInputStream(soc.getInputStream());					
+					out.writeObject("StartTaskTracker");
+					out.flush();
+					int port = Integer.parseInt((String)in.readObject());
 					refToTaskTracker = new NodeRef(node.getIp().getHostAddress(), port);	
 					System.out.println(refToTaskTracker.getIp() + " : " + refToTaskTracker.getPort());
 					ips.put(node.getIp().getHostAddress(), port);
@@ -118,7 +115,7 @@ public class JobTracker {
 					refToTaskTracker = new NodeRef(curIp, ips.get(curIp));
 				}				
 				MapperTask task = new MapperTask(refToTaskTracker, taskID, mapReduceClass, 
-						new ArrayList<BlockRef>(assignment.get(node)), new ArrayList<NodeRef>(reducers));
+						new ArrayList<BlockRef>(assignment.get(node)), new ArrayList<NodeRef>(newReducers));
 				System.out.println(job.getMapperTasks().size());
 				System.out.println(task.getBlockList());
 				job.addMapperTasks(task);
@@ -126,6 +123,9 @@ public class JobTracker {
 
 			}			
 		}catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}	
@@ -180,12 +180,7 @@ public class JobTracker {
 					out.writeObject("ReduceTask");
 					out.writeObject(reducerTask);
 					out.flush();
-					String ret = (String)in.readObject();
-					if (!ret.equals("ReduceSuccess")) {
-						System.out.println("Reduce Task Failed at " + cur.getIp());
-						stop = true;
-						break;
-					}
+
 					in.close();
 					out.close();
 					soc.close();
@@ -199,12 +194,7 @@ public class JobTracker {
 						out.writeObject("MapperTask");
 						out.writeObject(mapperTask);
 						out.flush();
-						String ret = (String)in.readObject();
-						if (!ret.equals("MapperSuccess")) {
-							System.out.println("Mapper Task Failed at " + cur.getIp());
-							stop = true;
-							break;							
-						}
+
 						in.close();
 						out.close();
 						soc.close();
@@ -214,9 +204,6 @@ public class JobTracker {
 					new Thread(new JobMonitor(job)).start();
 				}
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (ClassNotFoundException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
@@ -250,12 +237,14 @@ public class JobTracker {
 						jobTracker = new Socket(taskTracker.getIp(), taskTracker.getPort());
 						System.out.println(jobTracker.getLocalAddress() + " : " + jobTracker.getLocalPort());
 						System.out.println("IN JOBTRA1 " + task.getNode().getIp() + " * " + task.getNode().getPort());
-						ObjectOutputStream out = new ObjectOutputStream(jobTracker.getOutputStream());	
-						ObjectInputStream in = new ObjectInputStream(jobTracker.getInputStream());
+						ObjectOutputStream out = new ObjectOutputStream(jobTracker.getOutputStream());							
 						System.out.println("IN JOBTRA2 " + task.getNode().getIp() + " * " + task.getNode().getPort());
 						out.writeObject("ReportMapper");
-						out.flush();						
+						out.flush();	
+						Thread.sleep(1000);
 						System.out.println("IN JOBTRA3 " + task.getNode().getIp() + " * " + task.getNode().getPort());
+						ObjectInputStream in = new ObjectInputStream(jobTracker.getInputStream());
+						System.out.println("IN JOBTRA4 " + task.getNode().getIp() + " * " + task.getNode().getPort());
 						Hashtable<Integer, Hashtable<Integer, String>> nodeReport = 
 								(Hashtable<Integer, Hashtable<Integer, String>>)in.readObject();
 						System.out.println("JobTracker MapperReport: " + nodeReport.toString());
@@ -286,6 +275,7 @@ public class JobTracker {
 					NodeRef taskTracker = task.getNode();					
 					jobTracker = new Socket(taskTracker.getIp(), taskTracker.getPort());
 					ObjectOutputStream out = new ObjectOutputStream(jobTracker.getOutputStream());
+					@SuppressWarnings("unused")
 					ObjectInputStream in = new ObjectInputStream(jobTracker.getInputStream());
 					System.out.println("JOBTRACKER: " + task.getStatus());
 					out.writeObject("MapperFinished");
@@ -303,6 +293,7 @@ public class JobTracker {
 						if (report.equals("finished")) {
 							reducerStatus.remove(task.getTaskID());
 						}
+						Thread.sleep(5000);
 					}
 				}				
 				System.out.println("Job Finished!");				
@@ -310,6 +301,9 @@ public class JobTracker {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (ClassNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}

@@ -7,6 +7,10 @@ import dfs.NodeRef;
 
 public class MapperTask extends Task{
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private ArrayList<BlockRef> blockList;
 	private ArrayList<NodeRef> reducers;
 	
