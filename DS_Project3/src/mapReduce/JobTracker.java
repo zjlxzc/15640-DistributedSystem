@@ -281,7 +281,7 @@ public class JobTracker {
 						in.close();
 						out.close();
 						jobTracker.close();
-						Thread.sleep(5000);
+						Thread.sleep(1000);
 					}catch (IOException e) {
 						System.out.println("Mapper tast failed on " + taskTracker.getIp() + " : " + taskTracker.getPort());
 						ArrayList<BlockRef> failedBlockList = task.getBlockList();
@@ -349,7 +349,6 @@ public class JobTracker {
 					ObjectOutputStream out = new ObjectOutputStream(jobTracker.getOutputStream());
 					@SuppressWarnings("unused")
 					ObjectInputStream in = new ObjectInputStream(jobTracker.getInputStream());
-					System.out.println("JOBTRACKER: " + task.getStatus());
 					out.writeObject("MapperFinished");
 					out.flush();
 				}
@@ -364,8 +363,9 @@ public class JobTracker {
 						String report = (String)in.readObject();
 						if (report.equals("finished")) {
 							reducerStatus.remove(task.getTaskID());
+							break;
 						}
-						Thread.sleep(5000);
+						Thread.sleep(1000);
 					}
 				}				
 				System.out.println("Job Finished!");				

@@ -83,6 +83,8 @@ public class TaskTracker {
 		}
 		
 		public void run() {
+			MapperTask mapperTask = new MapperTask();
+			ReducerTask reducerTask = new ReducerTask();
 			while (true) {
 				try {
 					Socket nameNode = taskListenSocket.accept(); // get name node socket	
@@ -91,20 +93,20 @@ public class TaskTracker {
 					
 					String inLine = (String)object.readObject(); // get name node information
 					if (inLine.equals("MapperTask")) {
-						MapperTask task = (MapperTask)object.readObject(); // get map task
+						mapperTask = (MapperTask)object.readObject(); // get map task
 						srcOut.writeObject("MapperSuccess");
 						srcOut.flush();
-						trackMapper(task);
+						trackMapper(mapperTask);
 					} else if (inLine.equals("ReduceTask")) {
-						ReducerTask task = (ReducerTask)object.readObject(); // get reduce task
+						reducerTask = (ReducerTask)object.readObject(); // get reduce task
 						srcOut.writeObject("ReduceSuccess");
 						srcOut.flush();
-						trackReducer(task);
+						trackReducer(reducerTask);
 					} else if (inLine.equals("ReportMapper")){ // send map information
 						srcOut.writeObject(status);
 						srcOut.flush();
 					} else if (inLine.equals("ReportReducer")) { // send reduce information
-						srcOut.writeObject(reducerStatus);
+						srcOut.writeObject(reducerTask.getStatus());
 						srcOut.flush();
 					} else if (inLine.equals("MapperFinished")) {
 						reduce.setFlag(false);

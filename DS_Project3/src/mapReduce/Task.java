@@ -36,7 +36,7 @@ public class Task implements Serializable {
 		return taskID;
 	}
 	public String getStatus() {
-		return status;
+		return this.status;
 	}
 
 	public void setStatus(String status) {

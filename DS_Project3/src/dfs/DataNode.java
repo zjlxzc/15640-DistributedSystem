@@ -106,14 +106,11 @@ public class DataNode {
 						BLOCK_SIZE = (int)in.readObject();
 						System.out.println("block size: " + BLOCK_SIZE);
 					} else if (first.equals("BlockTransfer")) {
-						System.out.println("Start to receive from " + remote.getRemoteSocketAddress());
 						new Thread(new BlockReceiver(in, out)).start();
 					} else if (first.equals("StartTaskTracker")) {
-						System.out.println(first);
 						TaskTracker taskTracker = new TaskTracker();
 						out.writeObject("" + taskTracker.getPort());
 						out.flush();
-						System.out.println(taskTracker.getPort());
 					}
 				} 				
 			}catch (IOException e) {
@@ -189,6 +186,7 @@ public class DataNode {
 				
 				fileTable.put(fileName, blockList);
 				br.close();
+				System.out.println("Upload Finished");
 			} catch (IOException e) {
 				e.printStackTrace();
 			} catch (InterruptedException e) {
@@ -267,7 +265,6 @@ public class DataNode {
 						out.writeObject("end of block");
 						br.close();
 						String response = (String)in.readObject();
-						System.out.println("Block Transfer: " + response);
 						
 						if (response.equals("Received")) {
 							transfered = true;
