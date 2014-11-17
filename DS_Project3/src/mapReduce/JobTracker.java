@@ -15,12 +15,12 @@ import dfs.NodeRef;
 public class JobTracker {
 	private static JobTracker jobTracker = null;
 	private static int jobID;
-	private static ArrayList<Job> jobList; 
-	
+	private static ArrayList<Job> jobList;
+
 	public JobTracker() {
-		jobID = 1;		
+		jobID = 1;
 	}
-	
+
 	public static JobTracker getInstance() {
 		if (jobTracker == null) {
 			jobTracker = new JobTracker();
@@ -29,18 +29,19 @@ public class JobTracker {
 		System.out.println("JobTracker start");
 		return jobTracker;
 	}
-	
-	public void createJob(String inputFile, int splitNum, Hashtable<NodeRef, ArrayList<BlockRef>> refTable, 
-					String outputPath, Class<?> mapReduceClass) {
-				
+
+	public void createJob(String inputFile, int splitNum,
+			Hashtable<NodeRef, ArrayList<BlockRef>> refTable,
+			String outputPath, Class<?> mapReduceClass) {
+		
 		HashSet<String> splitNameSet = new HashSet<String>();
 		HashMap<NodeRef, ArrayList<BlockRef>> assignment = new HashMap<NodeRef, ArrayList<BlockRef>>();
 		int taskID = 1;
-		
+
 		while (splitNum > 0) {
 			for (NodeRef node : refTable.keySet()) {
 				ArrayList<BlockRef> blockList = refTable.get(node);
-		
+
 				int i = 0;
 				for (; i < blockList.size(); i++) {
 					String curSplitName = blockList.get(i).getFileName();
@@ -57,7 +58,7 @@ public class JobTracker {
 						break;
 					}
 				}
-			}			
+			}
 		}
 		NodeRef reducer = null;
 		int min = Integer.MAX_VALUE;
@@ -68,25 +69,28 @@ public class JobTracker {
 		}
 		ArrayList<NodeRef> reducers = new ArrayList<NodeRef>();
 		reducers.add(reducer);
-		
+
 		Job job = new Job(jobID, inputFile, outputPath, mapReduceClass,
-				new ArrayList<MapperTask>(), new ArrayList<ReducerTask>());
+				new ArrayList<MapperTask>(), new ArrayList<ReducerTask>(), refTable);
 		jobList.add(job);
-		
+
 		Socket soc = null;
-		
-		
+
 		try {
 			ArrayList<NodeRef> newReducers = new ArrayList<NodeRef>();
-			for (NodeRef node : reducers) {			
+			for (NodeRef node : reducers) {
 				soc = new Socket(node.getIp(), node.getPort());
-				ObjectOutputStream out = new ObjectOutputStream(soc.getOutputStream());
-				ObjectInputStream in = new ObjectInputStream(soc.getInputStream());				
+				ObjectOutputStream out = new ObjectOutputStream(
+						soc.getOutputStream());
+				ObjectInputStream in = new ObjectInputStream(
+						soc.getInputStream());
 				out.writeObject("StartTaskTracker");
 				out.flush();
-				int port = Integer.parseInt((String)in.readObject());
-				NodeRef refToTaskTracker = new NodeRef(node.getIp().getHostAddress(), port);		
-				ReducerTask task = new ReducerTask(refToTaskTracker, taskID, mapReduceClass, outputPath);
+				int port = Integer.parseInt((String) in.readObject());
+				NodeRef refToTaskTracker = new NodeRef(node.getIp()
+						.getHostAddress(), port);
+				ReducerTask task = new ReducerTask(refToTaskTracker, taskID, jobID,
+						mapReduceClass, outputPath);
 				job.addReducerTasks(task);
 				taskID++;
 				newReducers.add(refToTaskTracker);
@@ -99,13 +103,15 @@ public class JobTracker {
 				NodeRef refToTaskTracker = null;
 				if (!ips.containsKey(node.getIp().getHostAddress())) {
 					soc = new Socket(node.getIp(), node.getPort());
-					ObjectOutputStream out = new ObjectOutputStream(soc.getOutputStream());
-					ObjectInputStream in = new ObjectInputStream(soc.getInputStream());					
+					ObjectOutputStream out = new ObjectOutputStream(
+							soc.getOutputStream());
+					ObjectInputStream in = new ObjectInputStream(
+							soc.getInputStream());
 					out.writeObject("StartTaskTracker");
 					out.flush();
-					int port = Integer.parseInt((String)in.readObject());
-					refToTaskTracker = new NodeRef(node.getIp().getHostAddress(), port);	
-					System.out.println(refToTaskTracker.getIp() + " : " + refToTaskTracker.getPort());
+					int port = Integer.parseInt((String) in.readObject());
+					refToTaskTracker = new NodeRef(node.getIp()
+							.getHostAddress(), port);
 					ips.put(node.getIp().getHostAddress(), port);
 					in.close();
 					out.close();
@@ -113,26 +119,26 @@ public class JobTracker {
 				} else {
 					String curIp = node.getIp().getHostAddress();
 					refToTaskTracker = new NodeRef(curIp, ips.get(curIp));
-				}				
-				MapperTask task = new MapperTask(refToTaskTracker, taskID, mapReduceClass, 
-						new ArrayList<BlockRef>(assignment.get(node)), new ArrayList<NodeRef>(newReducers));
-				System.out.println(job.getMapperTasks().size());
-				System.out.println(task.getBlockList());
+				}
+				MapperTask task = new MapperTask(refToTaskTracker, taskID, jobID, 
+						mapReduceClass, new ArrayList<BlockRef>(
+								assignment.get(node)), new ArrayList<NodeRef>(
+								newReducers));
 				job.addMapperTasks(task);
 				taskID++;
 
-			}			
-		}catch (IOException e) {
+			}
+		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (ClassNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}	
-		
-		new Thread(new JobRunner(job)).start();		
+		}
+
+		new Thread(new JobRunner(job)).start();
 	}
-	
+
 	public void ListJobs() {
 		for (Job job : jobList) {
 			ArrayList<MapperTask> mappers = job.getMapperTasks();
@@ -140,7 +146,8 @@ public class JobTracker {
 			System.out.println("Job ID       : " + job.getJobID());
 			System.out.println("InputFile    : " + job.getInputFile());
 			System.out.println("OutputPath   : " + job.getOutputPath());
-			System.out.println("MapperReducer: " + job.getMapReducer().getSimpleName());
+			System.out.println("MapperReducer: "
+					+ job.getMapReducer().getSimpleName());
 			System.out.println("Mapper Job is running on :");
 			for (MapperTask mapper : mappers) {
 				String ip = mapper.getNode().getIp().getHostAddress();
@@ -148,35 +155,38 @@ public class JobTracker {
 				System.out.println(ip);
 				ArrayList<BlockRef> blocks = mapper.getBlockList();
 				for (BlockRef block : blocks) {
-					System.out.println(ip + " : " + port + " : " + block.getFileName());
-				}				
+					System.out.println(ip + " : " + port + " : "
+							+ block.getFileName());
+				}
 			}
 			System.out.println("Reducer Job is running on :");
 			for (ReducerTask reducer : reducers) {
 				String ip = reducer.getNode().getIp().getHostAddress();
 				int port = reducer.getNode().getPort();
-				System.out.println(ip + " : " + port);				
+				System.out.println(ip + " : " + port);
 			}
 		}
 	}
-	
-	
+
 	private class JobRunner implements Runnable {
 		private Job job;
+
 		public JobRunner(Job job) {
 			this.job = job;
 		}
-		
+
 		@Override
 		public void run() {
 			Socket soc = null;
 			try {
 				boolean stop = false;
 				for (ReducerTask reducerTask : job.getReducerTasks()) {
-					NodeRef cur = reducerTask.getNode();				
+					NodeRef cur = reducerTask.getNode();
 					soc = new Socket(cur.getIp(), cur.getPort());
-					ObjectOutputStream out = new ObjectOutputStream(soc.getOutputStream());
-					ObjectInputStream in = new ObjectInputStream(soc.getInputStream());
+					ObjectOutputStream out = new ObjectOutputStream(
+							soc.getOutputStream());
+					ObjectInputStream in = new ObjectInputStream(
+							soc.getInputStream());
 					out.writeObject("ReduceTask");
 					out.writeObject(reducerTask);
 					out.flush();
@@ -187,10 +197,12 @@ public class JobTracker {
 				}
 				if (!stop) {
 					for (MapperTask mapperTask : job.getMapperTasks()) {
-						NodeRef cur = mapperTask.getNode();				
+						NodeRef cur = mapperTask.getNode();
 						soc = new Socket(cur.getIp(), cur.getPort());
-						ObjectOutputStream out = new ObjectOutputStream(soc.getOutputStream());
-						ObjectInputStream in = new ObjectInputStream(soc.getInputStream());
+						ObjectOutputStream out = new ObjectOutputStream(
+								soc.getOutputStream());
+						ObjectInputStream in = new ObjectInputStream(
+								soc.getInputStream());
 						out.writeObject("MapperTask");
 						out.writeObject(mapperTask);
 						out.flush();
@@ -207,34 +219,38 @@ public class JobTracker {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-		}		
+		}
 	}
+
 	private class JobMonitor implements Runnable {
 		private Job job;
+
 		public JobMonitor(Job job) {
 			this.job = job;
 		}
+
 		@SuppressWarnings("unchecked")
 		@Override
-		public void run() {
-			try {
-				ArrayList<MapperTask> mapperTasks = job.getMapperTasks();
-				Hashtable<Integer, HashSet<Integer>> mapperStatus = new Hashtable<Integer, HashSet<Integer>>();
-				for (MapperTask task : mapperTasks) {
-					HashSet<Integer> blockIDs = new HashSet<Integer>();
-					for (BlockRef block : task.getBlockList()) {
-						blockIDs.add(block.getId());
-					}
-					mapperStatus.put(task.getTaskID(), blockIDs);
+		public void run() {			
+			ArrayList<MapperTask> mapperTasks = job.getMapperTasks();
+			Hashtable<Integer, HashSet<Integer>> mapperStatus = new Hashtable<Integer, HashSet<Integer>>();
+			for (MapperTask task : mapperTasks) {
+				HashSet<Integer> blockIDs = new HashSet<Integer>();
+				for (BlockRef block : task.getBlockList()) {
+					blockIDs.add(block.getId());
 				}
-				Socket jobTracker = null;
-				while (!mapperStatus.isEmpty()) {
-					for (MapperTask task : mapperTasks) {
-						if (!mapperStatus.containsKey(task.getTaskID())) {
-							continue;
-						}
-						System.out.println("In For : " + mapperStatus.toString());
-						NodeRef taskTracker = task.getNode();
+				mapperStatus.put(task.getTaskID(), blockIDs);
+			}
+			
+			
+			Socket jobTracker = null;				
+			while (!mapperStatus.isEmpty()) {
+				for (MapperTask task : mapperTasks) {
+					NodeRef taskTracker = task.getNode();
+					if (!mapperStatus.containsKey(task.getTaskID())) {
+						continue;
+					}
+					try {							
 						jobTracker = new Socket(taskTracker.getIp(), taskTracker.getPort());
 						ObjectOutputStream out = new ObjectOutputStream(jobTracker.getOutputStream());							
 						out.writeObject("ReportMapper");
@@ -242,7 +258,6 @@ public class JobTracker {
 						ObjectInputStream in = new ObjectInputStream(jobTracker.getInputStream());
 						Hashtable<Integer, Hashtable<Integer, String>> nodeReport = 
 								(Hashtable<Integer, Hashtable<Integer, String>>)in.readObject();
-						System.out.println("Node Report : " + nodeReport.toString());
 						for (Integer taskID : nodeReport.keySet()) {
 							HashSet<Integer> blockIDs = mapperStatus.get(taskID);
 							Hashtable<Integer, String> blockReport = nodeReport.get(taskID);
@@ -254,16 +269,69 @@ public class JobTracker {
 									mapperStatus.remove(taskID);
 								}
 							}
-						}
+						}	
 						in.close();
 						out.close();
 						jobTracker.close();
+						Thread.sleep(5000);
+					}catch (IOException e) {
+						System.out.println("Mapper tast failed on " + taskTracker.getIp() + " : " + taskTracker.getPort());
+						ArrayList<BlockRef> failedBlockList = task.getBlockList();
+						Hashtable<NodeRef, ArrayList<BlockRef>> refTable = jobList.get(task.getJobID()).getRefTable();
+						
+						for (BlockRef failedBlock : failedBlockList) {
+							for (NodeRef node : refTable.keySet()) {
+								if (!node.equals(taskTracker)) {								
+									for (BlockRef newBlock : refTable.get(node)) {
+										if (failedBlock.getSplitNum() == newBlock.getSplitNum()) {
+											try {
+												Socket soc = new Socket(node.getIp(), node.getPort());
+												ObjectOutputStream out = new ObjectOutputStream(soc.getOutputStream());
+												ObjectInputStream in = new ObjectInputStream(soc.getInputStream());
+												out.writeObject("StartTaskTracker");
+												out.flush();
+												int port = Integer.parseInt((String) in.readObject());
+												NodeRef refToTaskTracker = new NodeRef(node.getIp().getHostAddress(), port);
+												ArrayList<BlockRef> newList = new ArrayList<BlockRef>();
+												newList.add(newBlock);
+												MapperTask newTask = new MapperTask(refToTaskTracker, 999, jobID, 
+														task.getMapReducer(), newList , task.getReducers());
+												job.addMapperTasks(newTask);
+												
+												out.writeObject("MapperTask");
+												out.writeObject(newTask);
+												out.flush();
+
+												in.close();
+												out.close();
+												soc.close();
+												break;
+											} catch (IOException e1) {		
+												e1.printStackTrace();
+											} catch (NumberFormatException e1) {
+												// TODO Auto-generated catch block
+												e1.printStackTrace();
+											} catch (ClassNotFoundException e1) {
+												// TODO Auto-generated catch block
+												e1.printStackTrace();
+											}
+										}
+									}
+								}
+							}
+						}
+					} catch (ClassNotFoundException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
 					}
-					System.out.println("Out of For : " + mapperStatus.toString());
-					Thread.sleep(5000);
 				}
 				System.out.println("Mappers Finished!");
 				
+				
+			try {
 				ArrayList<ReducerTask> reducerTasks = job.getReducerTasks();
 				HashSet<Integer> reducerStatus = new HashSet<Integer>();
 				for (ReducerTask task : reducerTasks) {
@@ -304,5 +372,6 @@ public class JobTracker {
 				e.printStackTrace();
 			}
 		}
+	}
 	}
 }

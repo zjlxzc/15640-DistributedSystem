@@ -14,8 +14,8 @@ public class ReducerTask extends Task{
 		super();
 	}
 	
-	public ReducerTask(NodeRef node, int taskID, Class<?> mapReduce, String outputPath) {
-		super(node, taskID, mapReduce);
+	public ReducerTask(NodeRef node, int taskID, int jobID, Class<?> mapReduce, String outputPath) {
+		super(node, taskID, jobID, mapReduce);
 		this.setOutputPath(outputPath);
 	}
 

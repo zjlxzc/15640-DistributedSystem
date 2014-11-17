@@ -10,6 +10,7 @@ public class Task implements Serializable {
 	 */
 	private static final long serialVersionUID = 1L;
 	protected int taskID;
+	protected int jobID;
 	protected NodeRef node;
 	protected String status;
 	protected Class<?> mapReduce;	
@@ -17,11 +18,12 @@ public class Task implements Serializable {
 		
 	}
 	
-	public Task(NodeRef node, int taskID, Class<?> mapReduce) {
+	public Task(NodeRef node, int taskID, int jobID, Class<?> mapReduce) {
 		this.node = node;
 		this.taskID = taskID;
 		this.status = "Initializing";
 		this.mapReduce = mapReduce;
+		this.jobID = jobID;
 	}
 
 	public int getTaskID() {
@@ -50,5 +52,8 @@ public class Task implements Serializable {
 	public void setNode(NodeRef node) {
 		this.node = node;
 	}
-	
+
+	public int getJobID() {
+		return jobID;
+	}	
 }

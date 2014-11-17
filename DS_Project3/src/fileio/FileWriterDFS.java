@@ -46,7 +46,7 @@ public class FileWriterDFS implements Runnable{
 		
 		while (iterator.hasNext()) {
 			SingleRecord sr = (SingleRecord)iterator.next();
-			System.out.println("In Reducer while :" + sr.getKey() + sr.getValue());
+			//System.out.println("In Reducer while :" + sr.getKey() + sr.getValue());
 			if (!map.containsKey(sr.getKey())) { // put all values of the same key to a hash map
 				map.put(sr.getKey(), new ArrayList<String>());
 			}
@@ -75,7 +75,7 @@ public class FileWriterDFS implements Runnable{
 		SingleRecord record = new SingleRecord();
 		while (it.hasNext()) {
 			record = it.next();
-			System.out.println("sisisis" + record.getKey() + "\t" + record.getValue());
+			//System.out.println("sisisis" + record.getKey() + "\t" + record.getValue());
 			writer.write(record.getKey() + "\t" + record.getValue() + "\n");
 		}
 		writer.close();
@@ -97,7 +97,6 @@ public class FileWriterDFS implements Runnable{
 				outStream = new ObjectOutputStream(clientSocket.getOutputStream());
 				
 				Object obj = inStream.readObject();
-				System.out.println("SingleRecord is NULL: " + obj == null + " **" + obj.toString().length());
 				
 				SingleRecord record = new SingleRecord();
 				if (obj instanceof SingleRecord) {
