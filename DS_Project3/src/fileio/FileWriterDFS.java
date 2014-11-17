@@ -79,6 +79,7 @@ public class FileWriterDFS implements Runnable{
 		
 		writer.close();
 		task.setStatus("finished"); // set current status
+		System.out.println("This task finished successfully!");
 	}
 
 	@Override
