@@ -116,7 +116,6 @@ public class FileReaderDFS implements Runnable {
 			}
 			
 			isEnd = true;
-			System.out.println("Get Mapper End");
 			reader.close();
 			
 		} catch (IOException e) {
