@@ -19,6 +19,7 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.PriorityQueue;
 
 import mapReduce.MRContext;
 import mapReduce.MapReduce;
@@ -40,10 +41,10 @@ public class FileWriterDFS implements Runnable{
 	
 	public void reducer(MRContext context) throws IOException {
 		HashMap<String, ArrayList<String>> map = new HashMap<String, ArrayList<String>>();
-		Iterator<SingleRecord> iterator = context.getIterator(); // get all key-value pair
+		PriorityQueue<SingleRecord> queue = context.getQueue(); // get all key-value pair
 		
-		while (iterator.hasNext()) { // go through each record
-			SingleRecord sr = (SingleRecord)iterator.next();
+		while (queue.size() > 0) { // go through each record
+			SingleRecord sr = queue.poll();
 			//System.out.println("In Reducer while :" + sr.getKey() + sr.getValue());
 			if (!map.containsKey(sr.getKey())) { // put all values of the same key to a hash map
 				map.put(sr.getKey(), new ArrayList<String>());
@@ -68,11 +69,11 @@ public class FileWriterDFS implements Runnable{
 			mr.reduce(key, map.get(key).iterator(), contextReducer); // call user-defined reducer method
 		}
 		
-		Iterator<SingleRecord> it = contextReducer.getIterator();
+		PriorityQueue<SingleRecord> que = contextReducer.getQueue();
 		SingleRecord record = new SingleRecord();
 		
-		while (it.hasNext()) { // to through each record
-			record = it.next();
+		while (que.size() > 0) { // to through each record
+			record = que.poll();
 			//System.out.println("sisisis" + record.getKey() + "\t" + record.getValue());
 			writer.write(record.getKey() + "\t" + record.getValue() + "\n");
 		}

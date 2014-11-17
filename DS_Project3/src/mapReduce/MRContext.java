@@ -8,7 +8,6 @@ package mapReduce;
  */
 
 import java.util.Comparator;
-import java.util.Iterator;
 import java.util.PriorityQueue;
 
 import mergeSort.SingleRecord;
@@ -19,11 +18,7 @@ public class MRContext {
 	public MRContext() {
 		context = new PriorityQueue<SingleRecord>(1, new Comparator<SingleRecord>() {
 			public int compare(SingleRecord sr1, SingleRecord sr2) { // sort record by key first, then by value
-				int value = sr1.getKey().compareTo(sr2.getKey());
-				if (value == 0) {
-					return sr1.getValue().compareTo(sr2.getValue());
-				}
-				return value;
+				return sr1.getKey().compareTo(sr2.getKey());
 			}
 		});
 	}
@@ -33,7 +28,7 @@ public class MRContext {
 		context.add(newPair); // store all key-value pair
 	}
 	
-	public Iterator<SingleRecord> getIterator() {
-		return context.iterator(); // return an iterator to go through all pairs
+	public PriorityQueue<SingleRecord> getQueue() {
+		return context; // return an iterator to go through all pairs
 	}
 }
