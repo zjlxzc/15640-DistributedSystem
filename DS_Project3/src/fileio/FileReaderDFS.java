@@ -17,6 +17,7 @@ import java.lang.reflect.Constructor;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.PriorityQueue;
 
 import mapReduce.MRContext;
 import mapReduce.MapReduce;
@@ -91,12 +92,12 @@ public class FileReaderDFS implements Runnable {
 				e.printStackTrace();
 			}
 			
-			Iterator<SingleRecord> iterator = context.getIterator();
+			PriorityQueue<SingleRecord> queue = context.getQueue();
 			SingleRecord pair = null;
 			
-			while (iterator.hasNext()) { // iterator each key-value pair and
+			while (queue.size() > 0) { // iterator each key-value pair and
 											// send to corresponding reducer
-				pair = iterator.next();
+				pair = queue.remove();
 				int hashValue = pair.hashCode() % reducers.size(); // get correct reducer number
 				
 				NodeRef nr = sockets.get(hashValue); // get corresponding reducer
