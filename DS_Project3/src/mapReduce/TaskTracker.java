@@ -68,8 +68,7 @@ public class TaskTracker {
 		Thread reducer = new Thread(reduce);
 		reducer.start();
 		
-		reducerStatus = task.getStatus();
-		System.out.println("after sssstrackReducer : " + reducerStatus);	
+		reducerStatus = task.getStatus();	
 	}
 	
 	public boolean isFinished() {
@@ -91,10 +90,8 @@ public class TaskTracker {
 					ObjectInputStream object = new ObjectInputStream(nameNode.getInputStream());			
 					
 					String inLine = (String)object.readObject(); // get name node information
-					System.out.println("INLINE: " + inLine);
 					if (inLine.equals("MapperTask")) {
 						MapperTask task = (MapperTask)object.readObject(); // get map task
-						System.out.println("IN MapperTask");
 						srcOut.writeObject("MapperSuccess");
 						srcOut.flush();
 						trackMapper(task);
@@ -103,18 +100,14 @@ public class TaskTracker {
 						srcOut.writeObject("ReduceSuccess");
 						srcOut.flush();
 						trackReducer(task);
-						System.out.println("IN ReducerTask");
 					} else if (inLine.equals("ReportMapper")){ // send map information
-						System.out.println("TASKTRACK " + status.toString());
 						srcOut.writeObject(status);
 						srcOut.flush();
 					} else if (inLine.equals("ReportReducer")) { // send reduce information
 						srcOut.writeObject(reducerStatus);
 						srcOut.flush();
-						System.out.println("reducer status : " + reducerStatus);
 					} else if (inLine.equals("MapperFinished")) {
 						reduce.setFlag(false);
-						System.out.println("TaskTracker : flag set to false");
 						Socket toRed = new Socket(InetAddress.getLocalHost(), reduce.getNewPort());
 						ObjectOutputStream redOut = new ObjectOutputStream(toRed.getOutputStream());
 						redOut.writeObject("");
@@ -157,7 +150,6 @@ public class TaskTracker {
 				try {
 					Thread.sleep(1000);
 				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}

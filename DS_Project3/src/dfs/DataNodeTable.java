@@ -1,5 +1,12 @@
 package dfs;
 
+/*
+ * @author Chun Xu (chunx)
+ * @author Jialing Zhou (jialingz)
+ *
+ * This class is the structure of a data node table.
+ */
+
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -30,10 +37,12 @@ public class DataNodeTable {
 		return slaves;
 	}
 	
+	// get node reference according to ip address
 	public NodeRef getDataNode(String ip) {
 		return nodeMap.get(ip);
 	}
 	
+	// get all node reference
 	public void list() {
 		for (String key : nodeMap.keySet()) {
 			NodeRef node = nodeMap.get(key);

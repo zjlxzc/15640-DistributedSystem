@@ -13,9 +13,10 @@ import mapReduce.MRContext;
 import mapReduce.MapReduce;
 
 public class OddEven implements MapReduce {
-	@Override // implement map method
+	
+	@Override  // implement map method
 	public void map(String key, String value, MRContext context){
-		String[] token = value.split("^[0-9]+$"); // ignore unwanted characters
+		String[] token = value.split(" "); // separate each integer
 		for (String word : token) {
 			if (Integer.valueOf(word) % 2 == 0) {
 				context.context("even", "1"); // indicate the this number is even
@@ -25,7 +26,7 @@ public class OddEven implements MapReduce {
 		}
 	}
 
-	@Override // implement reduce method
+	@Override  // implement reduce method
 	public void reduce (String key, Iterator<String> values, MRContext context) {
 		int sum = 0;
 		while (values.hasNext()) {
@@ -34,5 +35,4 @@ public class OddEven implements MapReduce {
 		}
 		context.context(key, String.valueOf(sum)); // use context object to store result
 	}
-
 }

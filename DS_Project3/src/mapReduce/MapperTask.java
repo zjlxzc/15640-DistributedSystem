@@ -1,16 +1,20 @@
 package mapReduce;
 
+/*
+ * @author Chun Xu (chunx)
+ * @author Jialing Zhou (jialingz)
+ *
+ * This class is the structure of a mapper task.
+ */
+
 import java.util.ArrayList;
 
 import dfs.BlockRef;
 import dfs.NodeRef;
 
 public class MapperTask extends Task{
-	
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
+
+	private static final long serialVersionUID = 1L; // generated id
 	private ArrayList<BlockRef> blockList;
 	private ArrayList<NodeRef> reducers;
 	
@@ -25,14 +29,17 @@ public class MapperTask extends Task{
 		this.reducers = reducers;
 	}
 	
+	// add a block reference to the block list
 	public void addBlock(BlockRef ref) {
 		blockList.add(ref);
 	}
 	
+	// add a block reference to reducer list
 	public void addRecucers(NodeRef ref) {
 		reducers.add(ref);
 	}
 	
+	// getters and setters
 	public ArrayList<BlockRef> getBlockList() {
 		return blockList;
 	}
