@@ -43,6 +43,10 @@ public class Job {
 	public void addMapperTasks(MapperTask mapperTask) {
 		mapperTasks.add(mapperTask);
 	}	
+	
+	public void removeMapperTask(MapperTask mapperTask) {
+		mapperTasks.remove(mapperTask);
+	}
 
 	public void addReducerTasks(ReducerTask reducerTask) {
 		reducerTasks.add(reducerTask);

@@ -134,7 +134,6 @@ public class JobTracker {
 								newReducers));
 				job.addMapperTasks(task);
 				taskID++;
-
 			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -305,6 +304,7 @@ public class JobTracker {
 												MapperTask newTask = new MapperTask(refToTaskTracker, 999, jobID, 
 														task.getMapReducer(), newList , task.getReducers());
 												job.addMapperTasks(newTask);
+												job.removeMapperTask(task);
 												
 												out.writeObject("MapperTask");
 												out.writeObject(newTask);
@@ -336,7 +336,8 @@ public class JobTracker {
 						e.printStackTrace();
 					}
 				}
-				System.out.println("Mappers Finished!");
+			}
+			System.out.println("Mappers Finished!");
 				
 				
 			try {
@@ -368,7 +369,24 @@ public class JobTracker {
 						Thread.sleep(1000);
 					}
 				}				
-				System.out.println("Job Finished!");				
+				System.out.println("Job Finished!");
+				Hashtable<NodeRef, ArrayList<BlockRef>> refTable = job.getRefTable();
+				for (ReducerTask task : reducerTasks) {
+					reducerStatus.add(task.getTaskID());
+					NodeRef taskTracker = task.getNode();	
+					for (NodeRef reducer : refTable.keySet()) {
+						if (reducer.getIp().getHostAddress().equals(taskTracker.getIp().getHostAddress())) {
+							Socket uploadSoc = new Socket(reducer.getIp(), reducer.getPort());
+							ObjectOutputStream out = new ObjectOutputStream(uploadSoc.getOutputStream());
+							out.writeObject("upload");
+							out.writeObject(task.getOutputPath());
+							out.flush();
+							out.close();
+							uploadSoc.close();							
+						}
+					}
+				}					
+					
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -380,6 +398,5 @@ public class JobTracker {
 				e.printStackTrace();
 			}
 		}
-	}
 	}
 }

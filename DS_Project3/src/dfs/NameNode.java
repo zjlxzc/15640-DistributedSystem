@@ -251,8 +251,6 @@ public class NameNode {
 						}
 						ret.add(des);
 						ips.add(des.getIp().toString());
-						System.out.println("Send " + sourceBlock.getFileName() + " from " + sourceNode.getIp().getHostAddress()
-									+ " to " + des.getIp().getHostAddress());
 						cnt++;
 					}
 					

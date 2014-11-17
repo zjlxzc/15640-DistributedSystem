@@ -111,6 +111,9 @@ public class DataNode {
 						TaskTracker taskTracker = new TaskTracker();
 						out.writeObject("" + taskTracker.getPort());
 						out.flush();
+					} else if (first.equals("upload")) {
+						String filename = (String)in.readObject();
+						new Thread(new Upload(filename)).start();
 					}
 				} 				
 			}catch (IOException e) {
