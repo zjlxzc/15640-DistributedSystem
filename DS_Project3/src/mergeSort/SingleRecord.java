@@ -10,10 +10,8 @@ import java.io.Serializable;
  */
 
 public class SingleRecord implements Serializable, Comparable<SingleRecord>{
-	/**
-	 * Auto-generated serialVersionUID
-	 */
-	private static final long serialVersionUID = -15136372946432285L;
+
+	private static final long serialVersionUID = -15136372946432285L; // Auto-generated serialVersionUID
 	private String key;
 	private String value;
 	
@@ -25,6 +23,8 @@ public class SingleRecord implements Serializable, Comparable<SingleRecord>{
 		value = v;
 	}
 	
+	
+	// getters and setters
 	public String getKey() {
 		return key;
 	}
@@ -47,7 +47,7 @@ public class SingleRecord implements Serializable, Comparable<SingleRecord>{
 	}
 	
 	// the hash code function will be used to do calculation for a key,
-	// so that this key-value pair can find corresponding reducer
+	// so that this key-value pair can find its corresponding reducer
 	public int hashCode() {
 		int len = key.length();
         int[] array = new int[256];

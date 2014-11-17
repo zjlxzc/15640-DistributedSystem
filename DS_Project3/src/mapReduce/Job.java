@@ -1,5 +1,12 @@
 package mapReduce;
 
+/*
+ * @author Chun Xu (chunx)
+ * @author Jialing Zhou (jialingz)
+ *
+ * This class is the structure of a single job.
+ */
+
 import java.util.ArrayList;
 import java.util.Hashtable;
 
@@ -32,6 +39,7 @@ public class Job {
 		return jobID;
 	}
 
+	// add tasks to corresponding array list
 	public void addMapperTasks(MapperTask mapperTask) {
 		mapperTasks.add(mapperTask);
 	}	
@@ -39,7 +47,8 @@ public class Job {
 	public void addReducerTasks(ReducerTask reducerTask) {
 		reducerTasks.add(reducerTask);
 	}
-
+	
+	// getters
 	public ArrayList<MapperTask> getMapperTasks() {
 		return mapperTasks;
 	}

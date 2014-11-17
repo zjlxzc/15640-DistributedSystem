@@ -4,6 +4,7 @@ package mapReduce;
  * @author Chun Xu (chunx)
  * @author Jialing Zhou (jialingz)
  * 
+ * This is an interface of map reduce.
  * User should implement these two required methods.
  */
 

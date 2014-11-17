@@ -1,21 +1,26 @@
 package mapReduce;
 
+/*
+ * @author Chun Xu (chunx)
+ * @author Jialing Zhou (jialingz)
+ *
+ * This class is the structure of a data node.
+ */
+
 import java.io.Serializable;
 
 import dfs.NodeRef;
 
 public class Task implements Serializable {
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
+
+	private static final long serialVersionUID = 1L; // generated id
 	protected int taskID;
 	protected int jobID;
 	protected NodeRef node;
 	protected String status;
 	protected Class<?> mapReduce;	
-	public Task() {
-		
+	
+	public Task() {	
 	}
 	
 	public Task(NodeRef node, int taskID, int jobID, Class<?> mapReduce) {
@@ -26,6 +31,7 @@ public class Task implements Serializable {
 		this.jobID = jobID;
 	}
 
+	// getters and setters
 	public int getTaskID() {
 		return taskID;
 	}

@@ -1,14 +1,18 @@
 package mapReduce;
 
+/*
+ * @author Chun Xu (chunx)
+ * @author Jialing Zhou (jialingz)
+ *
+ * This class is the structure of a reducer task.
+ */
+
 import dfs.NodeRef;
 
 public class ReducerTask extends Task{
-	
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
-	private String outputPath;
+
+	private static final long serialVersionUID = 1L; // generated id
+	private String outputFile;
 	
 	public ReducerTask() {
 		super();
@@ -20,11 +24,11 @@ public class ReducerTask extends Task{
 	}
 
 	public String getOutputPath() {
-		return outputPath;
+		return outputFile;
 	}
 
-	public void setOutputPath(String outputPath) {
-		this.outputPath = outputPath;
+	public void setOutputPath(String outputFile) {
+		this.outputFile = outputFile;
 	}
 
 }

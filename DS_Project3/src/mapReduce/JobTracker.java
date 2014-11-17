@@ -1,5 +1,12 @@
 package mapReduce;
 
+/*
+ * @author Chun Xu (chunx)
+ * @author Jialing Zhou (jialingz)
+ *
+ * This class is the structure of a job tracker.
+ */
+
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -21,6 +28,7 @@ public class JobTracker {
 		jobID = 1;
 	}
 
+	// using singleton
 	public static JobTracker getInstance() {
 		if (jobTracker == null) {
 			jobTracker = new JobTracker();

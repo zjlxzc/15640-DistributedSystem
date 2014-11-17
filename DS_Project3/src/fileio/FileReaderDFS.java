@@ -24,12 +24,11 @@ import mergeSort.SingleRecord;
 import dfs.NodeRef;
 
 public class FileReaderDFS implements Runnable {
-	private int count;
 	private String fileName;
 	private ArrayList<NodeRef> reducers; // store all reducer of this job
 	private ArrayList<NodeRef> sockets; // store all connection of this job
-	private Class<?> MRClass; // get the class of map-reduce job
-	private boolean isEnd = false;
+	private Class<?> MRClass; // get the class of map-reduce job, either mapper or reducer
+	private boolean isEnd = false; // to check it reach the end of mapper
 	
 	public FileReaderDFS() {
 	}
@@ -49,6 +48,7 @@ public class FileReaderDFS implements Runnable {
 			clientSocket = new Socket(node.getIp(), node.getPort());
 			ObjectOutputStream sendInfor = new ObjectOutputStream(clientSocket.getOutputStream());
 			ObjectInputStream sendIn = new ObjectInputStream(clientSocket.getInputStream());
+			
 			sendInfor.writeObject("StartSend"); // write out information as a signal
 			sendInfor.flush();
 			
@@ -75,6 +75,7 @@ public class FileReaderDFS implements Runnable {
 		
 		String line = "";
 		MRContext context = null;
+		
 		try {
 			line = reader.readLine();
 			context = new MRContext(); // store result to an object
@@ -82,14 +83,14 @@ public class FileReaderDFS implements Runnable {
 			while (line != null) { // read file line by line
 				mr.map("", line, context); // call user map method
 				line = reader.readLine();
-				count++;
 			}
-			//System.out.println("IN MAPPER" + count);
+			
 			try {
 				connectReducer();
 			} catch (ClassNotFoundException e) {
 				e.printStackTrace();
 			}
+			
 			Iterator<SingleRecord> iterator = context.getIterator();
 			SingleRecord pair = null;
 			
@@ -97,14 +98,18 @@ public class FileReaderDFS implements Runnable {
 											// send to corresponding reducer
 				pair = iterator.next();
 				int hashValue = pair.hashCode() % reducers.size(); // get correct reducer number
-				NodeRef nr = sockets.get(hashValue);
+				
+				NodeRef nr = sockets.get(hashValue); // get corresponding reducer
 				Socket clientSocket = new Socket(nr.getIp(), nr.getPort());
+				
 				ObjectOutputStream sendPair = new ObjectOutputStream(
 						clientSocket.getOutputStream());
 				ObjectInputStream inPair = new ObjectInputStream(
 						clientSocket.getInputStream());
+				
 				sendPair.writeObject(pair); // write out key-value object
 				sendPair.flush();
+				
 				inPair.close();
 				sendPair.close();
 				clientSocket.close();
@@ -119,11 +124,7 @@ public class FileReaderDFS implements Runnable {
 		}
 	}
 
-	// return current number of lines that have been processed to indicate if this task is done
-	public int getCount() {
-		return count;
-	}
-	
+	// check to see if get the end of mapper
 	public boolean getEnd() {
 		return isEnd;
 	}

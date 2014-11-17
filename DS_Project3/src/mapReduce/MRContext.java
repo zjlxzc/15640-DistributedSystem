@@ -17,8 +17,8 @@ public class MRContext {
 	private PriorityQueue<SingleRecord> context; // to get key-value pair according to key order
 	
 	public MRContext() {
-		context = new PriorityQueue<SingleRecord>(30, new Comparator<SingleRecord>() {
-			public int compare(SingleRecord sr1, SingleRecord sr2) {
+		context = new PriorityQueue<SingleRecord>(0, new Comparator<SingleRecord>() {
+			public int compare(SingleRecord sr1, SingleRecord sr2) { // sort record by key first, then by value
 				int value = sr1.getKey().compareTo(sr2.getKey());
 				if (value == 0) {
 					return sr1.getValue().compareTo(sr2.getValue());
