@@ -67,12 +67,16 @@ public class FileWriterDFS implements Runnable{
 			e1.printStackTrace();
 		}
 		
-		//WordCount wc = new WordCount(); // create an instance of word count example
-		
 		for (String key : map.keySet()) {
 			mr.reduce(key, map.get(key).iterator(), contextReducer); // call user-defined reducer method
-			System.out.println("sisisis" + context.getIterator().next().getKey() + "\t" + context.getIterator().next().getValue());
-			writer.write(context.getIterator().next().getKey() + "\t" + context.getIterator().next().getValue() + "\n");
+		}
+		
+		Iterator<SingleRecord> it = contextReducer.getIterator();
+		SingleRecord record = new SingleRecord();
+		while (it.hasNext()) {
+			record = it.next();
+			System.out.println("sisisis" + record.getKey() + "\t" + record.getValue());
+			writer.write(record.getKey() + "\t" + record.getValue() + "\n");
 		}
 		writer.close();
 		task.setStatus("finished"); // set current status
