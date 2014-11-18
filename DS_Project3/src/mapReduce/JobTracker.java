@@ -35,7 +35,6 @@ public class JobTracker {
 			jobTracker = new JobTracker();
 			jobList = new ArrayList<Job>();
 		}
-		System.out.println("JobTracker start");
 		return jobTracker;
 	}
 
@@ -172,6 +171,9 @@ public class JobTracker {
 	}
 		
 	public void ListJobs() {
+		if (jobList.size() == 0) {
+			System.out.println("There is no job on this system!");
+		}
 		for (Job job : jobList) {
 			ArrayList<MapperTask> mappers = job.getMapperTasks();
 			ArrayList<ReducerTask> reducers = job.getReducerTasks();
