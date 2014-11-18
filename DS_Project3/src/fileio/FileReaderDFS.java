@@ -16,7 +16,6 @@ import java.io.ObjectOutputStream;
 import java.lang.reflect.Constructor;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.PriorityQueue;
 
 import mapReduce.MRContext;
@@ -94,32 +93,39 @@ public class FileReaderDFS implements Runnable {
 			
 			PriorityQueue<SingleRecord> queue = context.getQueue();
 			SingleRecord pair = null;
+			ArrayList<Socket> socketList = new ArrayList<Socket>();
+			ArrayList<ObjectOutputStream> outputList = new ArrayList<ObjectOutputStream>();
+
+			for (NodeRef reducer : sockets) {
+				Socket clientSocket = new Socket(reducer.getIp(), reducer.getPort());	
+				socketList.add(clientSocket);
+				outputList.add(new ObjectOutputStream(clientSocket.getOutputStream()));
+			}
 			
 			while (queue.size() > 0) { // iterator each key-value pair and
 											// send to corresponding reducer
 				pair = queue.remove();
 				int hashValue = pair.hashCode() % reducers.size(); // get correct reducer number
-				
-				NodeRef nr = sockets.get(hashValue); // get corresponding reducer
-				Socket clientSocket = new Socket(nr.getIp(), nr.getPort());
-				
-				ObjectOutputStream sendPair = new ObjectOutputStream(
-						clientSocket.getOutputStream());
-				ObjectInputStream inPair = new ObjectInputStream(
-						clientSocket.getInputStream());
-				
+				ObjectOutputStream sendPair = outputList.get(hashValue);
 				sendPair.writeObject(pair); // write out key-value object
 				sendPair.flush();
-				
-				inPair.close();
-				sendPair.close();
-				clientSocket.close();
-			}
+			}	
 			
 			isEnd = true;
 			reader.close();
+			for (int i = 0; i < sockets.size(); i++) {
+				ObjectOutputStream out = outputList.get(i);
+				out.writeObject("");
+				out.flush();
+				Thread.sleep(100);
+				out.close();
+				socketList.get(i).close();
+			}
 			
 		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}

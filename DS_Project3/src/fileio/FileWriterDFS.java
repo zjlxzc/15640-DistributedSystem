@@ -18,7 +18,6 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.PriorityQueue;
 
 import mapReduce.MRContext;
@@ -91,33 +90,16 @@ public class FileWriterDFS implements Runnable{
 			newPort = reducer.getLocalPort();
 			MRContext context = new MRContext(); // store result to a context object
 			
-			ObjectOutputStream outStream = null;
-			ObjectInputStream inStream = null;
-			
 			while (flag) { // true means mapper is still running
-				Socket clientSocket = reducer.accept(); // get client socket
-				inStream = new ObjectInputStream(clientSocket.getInputStream());
-				outStream = new ObjectOutputStream(clientSocket.getOutputStream());
-				
-				Object obj = inStream.readObject();
-				
-				SingleRecord record = new SingleRecord();
-				if (obj instanceof SingleRecord) {
-					record = (SingleRecord)obj;
-					context.context(record.getKey(), record.getValue());
-				}
+				Socket clientSocket = reducer.accept(); // get client socket				
+				new Thread(new ReceiveMapper(clientSocket, context)).start();
 			}
 
 			reducer(context); // after map phase, it can start to do reduce process
-			
-			inStream.close();
-			outStream.close();
 			reducer.close();
 		} catch (IOException e) {
 			e.printStackTrace();
-		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
-		}	
+		} 
 	}
 
 	public boolean isFlag() {
@@ -134,5 +116,42 @@ public class FileWriterDFS implements Runnable{
 
 	public void setNewPort(int newPort) {
 		this.newPort = newPort;
+	}
+	
+	private class ReceiveMapper implements Runnable {
+		Socket client;
+		MRContext context;
+		public ReceiveMapper(Socket client, MRContext context) {
+			this.client = client;
+			this.context = context;
+		}
+		
+		@Override
+		public void run() {
+			try {
+				ObjectInputStream inStream = new ObjectInputStream(client.getInputStream());
+				ObjectOutputStream outStream = new ObjectOutputStream(client.getOutputStream());
+			
+				while (flag) {
+					Object obj = inStream.readObject();
+					
+					SingleRecord record = new SingleRecord();
+					if (obj instanceof SingleRecord) {
+						record = (SingleRecord)obj;
+						context.context(record.getKey(), record.getValue());
+					} else {
+						break;
+					}
+				}				
+				inStream.close();
+				outStream.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (ClassNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}		
 	}
 }

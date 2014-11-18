@@ -21,10 +21,11 @@ public class Job {
 	private String outputPath;
 	private Class<?> mapReducer;
 	private Hashtable<NodeRef, ArrayList<BlockRef>> refTable;
+	private String status;
 	
 	public Job(int jobID, String inputFile, String outputPath, Class<?> mapReducer, 
 			ArrayList<MapperTask> mapperTasks, ArrayList<ReducerTask> reducerTasks,
-			Hashtable<NodeRef, ArrayList<BlockRef>> refTable) {
+			Hashtable<NodeRef, ArrayList<BlockRef>> refTable, String status) {
 		
 		this.jobID = jobID;
 		this.mapperTasks = mapperTasks;
@@ -33,6 +34,7 @@ public class Job {
 		this.outputPath = outputPath;
 		this.mapReducer = mapReducer;
 		this.refTable = refTable;
+		this.setStatus(status);
 	}
 
 	public int getJobID() {
@@ -75,6 +77,14 @@ public class Job {
 
 	public Hashtable<NodeRef, ArrayList<BlockRef>> getRefTable() {
 		return refTable;
+	}
+
+	public String getStatus() {
+		return status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
 	}
 
 }
