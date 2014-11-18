@@ -18,7 +18,7 @@ public class WordCount implements MapReduce{
 		String[] token = value.split("\\W"); // separate a line by unwanted characters
 		for (String word : token) {
 			if (word.length() != 0) {
-				context.context(word, "1"); // indicate the occurrence of a single word is 1
+				context.context(word.toLowerCase(), "1"); // indicate the occurrence of a single word is 1
 			}
 		}
 	}
