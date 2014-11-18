@@ -65,24 +65,30 @@ public class NameNode {
 			
 			ArrayList<NodeRef> nodeList = dataNodeTable.getDataNodes(); // get all data nodes
 			NodeRef cur;				
+			
 			for (int i = 0; i < nodeList.size(); i++) {
 				cur =  nodeList.get(i);
-				master = new Socket(cur.getIp(), cur.getPort());
+				master = new Socket(cur.getIp(), cur.getPort()); // for each data node, establish connection
+				
 				ObjectOutputStream out = new ObjectOutputStream(master.getOutputStream());
 				ObjectInputStream in = new ObjectInputStream(master.getInputStream());
+				
 				out.writeObject("BlockSize");
 				out.writeObject(BLOCK_SIZE);
-				out.flush();
+				out.flush(); // write the above information to data node
+				
 				in.close();
 				out.close();
 				master.close();
 			}				
+			
 			br.close();
 		} catch (FileNotFoundException e) {
 			System.out.println("The input file path does not exist");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}				
+		
 		new Thread(new Main()).start();
 		new Thread(new ListenToSlave()).start();
 	}
@@ -101,15 +107,19 @@ public class NameNode {
 		public void run() {		
 			Usage();
 			Scanner scan = new Scanner(System.in);
+			
 			while (true) {								
 				String[] str = scan.nextLine().split(" ");
+				
 				if (str[0].equals("files")){
 					System.out.println("Files distribution on DFS:");
 					System.out.println("===================================================");
+					
 					new Thread(new ListFileThread()).start();
 				} else if (str[0].equals("quit")) {
 					System.out.println("ByeBye");
 					scan.close();
+					
 					System.exit(0);
 				} else if (str[0].equals("jobs")) {
 					JobTracker jobTracker = JobTracker.getInstance();
@@ -126,7 +136,6 @@ public class NameNode {
 		}
 	}	
 	
-	@SuppressWarnings("unused")
 	private class Poll implements Runnable {
 
 		@Override
@@ -137,16 +146,19 @@ public class NameNode {
 				while (true) {
 					ArrayList<NodeRef> nodeList = dataNodeTable.getDataNodes();
 					NodeRef cur;
+					
 					for (i = 0; i < nodeList.size(); i++) {
 						Thread.sleep(5000);
 						master = new Socket();
 						cur =  nodeList.get(i);
+						
+						// connect to data node
 						master.connect(new InetSocketAddress(cur.getIp(), cur.getPort()), 1000);
 					}		
 				}						
 			} catch (IOException e) {
 				System.out.println(e.getMessage());
-				NodeRef errorNode = dataNodeTable.getDataNodes().get(i);
+				NodeRef errorNode = dataNodeTable.getDataNodes().get(i); // get failed data node
 				System.out.print(errorNode.getIp() + " : " + errorNode.getPort() + " : lost connection");
 			} catch (InterruptedException e) {
 				e.printStackTrace();
@@ -162,11 +174,13 @@ public class NameNode {
 			} else {
 				for (String file : metaTable.keySet()) {
 					System.out.println("File Name : " + file);
+					
 					Hashtable<String, ArrayList<BlockRef>> curTable = metaTable.get(file);
 					for (String ip : curTable.keySet()) {
 						System.out.println(ip);
+						
 						for (BlockRef block : curTable.get(ip)) {
-							System.out.print(block.getFileName() + " ");
+							System.out.print(block.getFileName() + " "); // get file information
 						}
 						System.out.println();
 					}
@@ -190,12 +204,13 @@ public class NameNode {
 			ServerSocket master = null;
 			try {
 				master = new ServerSocket(PORT);
+				
 				while(true) {
-					Socket slave = master.accept();
+					Socket slave = master.accept(); // establish connection with data node
 					ObjectInputStream in = new ObjectInputStream(slave.getInputStream());
 					ObjectOutputStream out = new ObjectOutputStream(slave.getOutputStream());
 					
-					String first = (String)in.readObject();
+					String first = (String)in.readObject(); // get information sent by data node
 					if (first.equals("addBlock")) {
 						new Thread(new BlockAdder(in, out)).start();
 					} else if (first.equals("update")) {
@@ -229,26 +244,29 @@ public class NameNode {
 		@Override
 		public void run() {		
 			try {				
-				String fileName = (String)in.readObject();
-				BlockRef sourceBlock = (BlockRef)in.readObject();
-				NodeRef sourceNode = sourceBlock.getNodeRef();
+				String fileName = (String)in.readObject(); // get filename
+				BlockRef sourceBlock = (BlockRef)in.readObject(); // get block reference
+				NodeRef sourceNode = sourceBlock.getNodeRef(); // get source node information
+				
 				ArrayList<NodeRef> ret = new ArrayList<NodeRef>();
 				ArrayList<NodeRef> nodeList = dataNodeTable.getDataNodes();
 				Random rand = new Random();
 				
-				if (!metaTable.containsKey(fileName)) {
+				if (!metaTable.containsKey(fileName)) { // if the meta data table has this file information
 					int cnt = 1;
 					int total = nodeList.size();
 					HashSet<String> ips = new HashSet<String>();
 					
-					while (cnt < REPLICA_FACTOR) {
+					while (cnt < REPLICA_FACTOR) { // if not reaching the number of replica factor
 						int index = 0;
 						NodeRef des = null;
+						
 						while (des == null || des.getIp().getHostAddress().equals(sourceNode.getIp().getHostAddress()) ||
 								(!ips.isEmpty() && ips.contains(des.getIp().toString()))) {
 							index = rand.nextInt(total);
 							des = nodeList.get(index);						
 						}
+						
 						ret.add(des);
 						ips.add(des.getIp().toString());
 						cnt++;
@@ -256,6 +274,7 @@ public class NameNode {
 					
 					Hashtable<String, ArrayList<BlockRef>> newNodeTable = new Hashtable<String, ArrayList<BlockRef>>();
 					ArrayList<BlockRef> newBlockList = new ArrayList<BlockRef>();
+					
 					newBlockList.add(sourceBlock);
 					newNodeTable.put(sourceNode.getIp().getHostAddress(), newBlockList);
 					metaTable.put(fileName, newNodeTable);
@@ -277,6 +296,7 @@ public class NameNode {
 					List<Map.Entry<NodeRef,Integer>> sort=new ArrayList<>();  
 					sort.addAll(freq.entrySet());  
 					Collections.sort(sort, new ValueComparator());
+					
 					int cnt = 1;
 					int total = sort.size();
 					HashSet<String> ips = new HashSet<String>();
@@ -334,13 +354,15 @@ public class NameNode {
 		@SuppressWarnings("unchecked")
 		public void run() {		
 			try {	
-				NodeRef sourceNode = (NodeRef)in.readObject();
+				NodeRef sourceNode = (NodeRef)in.readObject(); //update information to name node
 				Hashtable<String, ArrayList<BlockRef>> nodeTable = 
 						(Hashtable<String, ArrayList<BlockRef>>)in.readObject();
+				
 				for (String filename : nodeTable.keySet()) {
 					Hashtable<String, ArrayList<BlockRef>> fileTable = metaTable.get(filename);
-					fileTable.put(sourceNode.getIp().getHostAddress(), nodeTable.get(filename));
+					fileTable.put(sourceNode.getIp().getHostAddress(), nodeTable.get(filename)); // update file table
 				}
+				
 				in.close();
 				out.close();
 			} catch (IOException e) {
@@ -365,8 +387,9 @@ public class NameNode {
 			try {
 				String inputFile = (String)in.readObject();
 				String outputPath = (String)in.readObject();
-				Class<?> mapReduceClass = (Class<?>)in.readObject();
-				Hashtable<String, ArrayList<BlockRef>> ipTable = metaTable.get(inputFile);
+				Class<?> mapReduceClass = (Class<?>)in.readObject(); // get required map reduce job information
+				
+				Hashtable<String, ArrayList<BlockRef>> ipTable = metaTable.get(inputFile); // get data node ip address
 				Hashtable<NodeRef, ArrayList<BlockRef>> refTable = new Hashtable<NodeRef, ArrayList<BlockRef>>();
 				
 				for (String ip : ipTable.keySet()) {
@@ -380,7 +403,10 @@ public class NameNode {
 				
 				int splitNum = totalBlockNum / REPLICA_FACTOR;
 				JobTracker jobTracker = JobTracker.getInstance();
+				
+				// create a job by starting a job tracker
 				jobTracker.createJob(inputFile, splitNum, refTable, outputPath, mapReduceClass);
+				
 				in.close();
 				out.close();
 			} catch (ClassNotFoundException e) {
