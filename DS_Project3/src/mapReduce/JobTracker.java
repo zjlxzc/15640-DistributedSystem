@@ -177,7 +177,7 @@ public class JobTracker {
 			ArrayList<ReducerTask> reducers = job.getReducerTasks();
 			System.out.println("Job ID       : " + job.getJobID());
 			System.out.println("InputFile    : " + job.getInputFile());
-			System.out.println("OutputPath   : " + job.getOutputPath());
+			System.out.println("OutputFile   : " + job.getOutputPath());
 			System.out.println("MapperReducer: " + job.getMapReducer().getSimpleName());
 			if (job.getStatus().equals("finished")) {
 				System.out.println("Status       : finished");

@@ -73,13 +73,11 @@ public class FileWriterDFS implements Runnable{
 		
 		while (que.size() > 0) { // to through each record
 			record = que.poll();
-			//System.out.println("sisisis" + record.getKey() + "\t" + record.getValue());
 			writer.write(record.getKey() + "\t" + record.getValue() + "\n");
 		}
 		
 		writer.close();
 		task.setStatus("finished"); // set current status
-		System.out.println("This task finished successfully!");
 	}
 
 	@Override
