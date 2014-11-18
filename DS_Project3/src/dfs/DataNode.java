@@ -16,6 +16,8 @@ import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Hashtable;
@@ -114,6 +116,8 @@ public class DataNode {
 					} else if (first.equals("upload")) {
 						String filename = (String)in.readObject();
 						new Thread(new Upload(filename)).start();
+					} else if (first.equals("BeginPolling")) {
+						new Thread(new Reporter(out)).start();
 					}
 				} 				
 			}catch (IOException e) {
@@ -358,7 +362,10 @@ public class DataNode {
 		public void run() {
 			Socket master = null;					
 			try {
-				Class<?> mapReduceClass = Class.forName(mapReduceFile);			
+				URL dirUrl = new URL("file://" + mapReduceFile);
+				URLClassLoader cl = new URLClassLoader(new URL[]{dirUrl}, getClass().getClassLoader());
+				Class<?> mapReduceClass = cl.loadClass("");
+				//Class<?> mapReduceClass = Class.forName(mapReduceFile);			
 				master = new Socket(masterIP, masterPort);
 				ObjectOutputStream out = new ObjectOutputStream(master.getOutputStream());
 				ObjectInputStream in = new ObjectInputStream(master.getInputStream());
@@ -376,6 +383,49 @@ public class DataNode {
 			} catch (ClassNotFoundException e) {
 				e.printStackTrace();
 			} 		
+		}
+	}
+	
+	private class Reporter implements Runnable {
+		ObjectOutputStream out;
+		public Reporter(ObjectOutputStream out) {
+			this.out = out;
+		}
+		@Override
+		public void run() {
+			ServerSocket listener = null;
+			try {
+				listener = new ServerSocket(0);
+				int port = listener.getLocalPort();				
+				out.writeObject(port + "");
+				out.flush();
+				Thread.sleep(1000);
+				out.close();
+				
+				while(true) {
+					Socket master = listener.accept();
+					ObjectInputStream in = new ObjectInputStream(master.getInputStream());
+					in.readObject();
+				}
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (ClassNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} finally {
+				if (listener != null) {
+					try {
+						listener.close();
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+			}
 		}
 	}
 }

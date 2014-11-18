@@ -78,13 +78,17 @@ public class NameNode {
 				master.close();
 			}				
 			br.close();
+			
+			new Thread(new Main()).start();
+			new Thread(new ListenToSlave()).start();
+			for (NodeRef node : nodeList) {
+				new Thread(new Poll(node)).start();
+			}
 		} catch (FileNotFoundException e) {
 			System.out.println("The input file path does not exist");
 		} catch (IOException e) {
 			e.printStackTrace();
-		}				
-		new Thread(new Main()).start();
-		new Thread(new ListenToSlave()).start();
+		}						
 	}
 	
 	private static void Usage() {
@@ -126,29 +130,57 @@ public class NameNode {
 		}
 	}	
 	
-	@SuppressWarnings("unused")
 	private class Poll implements Runnable {
-
+		
+		NodeRef dataNode;
+		public Poll(NodeRef dataNode) {
+			this.dataNode = dataNode;
+		}
+				
 		@Override
 		public void run() {
-			Socket master;	
-			int i = 0;
-			try {				
-				while (true) {
-					ArrayList<NodeRef> nodeList = dataNodeTable.getDataNodes();
-					NodeRef cur;
-					for (i = 0; i < nodeList.size(); i++) {
-						Thread.sleep(5000);
-						master = new Socket();
-						cur =  nodeList.get(i);
-						master.connect(new InetSocketAddress(cur.getIp(), cur.getPort()), 1000);
-					}		
-				}						
+			Socket master = null;
+			ObjectOutputStream out;
+			ObjectInputStream in;
+			int port = 0;
+			try {	
+				master = new Socket(dataNode.getIp(), dataNode.getPort());
+				out = new ObjectOutputStream(master.getOutputStream());				
+				out.writeObject("BeginPolling");
+				out.flush();
+				Thread.sleep(1000);
+				in = new ObjectInputStream(master.getInputStream());
+				port = Integer.parseInt((String)in.readObject());
+				in.close();
+				out.close();
+				master.close();
+											
 			} catch (IOException e) {
 				System.out.println(e.getMessage());
-				NodeRef errorNode = dataNodeTable.getDataNodes().get(i);
-				System.out.print(errorNode.getIp() + " : " + errorNode.getPort() + " : lost connection");
 			} catch (InterruptedException e) {
+				e.printStackTrace();
+			} catch (NumberFormatException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (ClassNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}	
+			
+			try {
+				master = new Socket(dataNode.getIp(), port);
+				out = new ObjectOutputStream(master.getOutputStream());
+				in = new ObjectInputStream(master.getInputStream());
+				while (true) {
+					Thread.sleep(5000);
+					out.writeObject("polling");
+					out.flush();
+				}	
+			} catch (IOException e) {
+				System.out.println(e.getMessage());
+				System.out.println(dataNode.getIp()  +  " : lost connection");
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}			
 		}		
