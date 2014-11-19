@@ -405,6 +405,7 @@ public class DataNode {
 		}
 	}
 	
+	// report name node in a separated thread
 	private class Reporter implements Runnable {
 		ObjectOutputStream out;
 		public Reporter(ObjectOutputStream out) {
@@ -415,33 +416,31 @@ public class DataNode {
 			ServerSocket listener = null;
 			try {
 				listener = new ServerSocket(0);
-				int port = listener.getLocalPort();				
-				out.writeObject(port + "");
+				int port = listener.getLocalPort();	
+				
+				out.writeObject(port + ""); // send port to name node
 				out.flush();
+				
 				Thread.sleep(1000);
 				out.close();
 				
-				while(true) {
+				while(true) { // keep reporting
 					Socket master = listener.accept();
 					ObjectInputStream in = new ObjectInputStream(master.getInputStream());
 					in.readObject();
 				}
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				System.out.println("DataNode: " + e.getMessage());
 			} catch (ClassNotFoundException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				System.out.println("DataNode: " + e.getMessage());
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				System.out.println("DataNode: " + e.getMessage());
 			} finally {
 				if (listener != null) {
 					try {
 						listener.close();
 					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+						System.out.println("DataNode: " + e.getMessage());
 					}
 				}
 			}
