@@ -5,6 +5,7 @@ package example;
  * @author Jialing Zhou (jialingz)
  * 
  * This class is a word count example to do map-reduce processing.
+ * It will get the occurrence of each distinct word
  */
 
 import java.util.Iterator;

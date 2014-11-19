@@ -22,9 +22,11 @@ public class MapperTask extends Task{
 		super();
 	}
 	
+	// create mapper task with required information
 	public MapperTask(NodeRef node, int taskID, int jobID, Class<?> mapReduce,
 			ArrayList<BlockRef> blockList, ArrayList<NodeRef> reducers) {
 		super(node, taskID, jobID, mapReduce);
+		
 		this.blockList = blockList;
 		this.reducers = reducers;
 	}

@@ -108,7 +108,7 @@ public class TaskTracker {
 					} else if (inLine.equals("ReportReducer")) { // send reduce information
 						srcOut.writeObject(reducerTask.getStatus());
 						srcOut.flush();
-					} else if (inLine.equals("MapperFinished")) {
+					} else if (inLine.equals("MapperFinished")) { // if mapper has finished
 						reduce.setFlag(false);
 						Socket toRed = new Socket(InetAddress.getLocalHost(), reduce.getNewPort());
 						ObjectOutputStream redOut = new ObjectOutputStream(toRed.getOutputStream());

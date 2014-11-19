@@ -5,6 +5,7 @@ package dfs;
  * @author Jialing Zhou (jialingz)
  *
  * This class is the structure of a file block reference.
+ * It has user input file information, the data node it is sitting and the order of itself.
  */
 
 import java.io.Serializable;
@@ -18,6 +19,7 @@ public class BlockRef implements Serializable {
 	private NodeRef nodeRef; // node reference
 	private String fileName;
 	
+	// a constructor with all required information to create this block reference
 	public BlockRef(NodeRef nodeRef, int id, String parentFile, int splitNum, String fileName) {
 		this.id = id;
 		this.parentFile = parentFile;
@@ -26,6 +28,7 @@ public class BlockRef implements Serializable {
 		this.fileName = fileName;
 	}
 
+	// a set of getters to be assessed outside of this class
 	public int getId() {
 		return id;
 	}

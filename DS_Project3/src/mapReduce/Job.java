@@ -14,16 +14,17 @@ import dfs.BlockRef;
 import dfs.NodeRef;
 
 public class Job {
-	private int jobID;
-	private ArrayList<MapperTask> mapperTasks;
-	private ArrayList<ReducerTask> reducerTasks;
-	private String inputFile;
-	private String outputPath;
-	private Class<?> mapReducer;
+	private int jobID;							// specify job id
+	private ArrayList<MapperTask> mapperTasks;	// array list to store all mapper tasks
+	private ArrayList<ReducerTask> reducerTasks;// array list to store all reducer tasks
+	private String inputFile;					// user uploaded input file
+	private String outputFile;					// user specified output file
+	private Class<?> mapReducer;				// user defined mapReduce class
 	private Hashtable<NodeRef, ArrayList<BlockRef>> refTable;
-	private String status;
+	private String status;						// job status
 	
-	public Job(int jobID, String inputFile, String outputPath, Class<?> mapReducer, 
+	// create a new job with all required information
+	public Job(int jobID, String inputFile, String outputFile, Class<?> mapReducer, 
 			ArrayList<MapperTask> mapperTasks, ArrayList<ReducerTask> reducerTasks,
 			Hashtable<NodeRef, ArrayList<BlockRef>> refTable, String status) {
 		
@@ -31,7 +32,7 @@ public class Job {
 		this.mapperTasks = mapperTasks;
 		this.reducerTasks = reducerTasks;
 		this.inputFile = inputFile;
-		this.outputPath = outputPath;
+		this.outputFile = outputFile;
 		this.mapReducer = mapReducer;
 		this.refTable = refTable;
 		this.setStatus(status);
@@ -41,20 +42,22 @@ public class Job {
 		return jobID;
 	}
 
-	// add tasks to corresponding array list
+	// add mapper task to corresponding array list
 	public void addMapperTasks(MapperTask mapperTask) {
 		mapperTasks.add(mapperTask);
 	}	
 	
+	// remove mapper task from corresponding array list
 	public void removeMapperTask(MapperTask mapperTask) {
 		mapperTasks.remove(mapperTask);
 	}
 
+	// add reducer task to corresponding array list
 	public void addReducerTasks(ReducerTask reducerTask) {
 		reducerTasks.add(reducerTask);
 	}
 	
-	// getters
+	// a set of getters
 	public ArrayList<MapperTask> getMapperTasks() {
 		return mapperTasks;
 	}
@@ -68,7 +71,7 @@ public class Job {
 	}
 
 	public String getOutputPath() {
-		return outputPath;
+		return outputFile;
 	}
 
 	public Class<?> getMapReducer() {
