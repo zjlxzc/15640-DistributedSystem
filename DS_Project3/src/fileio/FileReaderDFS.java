@@ -5,6 +5,7 @@ package fileio;
  * @author Jialing Zhou (jialingz)
  * 
  * This class is used to do map job.
+ * It will read a file and do some pre-process and send to reducers.
  */
 
 import java.io.BufferedReader;
@@ -113,20 +114,21 @@ public class FileReaderDFS implements Runnable {
 			
 			isEnd = true;
 			reader.close();
+			
 			for (int i = 0; i < sockets.size(); i++) {
 				ObjectOutputStream out = outputList.get(i);
-				out.writeObject("");
+				out.writeObject(""); // a signal to indicate the end of sending from mapper
 				out.flush();
+				
 				Thread.sleep(100);
 				out.close();
 				socketList.get(i).close();
 			}
 			
 		} catch (IOException e) {
-			e.printStackTrace();
+			System.out.println(e.getMessage());
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.out.println(e.getMessage());
 		}
 	}
 

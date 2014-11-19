@@ -5,30 +5,27 @@ package dfs;
  * @author Jialing Zhou (jialingz)
  *
  * This class is the structure of a data node table.
+ * It has 
  */
 
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Random;
 
 public class DataNodeTable {
-	private static HashMap<String, NodeRef> nodeMap;
-	private static NameNode master = null;
-	Random rand = new Random();
+	private static HashMap<String, NodeRef> nodeMap; // a hash map to store a data node's ip address and its reference
+	
 	public DataNodeTable() {
 		nodeMap = new HashMap<String, NodeRef>();
 	}
 	
+	// add a data node information to the table
 	public void addNode(String ip, int port) throws UnknownHostException {	
-		NodeRef ref = new NodeRef(ip, port);
+		NodeRef ref = new NodeRef(ip, port); // create data node reference
 		nodeMap.put(ref.getIp().getHostAddress(), ref);
 	}
 	
-	public NameNode getMaster() {
-		return master;
-	}
-	
+	// return all data nodes
 	public ArrayList<NodeRef> getDataNodes() {
 		ArrayList<NodeRef> slaves = new ArrayList<NodeRef>();
 		for (NodeRef node : nodeMap.values()) {
@@ -42,7 +39,7 @@ public class DataNodeTable {
 		return nodeMap.get(ip);
 	}
 	
-	// get all node reference
+	// print out all data node 's ip address and port
 	public void list() {
 		for (String key : nodeMap.keySet()) {
 			NodeRef node = nodeMap.get(key);

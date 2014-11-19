@@ -18,6 +18,7 @@ public class ReducerTask extends Task{
 		super();
 	}
 	
+	// create reducer task with required information
 	public ReducerTask(NodeRef node, int taskID, int jobID, Class<?> mapReduce, String outputPath) {
 		super(node, taskID, jobID, mapReduce);
 		this.setOutputPath(outputPath);

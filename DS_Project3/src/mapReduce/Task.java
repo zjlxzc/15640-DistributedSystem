@@ -4,7 +4,7 @@ package mapReduce;
  * @author Chun Xu (chunx)
  * @author Jialing Zhou (jialingz)
  *
- * This class is the structure of a data node.
+ * This class is the structure of a task.
  */
 
 import java.io.Serializable;
@@ -31,7 +31,7 @@ public class Task implements Serializable {
 		this.jobID = jobID;
 	}
 
-	// getters and setters
+	// a set of getters and setters
 	public int getTaskID() {
 		return taskID;
 	}

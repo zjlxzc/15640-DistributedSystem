@@ -26,11 +26,11 @@ import mapReduce.Task;
 import mergeSort.SingleRecord;
 
 public class FileWriterDFS implements Runnable{
-	private String fileName; // the name of output file
+	private String fileName; 	// the name of output file
 	private boolean flag = true; // this variable indicate if the mapper job is done
-	private Task task; // reducer task
-	private int newPort; // port of a new socket
-	private Class<?> MRClass; // get the class of map-reduce job
+	private Task task; 			// reducer task
+	private int newPort; 		// port of a new socket
+	private Class<?> MRClass; 	// get the class of map-reduce job
 	
 	public FileWriterDFS(String fileName, Task task) throws IOException {
 		this.fileName = fileName;
@@ -100,6 +100,7 @@ public class FileWriterDFS implements Runnable{
 		} 
 	}
 
+	// a set of getters and setters
 	public boolean isFlag() {
 		return flag;
 	}
@@ -116,9 +117,11 @@ public class FileWriterDFS implements Runnable{
 		this.newPort = newPort;
 	}
 	
+	// run this class in a separated thread to keep the same connection without opening a new one
 	private class ReceiveMapper implements Runnable {
 		Socket client;
 		MRContext context;
+		
 		public ReceiveMapper(Socket client, MRContext context) {
 			this.client = client;
 			this.context = context;
@@ -130,25 +133,24 @@ public class FileWriterDFS implements Runnable{
 				ObjectInputStream inStream = new ObjectInputStream(client.getInputStream());
 				ObjectOutputStream outStream = new ObjectOutputStream(client.getOutputStream());
 			
-				while (flag) {
+				while (flag) { // if not finished yet
 					Object obj = inStream.readObject();
 					
 					SingleRecord record = new SingleRecord();
-					if (obj instanceof SingleRecord) {
+					if (obj instanceof SingleRecord) { // if receiving a SingleRecord instance instead of empty
 						record = (SingleRecord)obj;
-						context.context(record.getKey(), record.getValue());
+						context.context(record.getKey(), record.getValue()); // add this record to context
 					} else {
 						break;
 					}
 				}				
+				
 				inStream.close();
 				outStream.close();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				System.out.println(e.getMessage());
 			} catch (ClassNotFoundException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				System.out.println(e.getMessage());
 			}
 		}		
 	}

@@ -47,7 +47,7 @@ public class DataNode {
 		this.masterPort = masterPort;
 	}
 	
-	// useful command to use our system
+	// useful commands to use our system
 	private static void Usage() {
 		System.out.println("Please enter command:");
 		System.out.println("To upload a file to DFS : upload [filename]");
@@ -136,13 +136,14 @@ public class DataNode {
 		}		
 	}
 	
+	// run in a separated thread to list all file information
 	private class ListFileThread implements Runnable {		
 		@Override
 		public void run() {
 			if (fileTable == null || fileTable.isEmpty()) {
 				System.out.println("There is no file in the system!");
 			} else {
-				for (String file : fileTable.keySet()) {
+				for (String file : fileTable.keySet()) { // go through file
 					System.out.println("File Name : " + file);
 					for (BlockRef block : fileTable.get(file)) { // list all blocks
 						System.out.print(block.getFileName() + " ");
@@ -154,6 +155,7 @@ public class DataNode {
 		}		
 	}
 	
+	// run upload function in a separated thread
 	private class Upload implements Runnable {
 		private String fileName;
 		
@@ -168,6 +170,7 @@ public class DataNode {
 				BufferedReader br = new BufferedReader(new FileReader(inputFile));
 				String line;
 				NodeRef me = new NodeRef(InetAddress.getLocalHost().getHostName(), PORT);
+				
 				int splitNum = 1;
 				ArrayList<BlockRef> blockList = new ArrayList<BlockRef>();
 				Block curBlock = new Block(blockID, BLOCK_SIZE);

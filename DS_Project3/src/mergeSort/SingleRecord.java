@@ -6,7 +6,7 @@ import java.io.Serializable;
  * @author Chun Xu (chunx)
  * @author Jialing Zhou (jialingz)
  * 
- * This class is the structure of a single key-value pair
+ * This class is the structure of a single key-value pair.
  */
 
 public class SingleRecord implements Serializable, Comparable<SingleRecord>{
@@ -18,11 +18,11 @@ public class SingleRecord implements Serializable, Comparable<SingleRecord>{
 	public SingleRecord() {	
 	}
 	
+	// specify key and value for a new record
 	public SingleRecord(String k, String v) {
 		key = k;
 		value = v;
 	}
-	
 	
 	// getters and setters
 	public String getKey() {
@@ -46,12 +46,13 @@ public class SingleRecord implements Serializable, Comparable<SingleRecord>{
 		return this.key.compareTo(o.key);
 	}
 	
-	// the hash code function will be used to do calculation for a key,
+	// This hash code function will be used to do calculation for a key,
 	// so that this key-value pair can find its corresponding reducer
 	public int hashCode() {
 		int len = key.length();
         int[] array = new int[256];
-        for (int i = 0; i < len; i++) {
+        
+        for (int i = 0; i < len; i++) { // get the number of each character
             array[key.charAt(i)]++;
         }
         
@@ -59,7 +60,7 @@ public class SingleRecord implements Serializable, Comparable<SingleRecord>{
         long b = 63689;
         long hash = 0;
         
-        for (int value : array) {
+        for (int value : array) { // do some calculation to get hash value
             hash = hash * a + value;
             a = a * b;
         }
