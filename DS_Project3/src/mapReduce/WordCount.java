@@ -1,27 +1,21 @@
-package example;
-
+package mapReduce;
 /*
  * @author Chun Xu (chunx)
  * @author Jialing Zhou (jialingz)
  * 
- * This class is an example to do map-reduce processing.
- * It will get the total number of odd numbers and the total number of even numbers.
+ * This class is a word count example to do map-reduce processing.
  */
 
 import java.util.Iterator;
-import mapReduce.MRContext;
-import mapReduce.MapReduce;
 
-public class OddEven implements MapReduce {
-	
+public class WordCount implements MapReduce{
+	 	    
 	@Override  // implement map method
 	public void map(String key, String value, MRContext context){
-		String[] token = value.split(" "); // separate each integer
+		String[] token = value.split("\\W"); // separate a line by unwanted characters
 		for (String word : token) {
-			if (Integer.valueOf(word) % 2 == 0) {
-				context.context("even", "1"); // indicate the this number is even
-			} else {
-				context.context("odd", "1"); // use context object to store result
+			if (word.length() != 0) {
+				context.context(word.toLowerCase(), "1"); // indicate the occurrence of a single word is 1
 			}
 		}
 	}

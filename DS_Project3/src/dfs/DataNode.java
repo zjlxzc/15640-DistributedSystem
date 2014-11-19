@@ -8,6 +8,8 @@ package dfs;
  */
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
@@ -378,11 +380,10 @@ public class DataNode {
 		public void run() {
 			Socket master = null;					
 			try {
-
-				URL dirUrl = new URL("file://" + mapReduceFile);
-				URLClassLoader cl = new URLClassLoader(new URL[]{dirUrl}, getClass().getClassLoader());
-				Class<?> mapReduceClass = cl.loadClass("");
-				//Class<?> mapReduceClass = Class.forName(mapReduceFile);			
+				File file = new File(mapReduceFile);
+				URL dirUrl = file.toURI().toURL();
+				URLClassLoader cl = new URLClassLoader(new URL[]{dirUrl});
+				Class<?> mapReduceClass = Class.forName("mapReduce.WordCount", true, cl);
 				master = new Socket(masterIP, masterPort);
 				ObjectOutputStream out = new ObjectOutputStream(master.getOutputStream());
 				ObjectInputStream in = new ObjectInputStream(master.getInputStream());
@@ -390,9 +391,9 @@ public class DataNode {
 				out.writeObject("MapReduceNewJob");
 				out.writeObject(inputFile);
 				out.writeObject(outputFile);
-				out.writeObject(mapReduceClass); // write the above information to master
+			    out.writeObject(mapReduceClass);			
 				
-				out.flush();
+			    out.flush();
 				in.close();
 				out.close();
 			} catch (UnknownHostException e) {
