@@ -434,7 +434,7 @@ public class NameNode{
 				String outputPath = (String)in.readObject();
 				Class<?> mapReduceClass = (Class<?>)in.readObject();
 				
-				Hashtable<String, ArrayList<BlockRef>> ipTable = metaTable.get(inputFile); // get data node ip address
+				Hashtable<String, ArrayList<BlockRef>> ipTable = metaTable.get(inputFile); // get data node related to the file
 				Hashtable<NodeRef, ArrayList<BlockRef>> refTable = new Hashtable<NodeRef, ArrayList<BlockRef>>();
 				
 				for (String ip : ipTable.keySet()) {

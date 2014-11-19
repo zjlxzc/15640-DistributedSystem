@@ -230,7 +230,7 @@ public class DataNode {
 				masterOut.writeObject("addBlock");
 				masterOut.writeObject(fileName);
 				masterOut.writeObject(curRef);
-				masterOut.flush(); // send the above information to master
+				masterOut.flush(); // send the above information to namenode
 				
 				ArrayList<NodeRef> addList = (ArrayList<NodeRef>)masterIn.readObject();
 				masterIn.close();
@@ -340,7 +340,7 @@ public class DataNode {
 				fileTable.put(parentFile, blockList);
 				
 				// Report to the master
-				Socket report = new Socket(masterIP, masterPort); // connect to master
+				Socket report = new Socket(masterIP, masterPort); // connect to namenode
 				ObjectOutputStream masterOut = new ObjectOutputStream(report.getOutputStream());
 				ObjectInputStream masterIn = new ObjectInputStream(report.getInputStream());
 				
@@ -381,7 +381,8 @@ public class DataNode {
 				File file = new File(mapReduceFile);
 				URL dirUrl = file.toURI().toURL();
 				URLClassLoader cl = new URLClassLoader(new URL[]{dirUrl});
-				Class<?> mapReduceClass = Class.forName("mapReduce.WordCount", true, cl);
+				Class<?> mapReduceClass = Class.forName("mapReduce.WordCount", true, cl); // use a classloader to load external class
+								
 				master = new Socket(masterIP, masterPort);
 				ObjectOutputStream out = new ObjectOutputStream(master.getOutputStream());
 				ObjectInputStream in = new ObjectInputStream(master.getInputStream());
@@ -389,7 +390,7 @@ public class DataNode {
 				out.writeObject("MapReduceNewJob");
 				out.writeObject(inputFile);
 				out.writeObject(outputFile);
-			    out.writeObject(mapReduceClass);			
+			    out.writeObject(mapReduceClass); // send the essential information of job to namenode		
 				
 			    out.flush();
 				in.close();
