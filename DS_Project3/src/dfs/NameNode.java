@@ -30,7 +30,7 @@ import java.util.Scanner;
 
 import mapReduce.JobTracker;
 
-public class NameNode {
+public class NameNode{
 	
 	private DataNodeTable dataNodeTable;
 	
@@ -416,7 +416,7 @@ public class NameNode {
 			try {
 				String inputFile = (String)in.readObject();
 				String outputPath = (String)in.readObject();
-				Class<?> mapReduceClass = (Class<?>)in.readObject(); // get required map reduce job information
+				Class<?> mapReduceClass = (Class<?>)in.readObject();
 				
 				Hashtable<String, ArrayList<BlockRef>> ipTable = metaTable.get(inputFile); // get data node ip address
 				Hashtable<NodeRef, ArrayList<BlockRef>> refTable = new Hashtable<NodeRef, ArrayList<BlockRef>>();
@@ -444,6 +444,12 @@ public class NameNode {
 				e.printStackTrace();
 			}			
 		}
+	}
+	private class FileClassLoader extends ClassLoader {
+		public  Class<?> findClass(String name, byte [] data)
+	    {
+	       return  defineClass(name, data,  0 , data.length);
+	    }
 	}
 }
 

@@ -1,5 +1,4 @@
-package example;
-
+package mapReduce;
 /*
  * @author Chun Xu (chunx)
  * @author Jialing Zhou (jialingz)
@@ -8,8 +7,6 @@ package example;
  */
 
 import java.util.Iterator;
-import mapReduce.MRContext;
-import mapReduce.MapReduce;
 
 public class WordCount implements MapReduce{
 	 	    
