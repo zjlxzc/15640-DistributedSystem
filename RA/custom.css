@@ -1,0 +1,459 @@
+body {
+  padding-bottom: 40px;
+  background-color: #333;
+  color: #ffffff;
+  /*background-image: url("../img/watermark.jpg");*/
+  font-family: 'Roboto';
+}
+
+.footer {
+    margin-top: 30px;
+    margin-bottom: 30px;
+}
+
+.footer-bar, #copy {
+  background-color: #1BEE4E;
+  /*width: 100%;*/
+}
+
+p {
+  font-family: 'Bitter', serif;
+  font-style: italic;
+}
+
+a, a:hover {
+    color: #1BEE4E;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+a.anchor {
+    display: block; 
+    position: relative; 
+    top: -50px; 
+    visibility: hidden;
+}
+
+.bs-docs-section > .row > a.back-to-top {
+    color: #13A135;
+    margin-right: 10px;
+    font-size: 14px;
+}
+
+/* CUSTOMIZE THE NAVBAR
+-------------------------------------------------- */
+
+/* Special class on .container surrounding .navbar, used for positioning it into place. */
+.container {
+    margin-left: 0px;
+    margin-right: 0px;
+    width: 100%;
+}
+
+.navbar-inverse .navbar-nav > .open > a, .navbar-inverse .navbar-nav > .open > a:hover {
+	border-bottom: 5px solid #1bee4e;
+}
+
+.navbar-header {
+	border-left: 5px solid black;
+}
+
+.navbar-header:hover {
+    background-color: #ddd;
+    border-left: 5px solid #1bee4e;
+    border-right: 5px solid #1bee4e;
+}
+
+/*CUSTOMIZE BREADCRUMB*/
+.breadcrumb {
+    margin-bottom: 0px;
+}
+
+.breadcrumb > li > a {
+    color: #13A135;
+}
+
+/* CUSTOMIZE THE CAROUSEL
+-------------------------------------------------- */
+
+/* Carousel base class */
+.carousel {
+  margin-bottom: 0px;
+}
+/* Since positioning the image, we need to help out the caption */
+.carousel-caption {
+  z-index: 1;
+}
+
+/* Declare heights because of positioning of img element */
+.carousel .item {
+  height: 400px;
+  background-color:#555;
+}
+.carousel img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  min-width: 100%;
+  height: 500px;
+  max-width: none;
+}
+
+/* MARKETING CONTENT
+-------------------------------------------------- */
+
+/* Pad the edges of the mobile views a bit */
+.marketing {
+  padding-left: 15px;
+  padding-right: 15px;
+}
+
+/* Center align the text within the three columns below the carousel */
+.marketing .col-lg-4 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+.marketing h2 {
+  font-weight: normal;
+}
+.marketing .col-lg-4 p {
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
+
+/* Featurettes
+------------------------- */
+
+.featurette-divider {
+  margin: 80px 0; /* Space out the Bootstrap <hr> more */
+}
+.featurette {
+  padding-top: 120px; /* Vertically center images part 1: add padding above and below text. */
+  overflow: hidden; /* Vertically center images part 2: clear their floats. */
+}
+.featurette-image {
+  margin-top: -120px; /* Vertically center images part 3: negative margin up the image the same amount of the padding to center it. */
+}
+
+/* Give some space on the sides of the floated elements so text doesn't run right into it. */
+.featurette-image.pull-left {
+  margin-right: 40px;
+}
+.featurette-image.pull-right {
+  margin-left: 40px;
+}
+
+/* Thin out the marketing headings */
+.featurette-heading {
+  font-size: 50px;
+  font-weight: 300;
+  line-height: 1;
+  letter-spacing: -1px;
+}
+
+
+
+/* RESPONSIVE CSS
+-------------------------------------------------- */
+
+@media (min-width: 768px) {
+
+
+  /* Navbar positioning foo */
+  .navbar-wrapper {
+    margin-top: 20px;
+    margin-bottom: -90px; /* Negative margin to pull up carousel. 90px is roughly margins and height of navbar. */
+  }
+  /* The navbar becomes detached from the top, so we round the corners */
+  .navbar-wrapper .navbar {
+    border-radius: 4px;
+  }
+
+  /* Bump up size of carousel content */
+  .carousel-caption p {
+    margin-bottom: 20px;
+    font-size: 21px;
+    line-height: 1.4;
+  }
+
+  .navbar-inverse .navbar-brand {
+    color: #13A135;
+    padding: 2.5px 15px;
+  }
+
+/*This is an adjustment for the green bottom-border hover-off effect*/
+  .nav > li > a {
+      padding-top: 15px;
+      padding-bottom: 10px;
+  }
+  
+  
+  /*Font color in navbar*/
+  .navbar-inverse .navbar-nav > li > a {
+    color: #13A135;
+    font-weight: bold;
+  }
+
+/*Hover effect for navbar items*/
+.navbar-inverse .navbar-nav > li > a:hover {
+    background-color: whitesmoke;
+    color: rgb(19, 161, 53);
+    border-bottom: 5px solid #1bee4e;
+}
+
+/*Change the color of the active navbar item*/
+.navbar-inverse .navbar-nav > .active > a, .navbar-inverse .navbar-nav > .active > a:hover, .navbar-inverse .navbar-nav > .active > a:focus {
+    background-color: #13a135;
+    border-bottom: 5px solid #1bee4e;
+}
+
+/*Glyphicon spacing in navbar*/
+.glyphicon {
+    margin-right: 7px;
+}
+
+.dropdown-menu > li > a .glyphicon {
+    margin-right: 12px;
+}
+
+/*Sidenav hover effect.*/
+  .nav .bs-docs-sidenav > li > a:hover, .nav .sidenav-subgroup > li > a:hover {
+      padding-right: 8px;
+      border-right: 7px solid #1bee4e;
+      font-weight: bold;
+  }
+  
+/*Make all thumbnails in a gallery the same size for uniformity*/
+.thumbnail > img {
+    height: 160px;
+    min-height: 160px;
+}
+
+}
+
+@media (max-width: 767px) {
+	.navbar-brand {
+		padding: 2.5px 15px;
+	}
+}
+
+/* HEXAGON CSS
+-------------------------------------------------- */
+.hexagon {
+  -moz-transform: rotate(120deg);
+  -ms-transform: rotate(120deg);
+  -webkit-transform: rotate(120deg);
+  transform: rotate(120deg);
+  cursor: pointer;
+  height: 250px;
+  overflow: hidden;
+  visibility: hidden;
+  width: 220px;
+}
+
+.hex1 {
+  -moz-transform: rotate(-60deg);
+  -ms-transform: rotate(-60deg);
+  -webkit-transform: rotate(-60deg);
+  transform: rotate(-60deg);
+  height: 100%;
+  overflow: hidden;
+  width: 100%;
+}
+
+.hex2 {
+  -moz-transform: rotate(-60deg);
+  -ms-transform: rotate(-60deg);
+  -webkit-transform: rotate(-60deg);
+  transform: rotate(-60deg);
+  height: 100%;
+  /*@include background-size(($width + ($width * .20)) ($width + ($width * .20)));
+  background-position: 50%;*/
+  position: relative;
+  visibility: visible;
+  width: 100%;
+}
+
+.desc {
+  color: white;
+  font-family: 'Lato', sans-serif;
+  font-size: 1.5em;
+  font-weight: 300;
+  height: 440px;
+  line-height: 1.5em;
+  position: absolute;
+  text-align: center;
+  visibility: visible;
+  width: 220px;
+}
+.desc.base {
+  background: rgba(230, 0, 98, 0.75);
+}
+.desc.one {
+  background: rgba(252, 171, 55, 0.75);
+}
+.desc.two {
+  background: rgba(27, 238, 78, 0.75);
+}
+.desc.three {
+  background: rgba(83, 70, 54, 0.75);
+}
+.desc h2 {
+  margin: 100px 20px 0 20px;
+}
+.desc p {
+/*  font-size: .5em;*/
+  text-transform: lowercase;
+}
+
+.col-centered {
+    float: none;
+    margin: 0 auto;
+}
+
+/* Dashboard template CSS
+-------------------------------------------------- */
+
+/*
+ * Global add-ons
+ */
+
+.sub-header {
+  padding-bottom: 10px;
+  border-bottom: 1px solid #eee;
+}
+
+/*
+ * Top navigation
+ * Hide default border to remove 1px line.
+ */
+.navbar-fixed-top {
+  border: 0;
+}
+
+/*
+ * Sidebar
+ */
+
+/* Hide for mobile, show later */
+.sidebar {
+  display: none;
+}
+@media (min-width: 768px) {
+  .sidebar {
+    position: fixed;
+    top: 51px;
+    bottom: 0;
+    left: 0;
+    z-index: 1000;
+    display: block;
+    padding: 20px;
+    overflow-x: hidden;
+    overflow-y: auto; /* Scrollable contents if viewport is shorter than content. */
+    background-color: #f5f5f5;
+    border-right: 1px solid #eee;
+  }
+}
+
+/* Sidebar navigation */
+.nav-sidebar {
+  margin-right: -21px; /* 20px padding + 1px border */
+  margin-bottom: 20px;
+  margin-left: -20px;
+}
+.nav-sidebar > li > a {
+  padding-right: 20px;
+  padding-left: 20px;
+}
+.nav-sidebar > .active > a,
+.nav-sidebar > .active > a:hover,
+.nav-sidebar > .active > a:focus {
+  color: #fff;
+  background-color: #428bca;
+}
+
+/*
+ * Main content
+ */
+
+.main {
+  padding: 20px;
+}
+
+@media (min-width: 768px) {
+  .main {
+    padding-right: 40px;
+    padding-left: 40px;
+  }
+}
+.main .page-header {
+  margin-top: 10;
+}
+
+.page-header {
+    color: #13A135;
+    margin-top: 20px;
+    border-bottom: 2px solid #1bee4e;
+}
+
+blockquote {
+    border-left: 5px solid #1BEE4E;
+}
+
+.bs-docs-sidenav a {
+    color: #ffffff;
+    font-weight: bold;
+}
+
+.bs-docs-sidenav a:hover {
+    color: black;
+    text-decoration: none;
+}
+
+.bs-docs-sidenav .sidenav-subgroup a {
+    padding-left: 30px;
+    font-weight: normal;
+}
+
+/*Modal styling*/
+.modal {
+    color: black;
+}
+
+.modal-header {
+    color: white;
+    font-weight: bold;
+    background-color: #13a135;
+    border-bottom: 1px solid #1bee4e;
+}
+
+.modal-body {
+    height: 250px;
+}
+
+.modal-footer {
+    background-color: #aaa;
+}
+/*
+ * Placeholder dashboard ideas
+ */
+
+.placeholders {
+  margin-bottom: 30px;
+  text-align: center;
+}
+.placeholders h4 {
+  margin-bottom: 0;
+}
+.placeholder {
+  margin-bottom: 20px;
+}
+.placeholder img {
+  display: inline-block;
+  border-radius: 50%;
+}
+
+
