@@ -97,11 +97,13 @@ public class TaskTracker {
 						srcOut.writeObject("MapperSuccess");
 						srcOut.flush();
 						trackMapper(mapperTask);
+						System.out.println("Mapper Started!");
 					} else if (inLine.equals("ReduceTask")) {
 						reducerTask = (ReducerTask)object.readObject(); // get reduce task
 						srcOut.writeObject("ReduceSuccess");
 						srcOut.flush();
 						trackReducer(reducerTask);
+						System.out.println("Reducer Started!");
 					} else if (inLine.equals("ReportMapper")){ // send map information
 						srcOut.writeObject(status);
 						srcOut.flush();
@@ -115,6 +117,7 @@ public class TaskTracker {
 						redOut.writeObject("");
 						redOut.flush();
 						toRed.close();
+						System.out.println("Mapper Finished!");
 					} else if (inLine.equals("StartSend")) {
 						srcOut.writeObject(reduce.getNewPort());
 						srcOut.flush();

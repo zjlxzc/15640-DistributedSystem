@@ -49,7 +49,7 @@ public class FileReaderDFS implements Runnable {
 			clientSocket = new Socket(node.getIp(), node.getPort());
 			ObjectOutputStream sendInfor = new ObjectOutputStream(clientSocket.getOutputStream());
 			ObjectInputStream sendIn = new ObjectInputStream(clientSocket.getInputStream());
-			
+			System.out.println("Reducer runs on : " + node.getIp());
 			sendInfor.writeObject("StartSend"); // write out information as a signal
 			sendInfor.flush();
 			

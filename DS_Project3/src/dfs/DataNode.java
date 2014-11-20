@@ -63,14 +63,14 @@ public class DataNode {
 			// take the user input to decide the work flow
 			while (true) {							
 				String[] str = scan.nextLine().split(" ");
-				if (str[0].equals("upload")) {
+				if (str[0].equals("upload") && str.length == 2) {
 					String fileName = str[1];
 					new Thread(new Upload(fileName)).start();
 				} else if (str[0].equals("quit")) {
 					System.out.println("ByeBye");
 					scan.close();
 					System.exit(0);
-				} else if (str[0].equals("job")) { // if the user wants to start a job
+				} else if (str[0].equals("job") && str.length == 4) { // if the user wants to start a job
 					String inputFile = str[1]; 	   // get input file
 					String outputPath = str[2];	   // get output file
 					String mapReduceFile = str[3];	// get map reduce class file
@@ -379,9 +379,10 @@ public class DataNode {
 			Socket master = null;					
 			try {
 				File file = new File(mapReduceFile);
+				String filename = mapReduceFile.substring(mapReduceFile.lastIndexOf('/') + 1, mapReduceFile.length() - 4);
 				URL dirUrl = file.toURI().toURL();
 				URLClassLoader cl = new URLClassLoader(new URL[]{dirUrl});
-				Class<?> mapReduceClass = Class.forName("mapReduce.WordCount", true, cl); // use a classloader to load external class
+				Class<?> mapReduceClass = Class.forName("mapReduce." + filename, true, cl); // use a classloader to load external class
 								
 				master = new Socket(masterIP, masterPort);
 				ObjectOutputStream out = new ObjectOutputStream(master.getOutputStream());
