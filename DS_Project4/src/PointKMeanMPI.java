@@ -1,4 +1,3 @@
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
@@ -9,15 +8,13 @@ import java.util.Scanner;
 import mpi.MPI;
 import mpi.MPIException;
 
-
 public class PointKMeanMPI {
 
 	public PointKMeanMPI(int clusterNum, String inputFileName) {
 		try {
 			int myRank = MPI.COMM_WORLD.Rank();
 			int[] lenArr = new int[1];
-			
-			
+						
 			if (myRank == 0) {
 				Point[] pointList = loadData(inputFileName);
 				Point[] centroids = randomPick(pointList, clusterNum);				
