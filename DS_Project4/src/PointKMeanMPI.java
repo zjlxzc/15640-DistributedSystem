@@ -15,8 +15,8 @@ public class PointKMeanMPI {
 			int myRank = MPI.COMM_WORLD.Rank();
 			int[] lenArr = new int[1];						
 			if (myRank == 0) {
-				long beforeTime = System.currentTimeMillis();
-				System.out.println("Start to prepare");
+				System.out.println("MPI start to run");
+				long startTime = System.currentTimeMillis();
 				Point[] pointList = loadData(inputFileName);
 				Point[] centroids = randomPick(pointList, clusterNum);				
 				int mpiNum = MPI.COMM_WORLD.Size();
@@ -27,11 +27,7 @@ public class PointKMeanMPI {
 					System.arraycopy(pointList, (i - 1) * len, listToCluster, 0, len);	
 					MPI.COMM_WORLD.Send(lenArr, 0, 1, MPI.INT, i, 0);
 					MPI.COMM_WORLD.Send(listToCluster, 0, len, MPI.OBJECT, i, 1);					
-				}	
-				
-				long startTime = System.currentTimeMillis();
-				System.out.println("MPI start to run");
-				System.out.println("Time Taken to prepare: " + (startTime - beforeTime) + "milliseconds");								
+				}							
 				
 				boolean finish = false;
 				PointsSum[] sums = new PointsSum[clusterNum];
@@ -145,8 +141,8 @@ public class PointKMeanMPI {
 		for (int i = 0; i < k; i++) {
 			double meanX = sums[i].xSum / sums[i].pointNum;
 			double meanY = sums[i].ySum / sums[i].pointNum;
-			if (Math.abs(meanX - centroids[i].x) > 0.0001 || 
-					Math.abs(meanY - centroids[i].y) > 0.0001) {
+			if (Math.abs(meanX - centroids[i].x) > 0.001 || 
+					Math.abs(meanY - centroids[i].y) > 0.001) {
 				change = true;
 			}
 			Point newCen = new Point(meanX, meanY);

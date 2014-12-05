@@ -22,9 +22,9 @@ public class MainEntry {
 			if (type.equals("points")) {
 				new PointKMeanMPI(clusterNum, inputFileName);
 			}
-//			} else {
-//				new DNAKMeanMPI(clusterNum, inputFileName, outputFileName);
-//			}			
+			} else {
+				new DNAKMeanMPI(clusterNum, inputFileName);
+			}			
 			//MPI.Finalize();
 		} catch (MPIException e) {
 			// TODO Auto-generated catch block
