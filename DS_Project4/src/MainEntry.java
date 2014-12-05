@@ -21,7 +21,6 @@ public class MainEntry {
 			
 			if (type.equals("points")) {
 				new PointKMeanMPI(clusterNum, inputFileName);
-			}
 			} else {
 				new DNAKMeanMPI(clusterNum, inputFileName);
 			}			

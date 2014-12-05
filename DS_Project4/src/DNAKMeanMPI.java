@@ -4,6 +4,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Random;
 import java.util.Scanner;
 
@@ -66,7 +67,7 @@ public class DNAKMeanMPI {
 						
 						for (int k = 0; k < clusterNum; k++) {
 							char[] frequency = getCharArray(sums[i]);
-							centroids[i] = createNewString(frequency);
+							centroids[i] = new String(frequency);
 						}
 					}										
 					finish = reCalculate();
@@ -92,7 +93,7 @@ public class DNAKMeanMPI {
 					for (int i = 0; i < clusterNum; i++) {
 						sums[i] = new DNASum(length);
 					}
-					firstCalculation(localCentroids, localList, sums);
+					calculate(localCentroids, localList, sums);
 					MPI.COMM_WORLD.Send(sums, 0, sums.length, MPI.OBJECT, 0, 3);
 				}				
 			}				
@@ -112,6 +113,7 @@ public class DNAKMeanMPI {
 			
 			for (Character c : dna.map.keySet()) {
 				if (dna.map.get(c) > max) {
+					max = dna.map.get(c);
 					ch = c;
 				}
 			}
@@ -120,23 +122,7 @@ public class DNAKMeanMPI {
 		
 		return result;
 	}
-	
-	public static String createNewString(char[] sum) {
-		StringBuilder result = new StringBuilder();
-		for (int i = 0; i< sum.length; i++) {
-			if (sum[i] == 'A') {
-				result.append('A');
-			} else if (sum[i] == 'C') {
-				result.append('C');
-			} else if (sum[i] == 'G') {
-				result.append('G');
-			} else {
-				result.append('T');
-			}
-		}
-		
-		return result.toString();
-	}
+
 	public static void KMeansDNASeq(int cluster, String inputFileName, int len) {	
 		clusterNum = cluster;
 		length = len;
@@ -164,46 +150,19 @@ public class DNAKMeanMPI {
 
 		return centroids;
 	}
-
-	/* Initial separate all strands to each cluster.
-	private static void firstCalculation(String[] centroids,
+	
+	private static void calculate(String[] centroids,
 			String[] allStrands, DNASum[] strandsOnEach) {
-
-		for (String strand : allStrands) {
-			int minIndex = Integer.MAX_VALUE;
-			int minDis = Integer.MAX_VALUE;
-
-			for (int i = 0; i < centroids.length; i++) { // compare each strand with all centroids to get the minimum value
-				int dis = calculateSimilarity(centroids[i], strand);
-				if (dis < minDis) {
-					minIndex = i;
-					minDis = dis;
-				}
-			}
-			DNA dna = new DNA();
-			for (int i = 0; i < strand.length(); i++) {
-				dna.map.put(strand.charAt(i), dna.map.get(strand.charAt(i)));
-			}
-			strandsOnEach[minIndex].add(dna);
-		}
 
 		for (int i = 0; i < strandsOnEach.length; i++) {
-			strandsOnEach[i].add(centroids[i]); // add centroid to array list of this cluster
-		}
-	}
-	*/
-	
-	private static void firstCalculation(String[] centroids,
-			String[] allStrands, DNASum[] strandsOnEach) {
-
-		DNA dna = new DNA();
-		for (String strand : allStrands) {
-			for (int i = 0; i < strand.length(); i++) {
-				char c = strand.charAt(i);
-				dna.map.put(c, dna.map.get(c));
+			for (int j = 0; j < length; j++) {
+				for (String strand : allStrands) {
+					char c = strand.charAt(j);
+					HashMap<Character, Integer> map = strandsOnEach[i].sums[j].map;
+					map.put(c, map.get(c) + 1);
+				}
 			}
 		}
-		strandsOnEach[0].sums[0] = dna;
 	}
 
 	// Calculate new centroid

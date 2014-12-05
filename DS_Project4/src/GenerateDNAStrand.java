@@ -47,8 +47,8 @@ public class GenerateDNAStrand {
 	
 	public static void main(String[] args) {
 		try {
-			int numOfStrands = 100;
-			int length = 20;
+			int numOfStrands = Integer.parseInt(args[0]);
+			int length = Integer.parseInt(args[1]);
 			GenerateDNAStrand generate = new GenerateDNAStrand(numOfStrands, length);
 			FileWriter fw = new FileWriter("dnaDataSet");
 				

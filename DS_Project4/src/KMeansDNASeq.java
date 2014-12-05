@@ -55,13 +55,13 @@ public class KMeansDNASeq {
 	}
 	
 	public static void main(String[] args) {
-		//int clusterNum = Integer.parseInt(args[0]);
-		// int len = Integer.parseInt(args[1]);
-		//String inputFileName = args[2];
+		int clusterNum = Integer.parseInt(args[0]);
+		int len = Integer.parseInt(args[1]);
+		String inputFileName = args[2];
 		
-		int clusterNum = 5;
-		int len = 20;
-		String inputFileName = "dnaDataSet";
+		//int clusterNum = 5;
+		//int len = 20;
+		//String inputFileName = "dnaDataSet";
 		
 		KMeansDNASeq dna = new KMeansDNASeq(clusterNum, inputFileName, len); // set up input
 		centroids = randomPick(dna.allStrands); // pick initial centroid randomly
