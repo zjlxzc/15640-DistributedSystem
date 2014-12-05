@@ -11,7 +11,6 @@ public class MainEntry {
 			int clusterNum = 0;
 			String inputFileName = "";
 			String type = "";
-			
 			if (args.length == 3) {
 				clusterNum = Integer.parseInt(args[0]);
 				inputFileName = args[1];
@@ -24,9 +23,9 @@ public class MainEntry {
 				new PointKMeanMPI(clusterNum, inputFileName);
 			}
 //			} else {
-//				new DNAKMeanMPI(clusterNum, inputFileName);
+//				new DNAKMeanMPI(clusterNum, inputFileName, outputFileName);
 //			}			
-			MPI.Finalize();
+			//MPI.Finalize();
 		} catch (MPIException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

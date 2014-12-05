@@ -13,11 +13,10 @@ public class PointKMeanMPI {
 	public PointKMeanMPI(int clusterNum, String inputFileName) {
 		try {
 			int myRank = MPI.COMM_WORLD.Rank();
-			int[] lenArr = new int[1];
-						
+			int[] lenArr = new int[1];						
 			if (myRank == 0) {
-				long startTime = System.currentTimeMillis();
-				System.out.println("MPI start to run: " + startTime);
+				long beforeTime = System.currentTimeMillis();
+				System.out.println("Start to prepare");
 				Point[] pointList = loadData(inputFileName);
 				Point[] centroids = randomPick(pointList, clusterNum);				
 				int mpiNum = MPI.COMM_WORLD.Size();
@@ -30,10 +29,15 @@ public class PointKMeanMPI {
 					MPI.COMM_WORLD.Send(listToCluster, 0, len, MPI.OBJECT, i, 1);					
 				}	
 				
+				long startTime = System.currentTimeMillis();
+				System.out.println("MPI start to run");
+				System.out.println("Time Taken to prepare: " + (startTime - beforeTime) + "milliseconds");								
+				
 				boolean finish = false;
 				PointsSum[] sums = new PointsSum[clusterNum];
 
 				while (!finish) {
+					
 					for (int i = 0; i < clusterNum; i++) {
 						sums[i] = new PointsSum();
 					}					
@@ -53,11 +57,10 @@ public class PointKMeanMPI {
 				
 				System.out.println(Arrays.toString(centroids));
 				long endTime = System.currentTimeMillis();
-				System.out.println("MPI end: " + endTime);
-				System.out.println("Time Taken: " + (endTime - startTime));
-				
-			} else {
-				
+				System.out.println("MPI end");
+				System.out.println("Time Taken to run MPI: " + (endTime - startTime) + "milliseconds");	
+				System.exit(0);
+			} else {				
 				MPI.COMM_WORLD.Recv(lenArr, 0, 1, MPI.INT, 0, 0);
 				int len = lenArr[0];
 				Point[] localList = new Point[len];
@@ -72,9 +75,9 @@ public class PointKMeanMPI {
 						sums[i] = new PointsSum();
 					}
 					calculateSum(localCentroids, localList, sums);
-					MPI.COMM_WORLD.Send(sums, 0, sums.length, MPI.OBJECT, 0, 3);
+					MPI.COMM_WORLD.Send(sums, 0, sums.length, MPI.OBJECT, 0, 3);	
 				}				
-			}				
+			}		
 		} catch (MPIException e) {
 			e.printStackTrace();
 		}
@@ -142,8 +145,8 @@ public class PointKMeanMPI {
 		for (int i = 0; i < k; i++) {
 			double meanX = sums[i].xSum / sums[i].pointNum;
 			double meanY = sums[i].ySum / sums[i].pointNum;
-			if ((meanX - centroids[i].x) > 0.00001 || 
-					(meanY - centroids[i].y) > 0.00001) {
+			if (Math.abs(meanX - centroids[i].x) > 0.0001 || 
+					Math.abs(meanY - centroids[i].y) > 0.0001) {
 				change = true;
 			}
 			Point newCen = new Point(meanX, meanY);

@@ -1,5 +1,6 @@
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -9,20 +10,30 @@ import java.util.Scanner;
 public class PointKMeanSeq {
 
 	public static void main(String[] args) {
+		long beforeTime = System.currentTimeMillis();
+		System.out.println("Start to prepare");
 		int k = Integer.parseInt(args[0]);
-		ArrayList<Point> pointList = loadData("pointsDataSet");
+		String inputFileName = args[1];
+		ArrayList<Point> pointList = loadData(inputFileName);
+		long startTime = System.currentTimeMillis();
+		System.out.println("Time Taken to prepare: " + (startTime - beforeTime) + "milliseconds");
+		System.out.println("MPI start to run");
+		
 		Point[] centroids = randomPick(pointList, k);
 		PointsSum[] sums = new PointsSum[k];
 		for (int i = 0; i < k; i++) {
 			sums[i] = new PointsSum();
 		}
 		boolean finish = false;
-		while (!finish) {			
+		while (!finish) {	
 			calculateSum(centroids, pointList, sums);
 			finish = !reCalculateMeans(centroids, sums);
 		}
 		  
 		System.out.println(Arrays.toString(centroids));		
+		long endTime = System.currentTimeMillis();
+		System.out.println("MPI end");
+		System.out.println("Time Taken to run MPI: " + (endTime - startTime) + "milliseconds");
 	}
 	
 	private static void calculateSum(Point[] centroids,
@@ -86,9 +97,8 @@ public class PointKMeanSeq {
 		for (int i = 0; i < k; i++) {
 			double meanX = sums[i].xSum / sums[i].pointNum;
 			double meanY = sums[i].ySum / sums[i].pointNum;
-
-			if (Math.abs(meanX - centroids[i].x) > 0.00001 || 
-					Math.abs(meanY - centroids[i].y) > 0.00001) {
+			if (Math.abs(meanX - centroids[i].x) > 0.0001 || 
+					Math.abs(meanY - centroids[i].y) > 0.0001) {
 				change = true;
 			}
 			Point newCen = new Point(meanX, meanY);
