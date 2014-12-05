@@ -1,5 +1,11 @@
+import java.io.Serializable;
 
-public class PointsSum {
+
+public class PointsSum implements Serializable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	public double xSum;
 	public double ySum;
 	public int pointNum;

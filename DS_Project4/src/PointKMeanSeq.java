@@ -1,5 +1,6 @@
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
@@ -20,8 +21,8 @@ public class PointKMeanSeq {
 			calculateSum(centroids, pointList, sums);
 			finish = !reCalculateMeans(centroids, sums);
 		}
-		System.out.println(Arrays.toString(centroids));
-		
+		  
+		System.out.println(Arrays.toString(centroids));		
 	}
 	
 	private static void calculateSum(Point[] centroids,
@@ -81,11 +82,13 @@ public class PointKMeanSeq {
 	private static boolean reCalculateMeans(Point[] centroids, PointsSum[] sums) {
 		boolean change = false;
 		int k = sums.length;
+
 		for (int i = 0; i < k; i++) {
 			double meanX = sums[i].xSum / sums[i].pointNum;
 			double meanY = sums[i].ySum / sums[i].pointNum;
-			if ((meanX - centroids[i].x) > 0.00001 || 
-					(meanY - centroids[i].y) > 0.00001) {
+
+			if (Math.abs(meanX - centroids[i].x) > 0.00001 || 
+					Math.abs(meanY - centroids[i].y) > 0.00001) {
 				change = true;
 			}
 			Point newCen = new Point(meanX, meanY);

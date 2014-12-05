@@ -16,6 +16,8 @@ public class PointKMeanMPI {
 			int[] lenArr = new int[1];
 						
 			if (myRank == 0) {
+				long startTime = System.currentTimeMillis();
+				System.out.println("MPI start to run: " + startTime);
 				Point[] pointList = loadData(inputFileName);
 				Point[] centroids = randomPick(pointList, clusterNum);				
 				int mpiNum = MPI.COMM_WORLD.Size();
@@ -50,6 +52,9 @@ public class PointKMeanMPI {
 				}
 				
 				System.out.println(Arrays.toString(centroids));
+				long endTime = System.currentTimeMillis();
+				System.out.println("MPI end: " + endTime);
+				System.out.println("Time Taken: " + (endTime - startTime));
 				
 			} else {
 				
@@ -108,7 +113,9 @@ public class PointKMeanMPI {
 		} catch (FileNotFoundException e) {
 			System.out.println("The file does not exist");
 		}
-		return (Point[]) pointList.toArray();	
+		Point[] points = new Point[pointList.size()];
+		points = pointList.toArray(points);
+		return points;	
 	}
 	
 	private static Point[] randomPick(Point[] pointList, int k) {
