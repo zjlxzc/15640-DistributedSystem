@@ -1,11 +1,14 @@
-import java.io.Serializable;
+/**
+ * @author Chun Xu (chunx)
+ * @author Jialing Zhou (jialingz)
+ * 
+ * This class is used to facilitate the calculation of character frequencies on each cluster.
+*/
 
+import java.io.Serializable;
 
 public class DNASum implements Serializable{
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = -553582776442070453L;
 	public DNA[] sums;
 	
@@ -16,6 +19,7 @@ public class DNASum implements Serializable{
 		}
 	}
 	
+	// add the character frequency from a cluster
 	public void add(DNASum sum) {
 		DNA[] oneSum = sums;
 		for (int i = 0; i < oneSum.length; i++) {
@@ -26,10 +30,9 @@ public class DNASum implements Serializable{
 		}
 	}
 	
+	// add the character frequency of a strand
 	public void addString(String strand) {
-		
 		for (int i = 0; i < strand.length(); i++) {
-			
 			if (strand.charAt(i) == 'A') {
 				sums[i].putA(1);
 			} else if (strand.charAt(i) == 'C') {

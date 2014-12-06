@@ -59,10 +59,6 @@ public class KMeansDNASeq {
 		int len = Integer.parseInt(args[1]);
 		String inputFileName = args[2];
 		
-		//int clusterNum = 5;
-		//int len = 20;
-		//String inputFileName = "dnaDataSet";
-		
 		KMeansDNASeq dna = new KMeansDNASeq(clusterNum, inputFileName, len); // set up input
 		centroids = randomPick(dna.allStrands); // pick initial centroid randomly
 		
@@ -104,7 +100,7 @@ public class KMeansDNASeq {
 					minDis = dis;
 				}
 			}
-			strandsOnEach[minIndex].add(strand);
+			strandsOnEach[minIndex].add(strand); // add strand to this group
 		}		
 		
 		for (int i = 0; i < strandsOnEach.length; i++) {
@@ -193,21 +189,22 @@ public class KMeansDNASeq {
 		return compareEqual(reCalculateCentroid());
 	}
 	
+	// calculate similarity of two strands
 	private static int calculateSimilarity(String cen, String strand) {
 		int difference = 0;
 		int index = 0;
 		int length = cen.length();
 		
 		while (index < length) {
-			if (cen.charAt(index) != strand.charAt(index)) {
+			if (cen.charAt(index) != strand.charAt(index)) { // if there are different characters
 				difference++;
 			}
 			index++;
 		}
-	
 		return difference;
 	}
 	
+	// compare old centroids and new centroids
 	public static boolean compareEqual(String[] newCentral) {
 		int clusterNum = centroids.length;
 		
@@ -222,7 +219,6 @@ public class KMeansDNASeq {
 				return false;
 			}
 		}
-		
 		return true;
 	}
 }

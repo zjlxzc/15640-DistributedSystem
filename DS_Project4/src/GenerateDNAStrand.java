@@ -63,8 +63,7 @@ public class GenerateDNAStrand {
 			
 			fw.close();			
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.out.println("In Generate DNAStrand: " + e.getMessage());
 		}
 	}
 }
