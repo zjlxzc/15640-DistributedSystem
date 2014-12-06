@@ -1,8 +1,14 @@
+/**
+ * @author Chun Xu (chunx)
+ * @author Jialing Zhou (jialingz)
+ * 
+ * This class is used to calculate parallel KMeans.
+*/
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Random;
 import java.util.Scanner;
 
@@ -12,10 +18,7 @@ import mpi.MPIException;
 public class DNAKMeanMPI {
 
 	private static String[] centroids; // an array to store centroid of each cluster
-	//private static ArrayList<String>[] strandsOnEach; // store strands for each cluster
 	private static final ArrayList<String> allStrands = new ArrayList<String>(); // store all input strands
-	//private static final char[] bases = { 'A', 'C', 'G', 'T' }; // the DNA string will be generated from this finite set
-	//private static final int baseLength = 4; // the number of available characters
 	private static int length = 0; // the number of characters per DNA strand has
 	private static int clusterNum = 0;
 
@@ -62,16 +65,16 @@ public class DNAKMeanMPI {
 						MPI.COMM_WORLD.Recv(localSum, 0, clusterNum, MPI.OBJECT, i, 3);
 					
 						for (int j = 0; j < clusterNum; j++) {
-							sums[j].add(localSum[j]);
+							sums[j].add(localSum[j]); // collect reslt from each cluster
 						}
 					}
 					
 					for (int k = 0; k < clusterNum; k++) {
-						char[] frequency = getCharArray(sums[k]);
-						newCentroids[k] = new String(frequency);
+						char[] frequency = getCharArray(sums[k]); 
+						newCentroids[k] = new String(frequency); // create new centroids
 					}
 					
-					if (!compareEqual(newCentroids)) {
+					if (!compareEqual(newCentroids)) { // if it is not stable, continue calculation
 						finish = false;
 						centroids = newCentroids;
 					} else {
@@ -85,31 +88,31 @@ public class DNAKMeanMPI {
 				System.out.println("Time Taken: " + (endTime - startTime));
 				
 			} else {
-				
 				MPI.COMM_WORLD.Recv(lenArr, 0, 1, MPI.INT, 0, 0);
 				int len = lenArr[0];
 				String[] localList = new String[len];
-				MPI.COMM_WORLD.Recv(localList, 0, len, MPI.OBJECT, 0, 1);
+				
+				MPI.COMM_WORLD.Recv(localList, 0, len, MPI.OBJECT, 0, 1); // receive data set from master
 				String[] localCentroids = new String[clusterNum];
 				
 				while (true) {
-					MPI.COMM_WORLD.Recv(localCentroids, 0, clusterNum, MPI.OBJECT, 0, 2);
+					MPI.COMM_WORLD.Recv(localCentroids, 0, clusterNum, MPI.OBJECT, 0, 2); // receive centroids from master
 
 					DNASum[] sums = new DNASum[clusterNum];
 					for (int i = 0; i < clusterNum; i++) {
 						sums[i] = new DNASum(10);
 					}
 					
-					calculate(localCentroids, localList, sums);
-					
-					MPI.COMM_WORLD.Send(sums, 0, sums.length, MPI.OBJECT, 0, 3);
+					calculate(localCentroids, localList, sums); // do calculation of each cluster
+					MPI.COMM_WORLD.Send(sums, 0, sums.length, MPI.OBJECT, 0, 3); // send result back to master
 				}				
 			}				
 		} catch (MPIException e) {
-			e.printStackTrace();
+			System.out.println("In DNAKMeanMPI Calculation: " + e.getMessage());
 		}
 	}
 	
+	// return new centroid character array based on the frequency of each character on each position
 	public char[] getCharArray(DNASum sum) {
 		DNA[] sums = sum.sums;
 		char[] result = new char[length];
@@ -120,7 +123,7 @@ public class DNAKMeanMPI {
 			char ch = 'A';
 			
 			for (Character c : dna.map.keySet()) {
-				if (dna.map.get(c) > max) {
+				if (dna.map.get(c) > max) { // get the character with the max frequency
 					max = dna.map.get(c);
 					ch = c;
 				}
@@ -131,6 +134,7 @@ public class DNAKMeanMPI {
 		return result;
 	}
 
+	// read data from input file and store the data to an array list
 	public static void KMeansDNASeq(int cluster, String inputFileName) {	
 		clusterNum = cluster;
 		File file = new File(inputFileName);
@@ -176,12 +180,13 @@ public class DNAKMeanMPI {
 		}
 	}
 
+	// calculate the similarity of two strands
 	private static int calculateSimilarity(String cen, String strand) {
 		int difference = 0;
 		int index = 0;
 
 		while (index < length) {
-			if (cen.charAt(index) != strand.charAt(index)) {
+			if (cen.charAt(index) != strand.charAt(index)) { // if there are different characters
 				difference++;
 			}
 			index++;
@@ -190,8 +195,8 @@ public class DNAKMeanMPI {
 		return difference;
 	}
 
+	// compare old centroids and new centroids
 	public static boolean compareEqual(String[] newCentral) {
-		
 		for (int i = 0; i < clusterNum; i++) {
 			int j = 0;
 			for (j = 0; j < clusterNum; j++) {
@@ -203,7 +208,6 @@ public class DNAKMeanMPI {
 				return false;
 			}
 		}
-
 		return true;
 	}
 }
