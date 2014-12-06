@@ -91,6 +91,7 @@ public class DNAKMeanMPI {
 				long endTime = System.currentTimeMillis();
 				System.out.println("MPI end: " + endTime);
 				System.out.println("Time Taken: " + (endTime - startTime)); // print out running time
+				System.exit(0);
 				
 			} else {
 				MPI.COMM_WORLD.Recv(lenArr, 0, 1, MPI.INT, 0, 0);
