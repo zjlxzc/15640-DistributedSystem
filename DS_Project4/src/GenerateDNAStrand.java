@@ -53,8 +53,12 @@ public class GenerateDNAStrand {
 			FileWriter fw = new FileWriter("dnaDataSet");
 				
 			ArrayList<String> strands = generate.getStrand();
-			for (String strand : strands) {
-				fw.write(strand + "\n");
+			for (int i = 0; i < strands.size(); i++) {
+				if (i == strands.size() - 1) {
+					fw.write(strands.get(i));
+				} else {
+					fw.write(strands.get(i) + "\n");
+				}
 			}
 			
 			fw.close();			

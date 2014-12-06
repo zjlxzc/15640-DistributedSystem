@@ -1,9 +1,14 @@
+import java.io.Serializable;
 import java.util.HashMap;
 
 
-public class DNA {
+public class DNA implements Serializable {
 
-	public static HashMap<Character, Integer> map = new HashMap<Character, Integer>();
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -4521365327173723180L;
+	public HashMap<Character, Integer> map = new HashMap<Character, Integer>();
 	
 	public DNA() {
 		map.put('A', 0);
@@ -12,17 +17,17 @@ public class DNA {
 		map.put('T', 0);
 	}
 	
-	public static void putA(int value) {
+	public void putA(int value) {
 		map.put('A', map.get('A') + value);
 	}
 	
-	public static void putC(int value) {
+	public void putC(int value) {
 		map.put('C', map.get('C') + value);
 	}
-	public static void putG(int value) {
+	public void putG(int value) {
 		map.put('G', map.get('G') + value);
 	}
-	public static void putT(int value) {
+	public void putT(int value) {
 		map.put('T', map.get('T') + value);
 	}
 }
