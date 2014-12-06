@@ -29,7 +29,7 @@ public class DNAKMeanMPI {
 			int myRank = MPI.COMM_WORLD.Rank(); // get current rank
 			int[] lenArr = new int[1];
 			
-			if (myRank == 0) { // if it is node0
+			if (myRank == 0) { // if it is master
 				long startTime = System.currentTimeMillis();
 				System.out.println("MPI start to run: " + startTime);
 				KMeansDNASeq(clusterNum, inputFileName); // store all input strands to an array list 	

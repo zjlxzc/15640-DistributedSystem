@@ -1,16 +1,16 @@
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Random;
-import java.util.Scanner;
-
 /**
  * @author Chun Xu (chunx)
  * @author Jialing Zhou (jialingz)
  * 
  * This class is used to K-Means algorithm for DNA Strands.
 */
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Random;
+import java.util.Scanner;
 
 public class KMeansDNASeq {
 
@@ -40,7 +40,7 @@ public class KMeansDNASeq {
 		
 		try {
 			Scanner scan = new Scanner(file);			
-			while (scan.hasNext()) {
+			while (scan.hasNext()) { // get all strands
 				allStrands.add(scan.nextLine().trim());
 			}
 			scan.close();			

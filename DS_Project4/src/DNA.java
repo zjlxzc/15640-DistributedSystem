@@ -1,12 +1,12 @@
-import java.io.Serializable;
-import java.util.HashMap;
-
 /**
  * @author Chun Xu (chunx)
  * @author Jialing Zhou (jialingz)
  * 
  * This class is used to aggregate the frequency of each character.
 */
+
+import java.io.Serializable;
+import java.util.HashMap;
 
 public class DNA implements Serializable {
 
