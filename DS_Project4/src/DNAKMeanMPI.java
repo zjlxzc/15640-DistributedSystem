@@ -19,6 +19,8 @@ public class DNAKMeanMPI {
 
 	private static String[] centroids; // an array to store centroid of each cluster
 	private static final ArrayList<String> allStrands = new ArrayList<String>(); // store all input strands
+	private static final char[] bases = {'A', 'C', 'G', 'T'}; // the DNA string will be generated from this finite set
+	private static final int baseLength = 4; // the number of available characters
 	private static int length = 0; // the number of characters per DNA strand has
 	private static int clusterNum = 0;
 
@@ -100,7 +102,7 @@ public class DNAKMeanMPI {
 
 					DNASum[] sums = new DNASum[clusterNum];
 					for (int i = 0; i < clusterNum; i++) {
-						sums[i] = new DNASum(10);
+						sums[i] = new DNASum(localList[0].length());
 					}
 					
 					calculate(localCentroids, localList, sums); // do calculation of each cluster
