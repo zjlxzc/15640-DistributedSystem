@@ -1,3 +1,11 @@
+/**
+ * @author Chun Xu (chunx)
+ * @author Jialing Zhou (jialingz)
+ * 
+ * This class is used to calculate k-means of a set of 2D points on OpenMPI.
+ * 
+*/
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
@@ -8,13 +16,6 @@ import java.util.Scanner;
 import mpi.MPI;
 import mpi.MPIException;
 
-/**
- * @author Chun Xu (chunx)
- * @author Jialing Zhou (jialingz)
- * 
- * This class is used to calculate k-means of a set of 2D points on OpenMPI.
- * 
-*/
 public class PointKMeanMPI {
 
 	public PointKMeanMPI(int clusterNum, String inputFileName) {

@@ -1,12 +1,13 @@
-import mpi.MPI;
-import mpi.MPIException;
-
 /**
  * @author Chun Xu (chunx)
  * @author Jialing Zhou (jialingz)
  * 
  * This is the main entry of the k-mean algorithm.
 */
+
+import mpi.MPI;
+import mpi.MPIException;
+
 public class MainEntry {
 
 	public static void main(String[] args) {		

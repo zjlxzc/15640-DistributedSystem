@@ -1,10 +1,3 @@
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Random;
-import java.util.Scanner;
-
 /**
  * @author Chun Xu (chunx)
  * @author Jialing Zhou (jialingz)
@@ -12,6 +5,13 @@ import java.util.Scanner;
  * This class is used to calculate k-means of a set of 2D points sequentially.
  * The input arguments is k cluster and input file name
 */
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Random;
+import java.util.Scanner;
 
 public class PointKMeanSeq {
 

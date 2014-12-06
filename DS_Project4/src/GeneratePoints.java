@@ -1,13 +1,13 @@
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.Random;
-
 /**
  * @author Chun Xu (chunx)
  * @author Jialing Zhou (jialingz)
  * 
  * This class is used to generate Point dataset.
 */
+
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.Random;
 
 public class GeneratePoints {
 	

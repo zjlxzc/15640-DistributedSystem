@@ -1,11 +1,11 @@
-import java.io.Serializable;
-
 /**
  * @author Chun Xu (chunx)
  * @author Jialing Zhou (jialingz)
  * 
  * This class used to store a sum of a serious of point.
 */
+
+import java.io.Serializable;
 
 public class PointsSum implements Serializable {
 	/**
@@ -15,6 +15,7 @@ public class PointsSum implements Serializable {
 	public double xSum;
 	public double ySum;
 	public int pointNum;
+	
 	public PointsSum() {
 		xSum = 0;
 		ySum = 0;

@@ -46,10 +46,10 @@ public class GenerateDNAStrand {
 	
 	public static void main(String[] args) {
 		try {
-			int numOfStrands = Integer.parseInt(args[0]);
-			int length = Integer.parseInt(args[1]);
+			int numOfStrands = Integer.parseInt(args[0]); // get total number of strands
+			int length = Integer.parseInt(args[1]); // get length of a strand
 			GenerateDNAStrand generate = new GenerateDNAStrand(numOfStrands, length);
-			FileWriter fw = new FileWriter("dnaDataSet");
+			FileWriter fw = new FileWriter("dnaDataSet"); // write data set to a file
 				
 			ArrayList<String> strands = generate.getStrand();
 			for (int i = 0; i < strands.size(); i++) {

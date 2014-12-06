@@ -2,7 +2,7 @@
  * @author Chun Xu (chunx)
  * @author Jialing Zhou (jialingz)
  * 
- * This class is used to calculate parallel KMeans.
+ * This class is used to calculate parallel KMeans on OpenMPI.
 */
 
 import java.io.File;
@@ -25,11 +25,13 @@ public class DNAKMeanMPI {
 	private static int clusterNum = 0;
 
 	public DNAKMeanMPI(int clusterNumber, String inputFileName) {
-		clusterNum = clusterNumber;
-		centroids = new String[clusterNum];
+		clusterNum = clusterNumber; // set cluster number
+		centroids = new String[clusterNum]; // initialize string array to store centroid of each cluster
+		
 		try {
 			int myRank = MPI.COMM_WORLD.Rank(); // get current rank
 			int[] lenArr = new int[1];
+			int times = 0;
 			
 			if (myRank == 0) { // if it is master
 				long startTime = System.currentTimeMillis();
@@ -45,12 +47,13 @@ public class DNAKMeanMPI {
 					String[] listToCluster = new String[len];
 					System.arraycopy(allStrands.toArray(), (i - 1) * len, listToCluster, 0, len);	
 					MPI.COMM_WORLD.Send(lenArr, 0, 1, MPI.INT, i, 0);
-					MPI.COMM_WORLD.Send(listToCluster, 0, len, MPI.OBJECT, i, 1);					
+					MPI.COMM_WORLD.Send(listToCluster, 0, len, MPI.OBJECT, i, 1); // send strands to slaves				
 				}	
 				
 				boolean finish = false;
 				DNASum[] sums = new DNASum[clusterNum];
-
+				String[] newCentroids = new String[clusterNum];
+				
 				while (!finish) {
 					
 					for (int i = 0; i < clusterNum; i++) {
@@ -58,36 +61,36 @@ public class DNAKMeanMPI {
 					}	
 					
 					for (int i = 1; i < mpiNum; i++) {
-						MPI.COMM_WORLD.Send(centroids, 0, clusterNum, MPI.OBJECT, i, 2); // send centroid
+						MPI.COMM_WORLD.Send(centroids, 0, clusterNum, MPI.OBJECT, i, 2); // send centroids to slaves
 					}
 					
-					String[] newCentroids = new String[clusterNum];
 					for (int i = 1; i < mpiNum; i++) {
 						DNASum[] localSum = new DNASum[clusterNum]; // get character sum from each process
 						MPI.COMM_WORLD.Recv(localSum, 0, clusterNum, MPI.OBJECT, i, 3);
-					
+						
 						for (int j = 0; j < clusterNum; j++) {
-							sums[j].add(localSum[j]); // collect reslt from each cluster
+							sums[j].add(localSum[j]); // collect result from each cluster
 						}
 					}
 					
 					for (int k = 0; k < clusterNum; k++) {
 						char[] frequency = getCharArray(sums[k]); 
-						newCentroids[k] = new String(frequency); // create new centroids
+						newCentroids[k] = new String(frequency); // calculate new centroids
 					}
 					
-					if (!compareEqual(newCentroids)) { // if it is not stable, continue calculation
+					if (times < 500) { // run 500 times
 						finish = false;
 						centroids = newCentroids;
+						times++;
 					} else {
 						finish = true;
 					}
 				}
 				
-				System.out.println(Arrays.toString(centroids));
+				System.out.println("Final Result: " + Arrays.toString(centroids));
 				long endTime = System.currentTimeMillis();
 				System.out.println("MPI end: " + endTime);
-				System.out.println("Time Taken: " + (endTime - startTime));
+				System.out.println("Time Taken: " + (endTime - startTime)); // print out running time
 				
 			} else {
 				MPI.COMM_WORLD.Recv(lenArr, 0, 1, MPI.INT, 0, 0);
@@ -99,8 +102,8 @@ public class DNAKMeanMPI {
 				
 				while (true) {
 					MPI.COMM_WORLD.Recv(localCentroids, 0, clusterNum, MPI.OBJECT, 0, 2); // receive centroids from master
-
 					DNASum[] sums = new DNASum[clusterNum];
+					
 					for (int i = 0; i < clusterNum; i++) {
 						sums[i] = new DNASum(localList[0].length());
 					}
@@ -146,7 +149,8 @@ public class DNAKMeanMPI {
 			while (scan.hasNext()) {
 				allStrands.add(scan.nextLine().trim());
 			}
-			length = allStrands.get(0).length();
+			
+			length = allStrands.get(0).length(); // get the length of a strand
 			scan.close();			
 		} catch (FileNotFoundException e) {
 			System.out.println("The file does not exist");
@@ -166,14 +170,13 @@ public class DNAKMeanMPI {
 	}
 	
 	private static void calculate(String[] localCentroids, String[] allStrands, DNASum[] strandsOnEach) {
-
 		for (String strand : allStrands) {
-			int minIndex = Integer.MAX_VALUE;
-			int minDis = Integer.MAX_VALUE;
+			int minIndex = 10;
+			int minDis = 11;
 			
 			for (int i = 0; i < clusterNum; i++) { // compare each strand with all centroids to get the minimum value
-				int dis = calculateSimilarity(centroids[i], strand);
-				if (dis < minDis) {
+				int dis = calculateSimilarity(localCentroids[i], strand);
+				if ((dis - minDis) < 0) {
 					minIndex = i;
 					minDis = dis;
 				}
@@ -187,29 +190,12 @@ public class DNAKMeanMPI {
 		int difference = 0;
 		int index = 0;
 
-		while (index < length) {
+		while (index < 10) {
 			if (cen.charAt(index) != strand.charAt(index)) { // if there are different characters
 				difference++;
 			}
 			index++;
 		}
-
 		return difference;
-	}
-
-	// compare old centroids and new centroids
-	public static boolean compareEqual(String[] newCentral) {
-		for (int i = 0; i < clusterNum; i++) {
-			int j = 0;
-			for (j = 0; j < clusterNum; j++) {
-				if (centroids[i].equals(newCentral[j])) {
-					break;
-				}
-			}
-			if (j == clusterNum) {
-				return false;
-			}
-		}
-		return true;
 	}
 }

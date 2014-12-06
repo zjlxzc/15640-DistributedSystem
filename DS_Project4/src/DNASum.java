@@ -21,7 +21,7 @@ public class DNASum implements Serializable{
 	
 	// add the character frequency from a cluster
 	public void add(DNASum sum) {
-		DNA[] oneSum = sums;
+		DNA[] oneSum = sum.sums;
 		for (int i = 0; i < oneSum.length; i++) {
 			sums[i].putA(oneSum[i].map.get('A'));
 			sums[i].putC(oneSum[i].map.get('C'));
@@ -33,15 +33,8 @@ public class DNASum implements Serializable{
 	// add the character frequency of a strand
 	public void addString(String strand) {
 		for (int i = 0; i < strand.length(); i++) {
-			if (strand.charAt(i) == 'A') {
-				sums[i].putA(1);
-			} else if (strand.charAt(i) == 'C') {
-				sums[i].putC(1);
-			} else if (strand.charAt(i) == 'G') {
-				sums[i].putG(1);
-			} else {
-				sums[i].putT(1);
-			}
+			char c = strand.charAt(i);
+			sums[i].map.put(c, sums[i].map.get(c) + 1);
 		}
 	}
 }
