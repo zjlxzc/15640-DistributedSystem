@@ -1,8 +1,3 @@
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Random;
-
 /**
  * @author Chun Xu (chunx)
  * @author Jialing Zhou (jialingz)
@@ -10,12 +5,16 @@ import java.util.Random;
  * This class is used to generate a strand of DNA.
 */
 
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Random;
+
 public class GenerateDNAStrand {
 
 	private final char[] bases = {'A', 'C', 'G', 'T'}; // the DNA string will be generated from this finite set
 	private int number = 0; // the number of DNA strands per cluster
 	private int length = 0; // the number of characters per DNA strand has
-	
 	
 	/**
 	 * @param n the number of DNA strands per cluster
