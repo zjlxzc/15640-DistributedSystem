@@ -1,7 +1,12 @@
 import java.io.Serializable;
 import java.text.DecimalFormat;
 
-
+/**
+ * @author Chun Xu (chunx)
+ * @author Jialing Zhou (jialingz)
+ * 
+ * This class is used to define a 2D point.
+*/
 public class Point implements Serializable {
 	/**
 	 * 

@@ -1,7 +1,12 @@
 import mpi.MPI;
 import mpi.MPIException;
 
-
+/**
+ * @author Chun Xu (chunx)
+ * @author Jialing Zhou (jialingz)
+ * 
+ * This is the main entry of the k-mean algorithm.
+*/
 public class MainEntry {
 
 	public static void main(String[] args) {		
@@ -20,14 +25,13 @@ public class MainEntry {
 			}
 			
 			if (type.equals("points")) {
-				//new PointKMeanMPI(clusterNum, inputFileName);
+				new PointKMeanMPI(clusterNum, inputFileName);
 			} else {
 				new DNAKMeanMPI(clusterNum, inputFileName);
 			}			
-			//MPI.Finalize();
+			MPI.Finalize();
 		} catch (MPIException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.out.println("MPI Exception: " + e.getMessage());
 		}
 	}
 }
